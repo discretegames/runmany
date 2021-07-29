@@ -1,0 +1,43 @@
+Trying to think up a good separator for .many files that never appears in any language's syntax.
+
+According to https://www.wired.com/2013/08/the-rarity-of-the-ampersand/
+*Character Frequency*: SPC e t a o i n s r h l d c u m f g p y w ENT b , . v k - " _ ' x ) ( ; 0 &nbsp;j 1 q = 2 : z / * ! ? $ 3 5 > { } 4 9 [ ] 8 6 7  + | & < % @ # ^ ` ~
+*Punctuation Frequency*: , . - " _ ' ) ( ; = : / * ! ? $ > { } [ ]  + | & < % @ # ^ ` ~
+
+so `~^@# seem good candidates
+
+~~~ feels to simple, a language that uses ~ as a comment might have ~~~THING~~~ in it
+
+
+~!@ appears here https://github.com/ICGog/MapReduce-Thorn/blob/master/lib/fisher/testcase/eval/071-json/071a.th
+~!@eq(jsonParse('"\\u0041"'), 'A')@!~  ;
+
+a few languages use @ or ~ for comments https://rosettacode.org/wiki/Comments
+
+@~~ seems like it'd work, "spring" operator
+@~~NAME~~@
+
+using chars forbidden in filenames might be a good idea
+on Linux that's just /
+on windows there's way more but stick to /
+
+\@/NAME\@/ yay operators
+look worse and harder to type
+
+also a good idea to start it with a character that doesn't usually start lines
+so none of / # @
+
+maybe then
+~~| PYTHON |~~
+~~~| PYTHON |~~~
+~~~| py |~~~
+
+I like "~~~| " on both sides since it looks nice and adds 10 chars to the line, nice even number
+no real google github search results for it, good
+
+think I want to be lenient with case and abbreviations
+py PYTHON PY python Python all fine
+
+but also is ~ on most keyboards? https://superuser.com/questions/667622/italian-keyboard-entering-tilde-and-backtick-characters-without-changin
+
+§ could be another option but ehh, way too hard to type
