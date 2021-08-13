@@ -41,3 +41,31 @@ py PYTHON PY python Python all fine
 but also is ~ on most keyboards? https://superuser.com/questions/667622/italian-keyboard-entering-tilde-and-backtick-characters-without-changin
 
 § could be another option but ehh, way too hard to type
+
+
+# TODO
+# detect command errors like "python" unrecognized
+# rewrite so the result is a generator over (language, output string) pairs
+# way to comment out a snippet !~~~|?
+# argv passthrough - overridable - allow multiline for \ continuation becaus
+# shared stdin - overridable - from file even?
+# add other 7 languages to languages.json
+# number the runs
+# verbose for unknown langs and other errors?
+# polyglots should be testable
+# could be a pip package manyfile
+# option to ignore empty lines? place for options in general - like to show when language unknown
+# ~~~| skip blank lines |~~~ - also contextual and overridable
+# but would need two skip and no skip, tidy, untidy - maybe compact, condensed, flatten uncondensed
+
+# stdin, argv, condensed, uncondensed
+# actually rethinking with @@@ $$$ syntax
+# could even allow language "sets" in languages.json but no
+
+# forget aboput othernames? - maybe
+# so dict is "Languagename": "command $file $argv"
+# forget about version too, now
+# also just have strip_blank_lines true by default
+# and all: "All"
+
+# lists for stdin, argv

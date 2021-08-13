@@ -105,3 +105,9 @@ if __name__ == "__main__":
 # could even allow language "sets" in languages.json but no
 
 # forget aboput othernames? - maybe
+# so dict is "Languagename": "command $file $argv"
+# forget about version too, now
+# also just have strip_blank_lines true by default
+# and all: "All"
+
+# lists for stdin, argv
