@@ -80,5 +80,80 @@ frankly All or ALL should especially match all languages and blank should match 
 just makes more sense that way
 ok
 
+hmm, thinking a bit more I still want All to not really be hardcoded
+which means language groups and ability to match all in languages.json
+could just have "match_all": "All" by default
+yeah, simpler than regex but fine frankly
+
+want to get rid of other_names anyway
+
+still thinking about newlines for argv and such
+
+@@@| Python |@@@
+--test --dev
+$$$| Python |$$$
+1
+2
+3
+~~~| Python | Ruby |~~~
+23
+
+
+ok
+the $$$| or @@@| applies for the matched languages until the next $$$| or @@@| declaration that matches
+
+so order matters - hmm, should it
+yeah, that's fine
+
+what if you want to test multiple stdins for one snippet? that seems common
+how to do it without duplicating the snippet, hmm
+backreferences to previous snippet or something
+
+better way is to allow for a list of stdins under $$$| This thing |$$$
+like
+
+$$$| Python |$$$
+stdin1
+
+$$$|$$$
+
+stdin2
+
+$$$|$$$
+
+stdin3
+
+@@@| likewise for |@@@
+
+args1
+
+@@@|@@@
+
+args2
+
+
+so stdins and argvs are lists and for each argv, for each stdin, run code in lang with those
+that works
+
+and how about ignore leading blank line if there is one
+ditto last line
+this is for any snippet
+
+but a way to disable this would be nice
+
+could have 3 compact modes - none, oneblank, allblanks, allblankseveninmiddle
+0 1 *
+this can easily turn into lots of options
+
+maybe just one, no all blanks is fine and have a "compact" option in the js, or strip_blank_lines
+
+ideally this could be specified for every single snippet rather than all at once
+
+@@@|@@@
+
+
+@@@| Python |@@@
+
+
 
 
