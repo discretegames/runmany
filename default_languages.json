@@ -1,7 +1,9 @@
 {
+	"all": "All",
 	"languages": {
 		"Python": "python",
 		"JavaScript": "node",
 		"TypeScript": "deno"
-	}
+	},
+	"strip_blank_lines": true
 }
