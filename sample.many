@@ -1,0 +1,84 @@
+comment area
+
+~~~| stdin |~~~
+
+default stdin
+
+~~~| language1 | language2 |~~~
+
+snippet that will attempt to run in language1 and language2
+
+~~~| language |~~~
+
+commented snippet because of !, gets totally ignored
+
+~~~| stdin | lang1 | lang2 |~~~
+defines the stdin for lang1 and lang2 that might be run later
+course newlines
+~~~||~~~
+
+a valid snippet with no language, basically acts as a comment
+
+~~~| stdin | Python |~~~
+Bob
+~~~| Python |~~~
+
+print(input('enter name'))
+
+
+# what if you want literal ~~~| in stdin? I guess you can't - or don't put it at start of line
+
+~~~| argv | Python | JS |~~~
+stuff here will be added to the $argv part of the command, or after the $file
+may be multiple lines with line continuation and such
+but usually just one crammed in
+~~~| more stuff |~~~
+
+~~~| condensed | Python 3 |~~~ 
+
+condensed mode means all empty lines (or even blank lines) are totally ignored
+
+but should these apply to just the language they mention or all of them after that point?
+and is condensed even that important - especially if not the default
+
+
+~~~| JS | argv |~~~
+
+the stdin/argv could have different syntax
+maybe like
+
+$$$| JS | Ruby |$$$
+
+for stdin, and
+
+@@@| Python |@@@
+
+for argv
+
+$$$|  |$$$
+
+this would set it for all then
+which is kinda weird
+but so is having reserved names
+
+
+$$$| Python \d |$$$
+i mean you could get fancy with the names and do string matching and everything, but that's totally overkill
+
+
+@@@| ALL |@@@
+
+Any could be built in but meh, blank is fine imo
+
+$$$||$$$ = stdin for all languages | separated
+@@@||@@@ = argv for 
+! before any section to 
+
+
+
+frankly All or ALL should especially match all languages and blank should match None
+just makes more sense that way
+ok
+
+
+

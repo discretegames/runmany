@@ -1,8 +1,9 @@
 Anything before the first language separator is considered a comment space and completely ignored.
 
+
 ~~~| Python |~~~
 
-print('Hello, World!)
+print('Hello, World!')
 
 ~~~| JavaScript |~~~
 
@@ -32,7 +33,7 @@ fn main() {
     println!("Hello, World!");
 }
 
-~~~| Go |~~~
+!~~~| Go |~~~
 
 package main
 

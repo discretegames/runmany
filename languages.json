@@ -14,7 +14,7 @@
 		{
 			"name": "TypeScript",
 			"other_names": ["ts"],
-			"command": "deno run"
+			"command": "deno"
 		}
 	]
 }

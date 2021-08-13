@@ -7,6 +7,9 @@ import subprocess
 LANG_SEP_START, LANG_SEP_END = '~~~|', '|~~~'
 DEFAULT_LANGUAGES_JSON = 'languages.json'
 FILENAME_PLACEHOLDER = '$file'
+ARGV_PLACEHOLDER = '$argv'
+NO_FILE_NO_
+$file $argv
 
 
 def get_language_commands(language_json_data):
@@ -83,10 +86,22 @@ if __name__ == "__main__":
 
 
 # TODO
-# detect command errors like "pyton" unrecognized
+# detect command errors like "python" unrecognized
 # rewrite so the result is a generator over (language, output string) pairs
 # way to comment out a snippet !~~~|?
-# argv
-# stdin
+# argv passthrough - overridable - allow multiline for \ continuation becaus
+# shared stdin - overridable - from file even?
 # add other 7 languages to languages.json
 # number the runs
+# verbose for unknown langs and other errors?
+# polyglots should be testable
+# could be a pip package manyfile
+# option to ignore empty lines? place for options in general - like to show when language unknown
+# ~~~| skip blank lines |~~~ - also contextual and overridable
+# but would need two skip and no skip, tidy, untidy - maybe compact, condensed, flatten uncondensed
+
+# stdin, argv, condensed, uncondensed
+# actually rethinking with @@@ $$$ syntax
+# could even allow language "sets" in languages.json but no
+
+# forget aboput othernames? - maybe
