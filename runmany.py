@@ -1,3 +1,4 @@
+from typing import List
 import os
 import io
 import json
@@ -24,11 +25,15 @@ BACKUP_LANGUAGES_JSON = {
     STRIP_BLANK_LINES_KEY: True
 }
 
+print(999)
 
-def to_file_like(x: int, y: int) -> str:
-    x = z
-    return ''*8
 
+# def to_file_like(x: list[str], y: int) -> float:
+#     return 5 / 9
+
+
+# def f() -> list[int]:
+#     return []
 
 # class RunMany:
 #     def __init__(self, manyfile, languages_json=None, string=False, string_json=False):
