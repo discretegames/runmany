@@ -1,5 +1,6 @@
-from typing import List
-import os
+from io import StringIO
+from typing import List, Union, Type, overload, Literal, TextIO
+import os import PathLike
 import io
 import json
 import tempfile
@@ -25,11 +26,26 @@ BACKUP_LANGUAGES_JSON = {
     STRIP_BLANK_LINES_KEY: True
 }
 
-print(999)
+
+@overload
+def to_filelike(obj: str, string: Literal[True]) -> TextIO: ...
+@overload
+def to_filelike(obj: Union[str, TextIO], string: Literal[False]) -> TextIO: ...
 
 
-# def to_file_like(x: list[str], y: int) -> float:
-#     return 5 / 9
+def to_filelike(obj: Union[str, bytes, PathLike, TextIO], string: bool) -> TextIO:
+    if isinstance(obj, (str, bytes, PathLike)):
+        if string:
+            return StringIO(obj)
+        else:
+            return open(os.fspath(obj))
+    return obj
+
+
+def runmany(manyfile, language_json=None, string=False, string_json=False):
+    manyfile = to_filelike(manyfile, )
+
+    pass
 
 
 # def f() -> list[int]:
