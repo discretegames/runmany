@@ -45,7 +45,6 @@ but also is ~ on most keyboards? https://superuser.com/questions/667622/italian-
 
 # TODO
 # detect command errors like "python" unrecognized
-# rewrite so the result is a generator over (language, output string) pairs
 # way to comment out a snippet !~~~|?
 # argv passthrough - overridable - allow multiline for \ continuation becaus
 # shared stdin - overridable - from file even?

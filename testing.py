@@ -1,5 +1,3 @@
-p = 'helloworld.many'
-with open(p) as f:
-    s = f.read()
-    
+from runmany import *
 
+runmany('helloworld.many')

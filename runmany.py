@@ -1,14 +1,15 @@
-from io import StringIO
-from typing import List, Union, Type, overload, Literal, TextIO
-import os import PathLike
-import io
 import json
-import tempfile
-import subprocess
+from typing import Dict, Any, Optional, TextIO, Union, List, Type, Iterator, Tuple
+from enum import Enum
 
-LANG_START, LANG_END, LANG_SEP = '~~~|', '|~~~', '|'
-STDIN_START, STDIN_END, STDIN_SEP = '$$$|', '|$$$', '$$$|$$$'
-ARGV_START, ARGV_END, ARGV_SEP = '@@@', '|@@@', '@@@|@@@'
+# import tempfile
+# import subprocess
+
+
+STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
+ENDS = CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
+SEPS = CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
+LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 ALL_KEY = 'all'
 LANGUAGES_KEY = 'languages'
@@ -27,112 +28,153 @@ BACKUP_LANGUAGES_JSON = {
 }
 
 
-@overload
-def to_filelike(obj: str, string: Literal[True]) -> TextIO: ...
-@overload
-def to_filelike(obj: Union[str, TextIO], string: Literal[False]) -> TextIO: ...
+def removeprefix(string: str, prefix: str) -> str:
+    return string[len(prefix):] if string.startswith(prefix) else string
 
 
-def to_filelike(obj: Union[str, bytes, PathLike, TextIO], string: bool) -> TextIO:
-    if isinstance(obj, (str, bytes, PathLike)):
-        if string:
-            return StringIO(obj)
+def removesuffix(string: str, suffix: str) -> str:
+    return string[:-len(suffix)] if string.endswith(suffix) else string
+
+
+SectionType = Enum('SectionType', ['CODE', 'ARGV', 'STDIN'])
+
+
+class Section:
+    def __init__(self, header: str, content: str, line_number: int = 0) -> None:
+        self.header = header.rstrip()
+        self.content = content  # todo strip blank lines here
+        self.line_number = line_number
+        self.commented = self.header.startswith(COMMENT_PREFIX)
+
+        header = removeprefix(self.header, COMMENT_PREFIX)
+        self.is_sep = header in SEPS
+
+        if header == CODE_SEP or header.startswith(CODE_START):
+            self.type, start, end = SectionType.CODE, CODE_START, CODE_END
+        elif header == ARGV_SEP or header.startswith(ARGV_START):
+            self.type, start, end = SectionType.ARGV, ARGV_START, ARGV_END
+        elif header == STDIN_SEP or header.startswith(STDIN_START):
+            self.type, start, end = SectionType.STDIN, STDIN_START, STDIN_END
+
+        if self.is_sep:
+            self.languages = []
         else:
-            return open(os.fspath(obj))
-    return obj
+            header = removesuffix(removeprefix(header, start), end)
+            self.languages = [lang.strip() for lang in header.split(LANGUAGE_DIVIDER)]
+
+    def __str__(self) -> str:
+        return self.header
+
+    def __repr__(self) -> str:
+        return f"{'//' if self.commented else ''}{self.type.name} " \
+               f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
+
+    @staticmethod
+    def line_is_header(line: str) -> bool:
+        line = removeprefix(line.rstrip(), COMMENT_PREFIX)
+        return line in SEPS or \
+            any(line.startswith(start) and line.endswith(end) for start, end in zip(STARTS, ENDS))
 
 
-def runmany(manyfile, language_json=None, string=False, string_json=False):
-    manyfile = to_filelike(manyfile, )
-
-    pass
-
-
-# def f() -> list[int]:
-#     return []
-
-# class RunMany:
-#     def __init__(self, manyfile, languages_json=None, string=False, string_json=False):
-#         if x == None:
-#             print('foo')
-#         pass
-
-# runmany works for filename or file handle
-# runmanys works for strings - meh
+def load_languages_json(languages_json: str) -> Any:
+    try:
+        with open(languages_json) as file:
+            return json.load(file)
+    except (OSError, json.JSONDecodeError):
+        return BACKUP_LANGUAGES_JSON
 
 
-# if __name__ == "__main__":
-#     RunMany('')
+def section_iterator(file: TextIO) -> Iterator[Section]:
+    header: Optional[str] = None
+    header_line_number = 0
+    section_lines: List[str] = []
+    for line_number, line in enumerate(file, 1):
+        if Section.line_is_header(line):
+            if header is not None:
+                yield Section(header, ''.join(section_lines), header_line_number)
+            header = line
+            header_line_number = line_number
+            section_lines = []
+        else:
+            section_lines.append(line)
+
+    if header is not None:
+        yield Section(header, ''.join(section_lines), header_line_number)
 
 
-# def get_language_commands(language_json_data):
-#     command = language_json_data.get('command')
-#     if command is None:
-#         return {}
-#     names = []
-#     if "name" in language_json_data:
-#         names.append(language_json_data["name"])
-#     names.extend(language_json_data.get("other_names", []))
-#     return {name.strip().lower(): command for name in names}
+def runmany(manyfile: str,
+            languages_json: str = DEFAULT_LANGUAGES_JSON) -> None:
+    languages_json = load_languages_json(languages_json)
+    with open(manyfile) as file:
+        for section in section_iterator(file):
+            # print(section)
+            print(repr(section))
 
 
-# def get_commands_dict(commands_dict):
-#     if commands_dict is None:
-#         with open(DEFAULT_LANGUAGES_JSON) as f:
-#             commands_dict = {}
-#             for language in json.load(f).get("languages", []):
-#                 for name, command in get_language_commands(language).items():
-#                     if name not in commands_dict:
-#                         commands_dict[name] = command
-#     return commands_dict
+if __name__ == "__main__":
+    runmany('test.many')
+    print('DONE')
 
+    # def get_language_commands(language_json_data):
+    #     command = language_json_data.get('command')
+    #     if command is None:
+    #         return {}
+    #     names = []
+    #     if "name" in language_json_data:
+    #         names.append(language_json_data["name"])
+    #     names.extend(language_json_data.get("other_names", []))
+    #     return {name.strip().lower(): command for name in names}
 
-# def runone(language, command, snippet):
-#     print(f"{LANG_START} {language} {LANG_END}")
-#     with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
-#         tmp.write(snippet)
-#         tmp_filename = tmp.name
-#     if FILENAME_PLACEHOLDER in command:
-#         command = command.replace(FILENAME_PLACEHOLDER, f'"{tmp_filename}"')
-#     else:
-#         command += f' "{tmp_filename}"'
-#     try:
-#         subprocess.check_call(command)
-#         return True
-#     except subprocess.CalledProcessError:
-#         return False
-#     finally:
-#         os.remove(tmp_filename)
+    # def get_commands_dict(commands_dict):
+    #     if commands_dict is None:
+    #         with open(DEFAULT_LANGUAGES_JSON) as f:
+    #             commands_dict = {}
+    #             for language in json.load(f).get("languages", []):
+    #                 for name, command in get_language_commands(language).items():
+    #                     if name not in commands_dict:
+    #                         commands_dict[name] = command
+    #     return commands_dict
 
+    # def runone(language, command, snippet):
+    #     print(f"{LANG_START} {language} {LANG_END}")
+    #     with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
+    #         tmp.write(snippet)
+    #         tmp_filename = tmp.name
+    #     if FILENAME_PLACEHOLDER in command:
+    #         command = command.replace(FILENAME_PLACEHOLDER, f'"{tmp_filename}"')
+    #     else:
+    #         command += f' "{tmp_filename}"'
+    #     try:
+    #         subprocess.check_call(command)
+    #         return True
+    #     except subprocess.CalledProcessError:
+    #         return False
+    #     finally:
+    #         os.remove(tmp_filename)
 
-# def runmany(manyfile, string=False, commands_dict=None):
-#     def tryrun():
-#         nonlocal snippets, runs, successes
-#         if language is not None:
-#             snippets += 1
-#             if language.lower() in commands_dict:
-#                 runs += 1
-#                 if runone(language, commands_dict[language.lower()], ''.join(snippet_lines)):
-#                     successes += 1
+    # def runmany(manyfile, string=False, commands_dict=None):
+    #     def tryrun():
+    #         nonlocal snippets, runs, successes
+    #         if language is not None:
+    #             snippets += 1
+    #             if language.lower() in commands_dict:
+    #                 runs += 1
+    #                 if runone(language, commands_dict[language.lower()], ''.join(snippet_lines)):
+    #                     successes += 1
 
-#     snippets, runs, successes = 0, 0, 0
-#     commands_dict = get_commands_dict(commands_dict)
+    #     snippets, runs, successes = 0, 0, 0
+    #     commands_dict = get_commands_dict(commands_dict)
 
-#     with (io.StringIO if string else open)(manyfile) as f:
-#         language = None
-#         snippet_lines = []
-#         for line in f:
-#             stripped = line.strip()
-#             if stripped.startswith(LANG_START) and stripped.endswith(LANG_END):
-#                 tryrun()
-#                 language = stripped[len(LANG_START):-len(LANG_END)].strip()
-#                 snippet_lines.clear()
-#             elif language is not None:
-#                 snippet_lines.append(line)
-#         tryrun()
-#     print(f"{LANG_START} {snippets} , {runs}, {successes} {LANG_END}")
-
-
-# if __name__ == "__main__":
-#     runmany('helloworld.many')
-#     print('DONE')
+    #     with (io.StringIO if string else open)(manyfile) as f:
+    #         language = None
+    #         snippet_lines = []
+    #         for line in f:
+    #             stripped = line.strip()
+    #             if stripped.startswith(LANG_START) and stripped.endswith(LANG_END):
+    #                 tryrun()
+    #                 language = stripped[len(LANG_START):-len(LANG_END)].strip()
+    #                 snippet_lines.clear()
+    #             elif language is not None:
+    #                 snippet_lines.append(line)
+    #         tryrun()
+    #     print(f"{LANG_START} {snippets} , {runs}, {successes} {LANG_END}")
