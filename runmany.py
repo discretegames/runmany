@@ -89,7 +89,7 @@ def section_iterator(file: TextIO, all_name: str, all_languages: List[str]) -> I
     section_lines: List[str] = []
     for line_number, line in enumerate(file, 1):
         if Section.line_is_header(line):
-            if header is not None:
+            if header:
                 yield current_section()
             header = line
             header_line_number = line_number
@@ -97,7 +97,7 @@ def section_iterator(file: TextIO, all_name: str, all_languages: List[str]) -> I
         else:
             section_lines.append(line)
 
-    if header is not None:
+    if header:
         yield current_section()
 
 
@@ -114,12 +114,12 @@ class Run:
     def run(self) -> None:
         pass  # BIG TODO
 
-    # def __str__(self) -> str:
-    #     return str((self.number, self.line_number))
-    #     lines = []
-    #     if argv:
-    #         lines.append('')
-    #     return 'f'
+    def __str__(self) -> str:
+        lines = []
+        if self.argv_section:
+
+            lines.append('')
+        return 'f'
 
 
 def make_languages_dict(languages_json: Any) -> Dict[str, Any]:
@@ -147,10 +147,10 @@ def run_iterator(file: TextIO, languages_json: Any) -> Iterator[Run]:
             continue
 
         if section.is_sep:
-            if lead_section is None:  # TODO better/optional error messages everywhere
+            if not lead_section:  # TODO better/optional error messages everywhere
                 print(f'Lead section missing. Skipping {repr(section)}')
                 continue
-            elif lead_section is not None and section.type is not lead_section.type:
+            elif lead_section and section.type is not lead_section.type:
                 print(f'No matching lead section. Skipping {repr(section)}')
                 continue
         else:
@@ -161,7 +161,6 @@ def run_iterator(file: TextIO, languages_json: Any) -> Iterator[Run]:
         elif section.type is SectionType.STDIN:
             update(stdins)
         elif section.type is SectionType.CODE:
-
             for lang in lead_section.languages:
                 lang_obj = languages_dict[lang]
                 for argv_section in argvs[lang]:
