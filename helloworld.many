@@ -1,5 +1,4 @@
-Anything before the first language separator is considered a comment space and completely ignored.
-
+Comment area
 
 ~~~| Python |~~~
 

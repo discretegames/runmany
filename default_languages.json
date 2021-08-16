@@ -12,7 +12,11 @@
 		},
 		{
 			"name": "TypeScript",
-			"command": "deno"
+			"command": "deno run"
+		},
+		{
+			"name": "Java",
+			"command": "java"
 		}
 	]
 }

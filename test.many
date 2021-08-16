@@ -1,25 +1,20 @@
+comment area
 
-pre stuff
-~~~| A | B b | C |~~~ 
- ~~~| part of code |~~~ 
-~~~|~~~ 
-~~~| part of code 2 |@@@
-!~~~|~~~  
-@@@| A | B b | C |@@@ 
-
-$$$||$$$
+$$$| Python |$$$
 
 
-@@@|@@@ 
-$$$| A | B b | C |$$$   
+
+~~~| Python |~~~
+
+print('Hello, World!')
+import time
+time.sleep(3)
 
 
-$$$|$$$   
+~~~| JavaScript |~~~
 
+console.log("Hello, World!")
 
-!$$$|$$$   
-!~~~| X |~~~   
+~~~| TypeScript |~~~
 
-!@@@| Y |@@@   
-
-!$$$| Z |$$$  
+console.log("Hello, World!")

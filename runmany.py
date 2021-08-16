@@ -145,8 +145,7 @@ class Run:
 
     def fill_command(self, code_file_name: str) -> str:
         command = self.command
-        file = f"'{code_file_name}'"  # TODO quotes and spaces not working, wth?
-        file = r"'C:\Users\r\Desktop\TenLanguages\test it.py'"
+        file = f'"{code_file_name}"'
         argv = self.argv_section.content if self.argv_section else ''
 
         if FILE_PLACEHOLDER in command:
@@ -159,7 +158,6 @@ class Run:
         elif argv:
             command += f' {argv}'
 
-        print(repr(command))
         return command
 
     def get_stdin(self) -> Optional[str]:
@@ -269,4 +267,4 @@ def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FI
 
 
 if __name__ == "__main__":
-    runmany('test2.many')
+    runmany('helloworld.many')
