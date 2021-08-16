@@ -1,4 +1,6 @@
 import json
+import tempfile
+import subprocess
 from typing import Any, List, Dict, DefaultDict, Optional, TextIO, Iterator, cast
 from enum import Enum, auto
 from collections import defaultdict
@@ -143,8 +145,16 @@ class Run:
     stdin_section: Optional[Section]
     output: Optional[str] = None
 
+    @staticmethod
+    def fill_command(command, language):
+        pass
+
     def run(self) -> None:
-        pass  # TODO
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as code_file:
+
+            # code_file.write(snippet)
+            print(repr(code_file.name))
+            # tmp_filename = tmp.name
 
     def __str__(self) -> str:  # todo make printing prettier
         lines = []
@@ -230,4 +240,15 @@ def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FI
 
 
 if __name__ == "__main__":
-    runmany('test2.many')
+    import time
+    start = time.perf_counter()
+
+    # need to catch TimeoutExpired
+
+    p = subprocess.run(['python', 'test it.py'], shell=True, text=True,
+                       input='A\nB\nF', capture_output=True, timeout=1)
+    # print(p)
+    print(p.stdout)
+    print(p.stderr)
+    print('time', time.perf_counter() - start)
+    # runmany('test2.many')

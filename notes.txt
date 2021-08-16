@@ -3,3 +3,4 @@ detect command errors like "python" unrecognized - get output at least
 add other 7 languages to languages.json
 verbose for unknown langs and other errors?
 could be a pip package
+timeout! - json key with default
