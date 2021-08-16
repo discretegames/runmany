@@ -103,27 +103,44 @@ def section_iterator(file: TextIO, all_name: str, all_languages: List[str]) -> I
 
 @dataclass
 class Run:
+    number: int
     language: str
     command: str
-    code: str
-    argv: str
-    stdin: str
+    code_section: Section
+    argv_section: Optional[Section]
+    stdin_section: Optional[Section]
     output: Optional[str] = None
 
     def run(self) -> None:
         pass  # BIG TODO
 
+    # def __str__(self) -> str:
+    #     return str((self.number, self.line_number))
+    #     lines = []
+    #     if argv:
+    #         lines.append('')
+    #     return 'f'
 
-def run_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str, Any]) -> Iterator[Run]:
+
+def make_languages_dict(languages_json: Any) -> Dict[str, Any]:
+    languages_dict = {}
+    for language_obj in languages_json[LANGUAGES_KEY]:
+        languages_dict[normalize_name(language_obj[NAME_KEY])] = language_obj
+    return languages_dict
+
+
+def run_iterator(file: TextIO, languages_json: Any) -> Iterator[Run]:
+    languages_dict = make_languages_dict(languages_json)
     lead_section: Optional[Section] = None
-    argvs: DefaultDict[str, List[str]] = defaultdict(lambda: [''])
-    stdins: DefaultDict[str, List[str]] = defaultdict(lambda: [''])
+    argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
+    stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
+    number = 1
 
-    def update(argvs_or_stdins: DefaultDict[str, List[str]]) -> None:
+    def update(argvs_or_stdins: DefaultDict[str, List[Optional[Section]]]) -> None:
         for language in cast(Section, lead_section).languages:
             if not section.is_sep:
                 argvs_or_stdins[language].clear()
-            argvs_or_stdins[language].append(section.content)
+            argvs_or_stdins[language].append(section)
 
     for section in section_iterator(file, normalize_name(languages_json[ALL_KEY]), list(languages_dict.keys())):
         if section.commented:
@@ -144,13 +161,16 @@ def run_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str, An
         elif section.type is SectionType.STDIN:
             update(stdins)
         elif section.type is SectionType.CODE:
+
             for lang in lead_section.languages:
                 lang_obj = languages_dict[lang]
-                for argv in argvs[lang]:
-                    for stdin in stdins[lang]:
-                        run = Run(lang_obj[NAME_KEY], lang_obj[COMMAND_KEY], section.content, argv, stdin)
+                for argv_section in argvs[lang]:
+                    for stdin_section in stdins[lang]:
+                        language, command = lang_obj[NAME_KEY], lang_obj[COMMAND_KEY]
+                        run = Run(number, language, command, section, argv_section, stdin_section)
                         run.run()
                         yield run
+                        number += 1
 
 
 def clean_languages_json(languages_json: Any) -> Any:
@@ -180,18 +200,10 @@ def load_languages_json(languages_json_file: str) -> Any:
         return DEFAULT_LANGUAGES_JSON
 
 
-def make_languages_dict(languages_json: Any) -> Dict[str, Any]:
-    languages_dict = {}
-    for language_obj in languages_json[LANGUAGES_KEY]:
-        languages_dict[normalize_name(language_obj[NAME_KEY])] = language_obj
-    return languages_dict
-
-
 def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FILE) -> None:
     languages_json = load_languages_json(languages_json_file)
-    languages_dict = make_languages_dict(languages_json)
     with open(many_file) as file:
-        for run in run_iterator(file, languages_json, languages_dict):
+        for run in run_iterator(file, languages_json):
             print(run)
 
 

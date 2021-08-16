@@ -391,3 +391,19 @@ self.languages = []
 #             language_obj = language_dict[lang]
 #             runone(language_obj[NAME_KEY], language_obj[COMMAND_KEY],
 #                    section.content, argv, stdin)
+
+
+
+Run should look like
+
+
+@@@| Python|@@@
+some argv, if any
+$$$| Python (line 4) |$$$
+some stdin, if any
+~~~| Python Output (#3 at line 7) |~~~
+
+~~~| Python (3 at line 8) |~~~
+Hello, World!
+~~~| JS |~~~
+Hello, World!
