@@ -1,15 +1,11 @@
-
-~~~|ALL    |~~~
-
-print(input())
-@@@| Python |@@@
-
---some args
-
 $$$| Python |$$$
-
 1
-
 $$$|$$$
-
 2
+
+@@@| JavaScript |@@@
+hmm
+
+~~~| aLL |~~~
+
+foo

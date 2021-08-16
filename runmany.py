@@ -66,19 +66,23 @@ class LanguagesData:
 
     def __init__(self, languages_json_file: str) -> None:
         self.json = self.clean_json(self.load_json(languages_json_file))
-        self.all = [language_obj[NAME_KEY] for language_obj in self.json[LANGUAGES_KEY]]
         self.dict = {}
         for language_obj in self.json[LANGUAGES_KEY]:
             self.dict[self.normalize(language_obj[NAME_KEY])] = language_obj
+        self.all_name_normalized = self.normalize(cast(str, self.json[ALL_KEY]))
+        self.all_languages = list(self.dict.keys())
 
-    def __getitem__(self, language: str) -> Any:
-        return self.dict.get(self.normalize(language))
+    def get_languages(self, language: str) -> List[str]:
+        language = self.normalize(language)
+        if language == self.all_name_normalized:
+            return self.all_languages
+        return [language] if language in self.dict else []
 
-    def __contains__(self, language: str) -> bool:
-        return self.normalize(language) in self.dict
+    def get_name(self, language: str) -> str:
+        return cast(str, self.dict[self.normalize(language)][NAME_KEY])
 
-    def matches_all(self, language: str) -> bool:
-        return self.normalize(language) == self.normalize(cast(str, self.json[ALL_KEY]))
+    def get_command(self, language: str) -> str:
+        return cast(str, self.dict[self.normalize(language)][COMMAND_KEY])
 
 
 class SectionType(Enum):
@@ -109,10 +113,9 @@ class Section:
         if not self.is_sep:
             header = removesuffix(removeprefix(header, start), end)
             for language in header.split(LANGUAGE_DIVIDER):
-                if languages_data.matches_all(language):
-                    self.languages.extend(languages_data.all)
-                elif language in languages_data:
-                    self.languages.append(language)
+                languages = languages_data.get_languages(language)
+                if languages:
+                    self.languages.extend(languages)
                 else:
                     print(f'Language "{language}" not found. Skipping.')
 
@@ -210,10 +213,9 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
             update(stdins)
         elif section.type is SectionType.CODE:
             for language in lead_section.languages:
-                language_obj = languages_data[language]
+                name, command = languages_data.get_name(language), languages_data.get_command(language)
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        name, command = language_obj[NAME_KEY], language_obj[COMMAND_KEY]
                         run = Run(number, name, command, section, argv_section, stdin_section)
                         run.run()
                         yield run
