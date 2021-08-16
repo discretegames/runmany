@@ -437,3 +437,6 @@ Hello, World!
         lines.append(str(self.output))
 
         return ''.join(lines) + '\n\n'
+
+
+		lines.append('-' * 80 + '\n')

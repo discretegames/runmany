@@ -13,13 +13,15 @@ FILE_PLACEHOLDER, ARGV_PLACEHOLDER = '$file', '$argv'
 FILE_MISSING_APPEND = f' {FILE_PLACEHOLDER}'
 ARGV_MISSING_APPEND = f' {ARGV_PLACEHOLDER}'
 
-ALL_KEY = 'all'
+ALL_KEY, STRIP_KEY = 'all', 'strip'
 LANGUAGES_KEY, NAME_KEY, COMMAND_KEY = 'languages', 'name', 'command'
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
 DEFAULT_LANGUAGES_JSON = {
     ALL_KEY: "All",
+    STRIP_KEY: True,
     LANGUAGES_KEY: [],
 }
+# TODO all not working for argv/stdin?
 
 
 def removeprefix(string: str, prefix: str) -> str:
@@ -30,8 +32,53 @@ def removesuffix(string: str, suffix: str) -> str:
     return string[:-len(suffix)] if string.endswith(suffix) else string
 
 
-def normalize_name(name: str) -> str:
-    return name.strip().lower()
+class LanguagesData:
+    @staticmethod
+    def normalize(language_name: str) -> str:
+        return language_name.strip().lower()
+
+    @staticmethod
+    def load_json(languages_json_file: str) -> Any:
+        try:
+            with open(languages_json_file) as file:
+                return json.load(file)
+        except (OSError, json.JSONDecodeError):
+            return DEFAULT_LANGUAGES_JSON
+
+    @staticmethod
+    def clean_json(languages_json: Any) -> Any:
+        for key, value in DEFAULT_LANGUAGES_JSON.items():
+            languages_json.setdefault(key, value)
+        languages = []
+        for language_obj in languages_json[LANGUAGES_KEY]:
+            if NAME_KEY not in language_obj:
+                print(f'No "{NAME_KEY}" key found in {language_obj}. Ignoring language.')
+                continue
+            if COMMAND_KEY not in language_obj:
+                print(f'No "{COMMAND_KEY}" key found in {language_obj}. Ignoring language.')
+                continue
+            if LanguagesData.normalize(language_obj[NAME_KEY]) == LanguagesData.normalize(languages_json[ALL_KEY]):
+                print(f'Language name cannot match name for all. Ignoring language.')
+                continue
+            languages.append(language_obj)
+        languages_json[LANGUAGES_KEY] = languages
+        return languages_json
+
+    def __init__(self, languages_json_file: str) -> None:
+        self.json = self.clean_json(self.load_json(languages_json_file))
+        self.all = [language_obj[NAME_KEY] for language_obj in self.json[LANGUAGES_KEY]]
+        self.dict = {}
+        for language_obj in self.json[LANGUAGES_KEY]:
+            self.dict[self.normalize(language_obj[NAME_KEY])] = language_obj
+
+    def __getitem__(self, language: str) -> Any:
+        return self.dict.get(self.normalize(language))
+
+    def __contains__(self, language: str) -> bool:
+        return self.normalize(language) in self.dict
+
+    def matches_all(self, language: str) -> bool:
+        return self.normalize(language) == self.normalize(cast(str, self.json[ALL_KEY]))
 
 
 class SectionType(Enum):
@@ -41,8 +88,9 @@ class SectionType(Enum):
 
 
 class Section:
-    def __init__(self, header: str, content: str, all_name: str, all_languages: List[str], line_number: int) -> None:
+    def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
         self.header = header.rstrip()
+
         self.content = content  # todo strip blank lines here
         self.line_number = line_number
         self.commented = self.header.startswith(COMMENT_PREFIX)
@@ -61,11 +109,12 @@ class Section:
         if not self.is_sep:
             header = removesuffix(removeprefix(header, start), end)
             for language in header.split(LANGUAGE_DIVIDER):
-                language = normalize_name(language)
-                if language == all_name:
-                    self.languages.extend(all_languages)
-                else:
+                if languages_data.matches_all(language):
+                    self.languages.extend(languages_data.all)
+                elif language in languages_data:
                     self.languages.append(language)
+                else:
+                    print(f'Language "{language}" not found. Skipping.')
 
     def __str__(self) -> str:
         return f"{self.header}\n{self.content}"
@@ -78,27 +127,6 @@ class Section:
     def line_is_header(line: str) -> bool:
         line = removeprefix(line.rstrip(), COMMENT_PREFIX)
         return line in SEPS or any(line.startswith(s) and line.endswith(e) for s, e in zip(STARTS, ENDS))
-
-
-def section_iterator(file: TextIO, all_name: str, all_languages: List[str]) -> Iterator[Section]:
-    def current_section() -> Section:
-        return Section(cast(str, header), ''.join(section_lines), all_name, all_languages, header_line_number)
-
-    header: Optional[str] = None
-    header_line_number = 0
-    section_lines: List[str] = []
-    for line_number, line in enumerate(file, 1):
-        if Section.line_is_header(line):
-            if header:
-                yield current_section()
-            header = line
-            header_line_number = line_number
-            section_lines = []
-        else:
-            section_lines.append(line)
-
-    if header:
-        yield current_section()
 
 
 @dataclass
@@ -129,15 +157,28 @@ class Run:
         return ''.join(lines)
 
 
-def make_languages_dict(languages_json: Any) -> Dict[str, Any]:
-    languages_dict = {}
-    for language_obj in languages_json[LANGUAGES_KEY]:
-        languages_dict[normalize_name(language_obj[NAME_KEY])] = language_obj
-    return languages_dict
+def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
+    def current_section() -> Section:
+        return Section(cast(str, header), ''.join(section_lines), languages_data, header_line_number)
+
+    header: Optional[str] = None
+    header_line_number = 0
+    section_lines: List[str] = []
+    for line_number, line in enumerate(file, 1):
+        if Section.line_is_header(line):
+            if header:
+                yield current_section()
+            header = line
+            header_line_number = line_number
+            section_lines = []
+        else:
+            section_lines.append(line)
+
+    if header:
+        yield current_section()
 
 
-def run_iterator(file: TextIO, languages_json: Any) -> Iterator[Run]:
-    languages_dict = make_languages_dict(languages_json)
+def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
@@ -149,7 +190,7 @@ def run_iterator(file: TextIO, languages_json: Any) -> Iterator[Run]:
                 argvs_or_stdins[language].clear()
             argvs_or_stdins[language].append(section)
 
-    for section in section_iterator(file, normalize_name(languages_json[ALL_KEY]), list(languages_dict.keys())):
+    for section in section_iterator(file, languages_data):
         if section.commented:
             continue
 
@@ -168,48 +209,20 @@ def run_iterator(file: TextIO, languages_json: Any) -> Iterator[Run]:
         elif section.type is SectionType.STDIN:
             update(stdins)
         elif section.type is SectionType.CODE:
-            for lang in lead_section.languages:
-                lang_obj = languages_dict[lang]
-                for argv_section in argvs[lang]:
-                    for stdin_section in stdins[lang]:
-                        language, command = lang_obj[NAME_KEY], lang_obj[COMMAND_KEY]
-                        run = Run(number, language, command, section, argv_section, stdin_section)
+            for language in lead_section.languages:
+                language_obj = languages_data[language]
+                for argv_section in argvs[language]:
+                    for stdin_section in stdins[language]:
+                        name, command = language_obj[NAME_KEY], language_obj[COMMAND_KEY]
+                        run = Run(number, name, command, section, argv_section, stdin_section)
                         run.run()
                         yield run
                         number += 1
 
 
-def clean_languages_json(languages_json: Any) -> Any:
-    for key, value in DEFAULT_LANGUAGES_JSON.items():
-        languages_json.setdefault(key, value)
-    languages = []
-    for language_obj in languages_json[LANGUAGES_KEY]:
-        if NAME_KEY not in language_obj:
-            print(f'No "{NAME_KEY}" key found in {language_obj}. Ignoring language.')
-            continue
-        if COMMAND_KEY not in language_obj:
-            print(f'No "{COMMAND_KEY}" key found in {language_obj}. Ignoring language.')
-            continue
-        if normalize_name(language_obj[NAME_KEY]) == normalize_name(languages_json[ALL_KEY]):
-            print(f'Language name cannot match name for all. Ignoring language.')
-            continue
-        languages.append(language_obj)
-    languages_json[LANGUAGES_KEY] = languages
-    return languages_json
-
-
-def load_languages_json(languages_json_file: str) -> Any:
-    try:
-        with open(languages_json_file) as file:
-            return clean_languages_json(json.load(file))
-    except (OSError, json.JSONDecodeError):
-        return DEFAULT_LANGUAGES_JSON
-
-
 def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FILE) -> None:
-    languages_json = load_languages_json(languages_json_file)
     with open(many_file) as file:
-        for run in run_iterator(file, languages_json):
+        for run in run_iterator(file, LanguagesData(languages_json_file)):
             print(run)
 
 

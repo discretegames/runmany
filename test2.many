@@ -1,11 +1,15 @@
-!@@@| Python |@@@
--someargs
-~~~| JavaScript |~~~
-console.log()
-$$$| Python |$$$
-1
-$$$|$$$
-2
-~~~| Python |~~~
-print(input())
 
+~~~|ALL    |~~~
+
+print(input())
+@@@| Python |@@@
+
+--some args
+
+$$$| Python |$$$
+
+1
+
+$$$|$$$
+
+2
