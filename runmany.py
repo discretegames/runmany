@@ -79,10 +79,10 @@ class LanguagesData:
     def get_name(self, language: str) -> str:
         return cast(str, self.dict[self.normalize(language)][NAME_KEY])
 
-    def get_command(self, language: str) -> Union[str, List[str]]:
-        return cast(Union[str, List[str]], self.dict[self.normalize(language)][COMMAND_KEY])
+    def get_command(self, language: str) -> str:
+        return cast(str, self.dict[self.normalize(language)][COMMAND_KEY])
 
-    def strip_content(self, content: str) -> str:
+    def strip_content(self, content: str) -> str:  # todo think about always stripping argv, also preformat stdin
         return content.strip('\r\n') if self.json[STRIP_KEY] else content
 
 
@@ -133,7 +133,7 @@ class Section:
 
 
 class Run:
-    def __init__(self, number: int, language: str, command: Union[str, List[str]],
+    def __init__(self, number: int, language: str, command: str,
                  code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section]) -> None:
         self.number = number
         self.language = language
@@ -143,8 +143,24 @@ class Run:
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
 
-    def fill_command(self, code_file_name: str) -> List[str]:
-        return []  # TODO
+    def fill_command(self, code_file_name: str) -> str:
+        command = self.command
+        file = f"'{code_file_name}'"  # TODO quotes and spaces not working, wth?
+        file = r"'C:\Users\r\Desktop\TenLanguages\test it.py'"
+        argv = self.argv_section.content if self.argv_section else ''
+
+        if FILE_PLACEHOLDER in command:
+            command = command.replace(FILE_PLACEHOLDER, file)
+        else:
+            command += f' {file}'
+
+        if ARGV_PLACEHOLDER in command:
+            command = command.replace(ARGV_PLACEHOLDER, argv)
+        elif argv:
+            command += f' {argv}'
+
+        print(repr(command))
+        return command
 
     def get_stdin(self) -> Optional[str]:
         if self.stdin_section:
@@ -154,7 +170,7 @@ class Run:
 
     def run(self) -> None:
         # todo probably put this in a try
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as code_file:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
