@@ -1,19 +1,16 @@
+import os
 import json
+import enum
 import tempfile
 import subprocess
-from typing import Any, List, Dict, DefaultDict, Optional, TextIO, Iterator, cast
-from enum import Enum, auto
+from typing import Any, List, DefaultDict, Union, Optional, TextIO, Iterator, cast
 from collections import defaultdict
-from dataclasses import dataclass
 
 STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 ENDS = CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 SEPS = CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
-
 FILE_PLACEHOLDER, ARGV_PLACEHOLDER = '$file', '$argv'
-FILE_MISSING_APPEND = f' {FILE_PLACEHOLDER}'
-ARGV_MISSING_APPEND = f' {ARGV_PLACEHOLDER}'
 
 ALL_KEY, STRIP_KEY = 'all', 'strip'
 LANGUAGES_KEY, NAME_KEY, COMMAND_KEY = 'languages', 'name', 'command'
@@ -82,17 +79,17 @@ class LanguagesData:
     def get_name(self, language: str) -> str:
         return cast(str, self.dict[self.normalize(language)][NAME_KEY])
 
-    def get_command(self, language: str) -> str:
-        return cast(str, self.dict[self.normalize(language)][COMMAND_KEY])
+    def get_command(self, language: str) -> Union[str, List[str]]:
+        return cast(Union[str, List[str]], self.dict[self.normalize(language)][COMMAND_KEY])
 
     def strip_content(self, content: str) -> str:
         return content.strip('\r\n') if self.json[STRIP_KEY] else content
 
 
-class SectionType(Enum):
-    CODE = auto()
-    ARGV = auto()
-    STDIN = auto()
+class SectionType(enum.Enum):
+    ARGV = enum.auto()
+    CODE = enum.auto()
+    STDIN = enum.auto()
 
 
 class Section:
@@ -135,26 +132,42 @@ class Section:
         return line in SEPS or any(line.startswith(s) and line.endswith(e) for s, e in zip(STARTS, ENDS))
 
 
-@dataclass
 class Run:
-    number: int
-    language: str
-    command: str
-    code_section: Section
-    argv_section: Optional[Section]
-    stdin_section: Optional[Section]
-    output: Optional[str] = None
+    def __init__(self, number: int, language: str, command: Union[str, List[str]],
+                 code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section]) -> None:
+        self.number = number
+        self.language = language
+        self.command = command
+        self.code_section = code_section
+        self.argv_section = argv_section
+        self.stdin_section = stdin_section
+        self.stdout = 'NOT YET RUN'
 
-    @staticmethod
-    def fill_command(command, language):
-        pass
+    def fill_command(self, code_file_name: str) -> List[str]:
+        return []  # TODO
+
+    def get_stdin(self) -> Optional[str]:
+        if self.stdin_section:
+            stdin = self.stdin_section.content
+            return stdin if stdin.endswith('\n') else stdin + '\n'
+        return None
 
     def run(self) -> None:
+        # todo probably put this in a try
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as code_file:
+            code_file.write(self.code_section.content)
+            code_file_name = code_file.name
 
-            # code_file.write(snippet)
-            print(repr(code_file.name))
-            # tmp_filename = tmp.name
+        timeout = 1  # todo add to json
+
+        try:
+            result = subprocess.run(self.fill_command(code_file_name), shell=True, text=True, timeout=timeout,
+                                    input=self.get_stdin(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            self.stdout = result.stdout
+        except subprocess.TimeoutExpired:
+            self.stdout = f'TIMED OUT OF {timeout}s LIMIT'  # todo format nicer?
+        finally:
+            os.remove(code_file_name)  # todo should this be in another try?
 
     def __str__(self) -> str:  # todo make printing prettier
         lines = []
@@ -166,7 +179,7 @@ class Run:
         if self.stdin_section:
             lines.append(self.stdin_section.content)
             lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
-        lines.append(str(self.output))
+        lines.append(self.stdout)
 
         return ''.join(lines)
 
@@ -240,15 +253,4 @@ def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FI
 
 
 if __name__ == "__main__":
-    import time
-    start = time.perf_counter()
-
-    # need to catch TimeoutExpired
-
-    p = subprocess.run(['python', 'test it.py'], shell=True, text=True,
-                       input='A\nB\nF', capture_output=True, timeout=1)
-    # print(p)
-    print(p.stdout)
-    print(p.stderr)
-    print('time', time.perf_counter() - start)
-    # runmany('test2.many')
+    runmany('test2.many')

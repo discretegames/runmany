@@ -1,4 +1,2 @@
-$$$| Python |$$$
-    spaces      
-~~~| Python | JavaScript |~~~
-a
+~~~| Python |~~~
+print('Hello')
