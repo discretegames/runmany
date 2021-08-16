@@ -116,10 +116,17 @@ class Run:
 
     def __str__(self) -> str:
         lines = []
+        lines.append(
+            f'{CODE_START} {self.language} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
         if self.argv_section:
+            lines.append(self.argv_section.content)
+            lines.append(f'[line {self.argv_section.line_number} argv]\n')
+        if self.stdin_section:
+            lines.append(self.stdin_section.content)
+            lines.append(f'[line {self.stdin_section.line_number} stdin]\n')
+        lines.append(str(self.output) + '\n')
 
-            lines.append('')
-        return 'f'
+        return ''.join(lines)
 
 
 def make_languages_dict(languages_json: Any) -> Dict[str, Any]:

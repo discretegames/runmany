@@ -1,10 +1,11 @@
-pre stuff
-$$$| all |$$$
-x
-@@@| ALL |@@@
-@@@|@@@
-y
-!@@@| ALL |@@@
-gee
-~~~| All |~~~
-foo
+!@@@| Python |@@@
+-someargs
+~~~| JavaScript |~~~
+console.log()
+$$$| Python |$$$
+1
+$$$|$$$
+2
+~~~| Python |~~~
+print(input())
+
