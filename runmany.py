@@ -2,6 +2,7 @@ import json
 from typing import Any, List, Dict, DefaultDict, Optional, TextIO, Iterator, cast
 from enum import Enum, auto
 from collections import defaultdict
+from dataclasses import dataclass
 
 STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 ENDS = CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
@@ -40,7 +41,7 @@ class SectionType(Enum):
 
 
 class Section:
-    def __init__(self, header: str, content: str, line_number: int = 0) -> None:
+    def __init__(self, header: str, content: str, all_name: str, all_languages: List[str], line_number: int) -> None:
         self.header = header.rstrip()
         self.content = content  # todo strip blank lines here
         self.line_number = line_number
@@ -56,11 +57,15 @@ class Section:
         elif header == STDIN_SEP or header.startswith(STDIN_START):
             self.type, start, end = SectionType.STDIN, STDIN_START, STDIN_END
 
-        if self.is_sep:
-            self.languages = []
-        else:
+        self.languages = []
+        if not self.is_sep:
             header = removesuffix(removeprefix(header, start), end)
-            self.languages = [normalize_name(language) for language in header.split(LANGUAGE_DIVIDER)]
+            for language in header.split(LANGUAGE_DIVIDER):
+                language = normalize_name(language)
+                if language == all_name:
+                    self.languages.extend(all_languages)
+                else:
+                    self.languages.append(language)
 
     def __str__(self) -> str:
         return f"{self.header}\n{self.content}"
@@ -75,14 +80,17 @@ class Section:
         return line in SEPS or any(line.startswith(s) and line.endswith(e) for s, e in zip(STARTS, ENDS))
 
 
-def section_iterator(file: TextIO) -> Iterator[Section]:
+def section_iterator(file: TextIO, all_name: str, all_languages: List[str]) -> Iterator[Section]:
+    def current_section() -> Section:
+        return Section(cast(str, header), ''.join(section_lines), all_name, all_languages, header_line_number)
+
     header: Optional[str] = None
     header_line_number = 0
     section_lines: List[str] = []
     for line_number, line in enumerate(file, 1):
         if Section.line_is_header(line):
             if header is not None:
-                yield Section(header, ''.join(section_lines), header_line_number)
+                yield current_section()
             header = line
             header_line_number = line_number
             section_lines = []
@@ -90,34 +98,26 @@ def section_iterator(file: TextIO) -> Iterator[Section]:
             section_lines.append(line)
 
     if header is not None:
-        yield Section(header, ''.join(section_lines), header_line_number)
+        yield current_section()
 
 
-def runone(language: str, command: str, code: str, argv: str, stdin: str) -> None:
-    print(f'Running {language}.')
+@dataclass
+class Run:
+    language: str
+    command: str
+    code: str
+    argv: str
+    stdin: str
+    output: Optional[str] = None
+
+    def run(self) -> None:
+        pass  # BIG TODO
 
 
-# TODO NOW - refactor json to use list of langs, the redo map to objects, then fix all, then fix runone
-
-# def runall(languages: List[str], argvs: DefaultDict[str, List[str]], stdins: DefaultDict[str, List[str]], code: str) -> None:
-#     for lang in languages:
-#     if lang not in languages_lower:
-#         print(f'Unknown language {lang}. Be sure to add it to languages.json')
-#         continue
-#     for argv in argvs[lang] if argvs[lang] else ['']:
-#         for stdin in stdins[lang] if stdins[lang] else ['']:
-#             language_obj = language_dict[lang]
-#             runone(language_obj[NAME_KEY], language_obj[COMMAND_KEY],
-#                    section.content, argv, stdin)
-
-# def run_iterator(languages)
-
-
-def output_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str, Any]) -> Iterator[str]:
-    # TODO yield Output class (to make), not str
+def run_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str, Any]) -> Iterator[Run]:
     lead_section: Optional[Section] = None
-    argvs: DefaultDict[str, List[str]] = defaultdict(list)
-    stdins: DefaultDict[str, List[str]] = defaultdict(list)
+    argvs: DefaultDict[str, List[str]] = defaultdict(lambda: [''])
+    stdins: DefaultDict[str, List[str]] = defaultdict(lambda: [''])
 
     def update(argvs_or_stdins: DefaultDict[str, List[str]]) -> None:
         for language in cast(Section, lead_section).languages:
@@ -125,12 +125,12 @@ def output_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str,
                 argvs_or_stdins[language].clear()
             argvs_or_stdins[language].append(section.content)
 
-    for section in section_iterator(file):
+    for section in section_iterator(file, normalize_name(languages_json[ALL_KEY]), list(languages_dict.keys())):
         if section.commented:
             continue
 
         if section.is_sep:
-            if lead_section is None:  # TODO better/optional error messages
+            if lead_section is None:  # TODO better/optional error messages everywhere
                 print(f'Lead section missing. Skipping {repr(section)}')
                 continue
             elif lead_section is not None and section.type is not lead_section.type:
@@ -139,17 +139,18 @@ def output_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str,
         else:
             lead_section = section
 
-        if section.type is SectionType.CODE:
-            print(languages_json)
-            print(languages_dict)
-            yield repr(section) + '|||' + section.content
-            pass
-            # yield from run_iterator
-            # yield runall(lead_section.languages)  # TODO
-        elif section.type is SectionType.ARGV:
+        if section.type is SectionType.ARGV:
             update(argvs)
         elif section.type is SectionType.STDIN:
             update(stdins)
+        elif section.type is SectionType.CODE:
+            for lang in lead_section.languages:
+                lang_obj = languages_dict[lang]
+                for argv in argvs[lang]:
+                    for stdin in stdins[lang]:
+                        run = Run(lang_obj[NAME_KEY], lang_obj[COMMAND_KEY], section.content, argv, stdin)
+                        run.run()
+                        yield run
 
 
 def clean_languages_json(languages_json: Any) -> Any:
@@ -163,7 +164,7 @@ def clean_languages_json(languages_json: Any) -> Any:
         if COMMAND_KEY not in language_obj:
             print(f'No "{COMMAND_KEY}" key found in {language_obj}. Ignoring language.')
             continue
-        if language_obj[NAME_KEY] == languages_json[ALL_KEY]:
+        if normalize_name(language_obj[NAME_KEY]) == normalize_name(languages_json[ALL_KEY]):
             print(f'Language name cannot match name for all. Ignoring language.')
             continue
         languages.append(language_obj)
@@ -190,73 +191,9 @@ def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FI
     languages_json = load_languages_json(languages_json_file)
     languages_dict = make_languages_dict(languages_json)
     with open(many_file) as file:
-        for output in output_iterator(file, languages_json, languages_dict):
-            print(output)
+        for run in run_iterator(file, languages_json, languages_dict):
+            print(run)
 
 
 if __name__ == "__main__":
     runmany('test2.many')
-
-    # def get_language_commands(language_json_data):
-    #     command = language_json_data.get('command')
-    #     if command is None:
-    #         return {}
-    #     names = []
-    #     if "name" in language_json_data:
-    #         names.append(language_json_data["name"])
-    #     names.extend(language_json_data.get("other_names", []))
-    #     return {name.strip().lower(): command for name in names}
-
-    # def get_commands_dict(commands_dict):
-    #     if commands_dict is None:
-    #         with open(DEFAULT_LANGUAGES_JSON) as f:
-    #             commands_dict = {}
-    #             for language in json.load(f).get("languages", []):
-    #                 for name, command in get_language_commands(language).items():
-    #                     if name not in commands_dict:
-    #                         commands_dict[name] = command
-    #     return commands_dict
-
-    # def runone(language, command, snippet):
-    #     print(f"{LANG_START} {language} {LANG_END}")
-    #     with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
-    #         tmp.write(snippet)
-    #         tmp_filename = tmp.name
-    #     if FILENAME_PLACEHOLDER in command:
-    #         command = command.replace(FILENAME_PLACEHOLDER, f'"{tmp_filename}"')
-    #     else:
-    #         command += f' "{tmp_filename}"'
-    #     try:
-    #         subprocess.check_call(command)
-    #         return True
-    #     except subprocess.CalledProcessError:
-    #         return False
-    #     finally:
-    #         os.remove(tmp_filename)
-
-    # def runmany(manyfile, string=False, commands_dict=None):
-    #     def tryrun():
-    #         nonlocal snippets, runs, successes
-    #         if language is not None:
-    #             snippets += 1
-    #             if language.lower() in commands_dict:
-    #                 runs += 1
-    #                 if runone(language, commands_dict[language.lower()], ''.join(snippet_lines)):
-    #                     successes += 1
-
-    #     snippets, runs, successes = 0, 0, 0
-    #     commands_dict = get_commands_dict(commands_dict)
-
-    #     with (io.StringIO if string else open)(manyfile) as f:
-    #         language = None
-    #         snippet_lines = []
-    #         for line in f:
-    #             stripped = line.strip()
-    #             if stripped.startswith(LANG_START) and stripped.endswith(LANG_END):
-    #                 tryrun()
-    #                 language = stripped[len(LANG_START):-len(LANG_END)].strip()
-    #                 snippet_lines.clear()
-    #             elif language is not None:
-    #                 snippet_lines.append(line)
-    #         tryrun()
-    #     print(f"{LANG_START} {snippets} , {runs}, {successes} {LANG_END}")

@@ -378,3 +378,16 @@ self.languages = []
                     self.languages.extend(all_languages)
                 else:
                     self.languages.append(language)
+
+	# TODO NOW - refactor json to use list of langs, the redo map to objects, then fix all, then fix runone
+
+# def runall(languages: List[str], argvs: DefaultDict[str, List[str]], stdins: DefaultDict[str, List[str]], code: str) -> None:
+#     for lang in languages:
+#     if lang not in languages_lower:
+#         print(f'Unknown language {lang}. Be sure to add it to languages.json')
+#         continue
+#     for argv in argvs[lang] if argvs[lang] else ['']:
+#         for stdin in stdins[lang] if stdins[lang] else ['']:
+#             language_obj = language_dict[lang]
+#             runone(language_obj[NAME_KEY], language_obj[COMMAND_KEY],
+#                    section.content, argv, stdin)
