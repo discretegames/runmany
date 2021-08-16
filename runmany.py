@@ -21,7 +21,6 @@ DEFAULT_LANGUAGES_JSON = {
     STRIP_KEY: True,
     LANGUAGES_KEY: [],
 }
-# TODO all not working for argv/stdin?
 
 
 def removeprefix(string: str, prefix: str) -> str:
@@ -84,6 +83,9 @@ class LanguagesData:
     def get_command(self, language: str) -> str:
         return cast(str, self.dict[self.normalize(language)][COMMAND_KEY])
 
+    def strip_content(self, content: str) -> str:
+        return content.strip('\r\n') if self.json[STRIP_KEY] else content
+
 
 class SectionType(Enum):
     CODE = auto()
@@ -95,7 +97,8 @@ class Section:
     def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
         self.header = header.rstrip()
 
-        self.content = content  # todo strip blank lines here
+        print(repr(content))
+        self.content = content  # languages_data.strip_content(content)
         self.line_number = line_number
         self.commented = self.header.startswith(COMMENT_PREFIX)
 
@@ -145,17 +148,17 @@ class Run:
     def run(self) -> None:
         pass  # BIG TODO
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # todo make printing prettier
         lines = []
         lines.append(
             f'{CODE_START} {self.language} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
         if self.argv_section:
             lines.append(self.argv_section.content)
-            lines.append(f'[line {self.argv_section.line_number} argv]\n')
+            lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
         if self.stdin_section:
             lines.append(self.stdin_section.content)
-            lines.append(f'[line {self.stdin_section.line_number} stdin]\n')
-        lines.append(str(self.output) + '\n')
+            lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
+        lines.append(str(self.output))
 
         return ''.join(lines)
 

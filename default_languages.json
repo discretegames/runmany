@@ -1,6 +1,6 @@
 {
 	"all": "All",
-	"strip": true,
+	"strip": false,
 	"languages": [
 		{
 			"name": "Python",
