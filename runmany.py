@@ -1,30 +1,23 @@
 import json
-from typing import Dict, Any, Optional, TextIO, Union, List, Type, Iterator, Tuple
-from enum import Enum
-
-# import tempfile
-# import subprocess
-
+from typing import Any, List, Dict, DefaultDict, Optional, TextIO, Iterator, cast
+from enum import Enum, auto
+from collections import defaultdict
 
 STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 ENDS = CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 SEPS = CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
-ALL_KEY = 'all'
-LANGUAGES_KEY = 'languages'
-STRIP_BLANK_LINES_KEY = 'strip_blank_lines'
 FILE_PLACEHOLDER, ARGV_PLACEHOLDER = '$file', '$argv'
 FILE_MISSING_APPEND = f' {FILE_PLACEHOLDER}'
 ARGV_MISSING_APPEND = f' {ARGV_PLACEHOLDER}'
 
-DEFAULT_LANGUAGES_JSON = 'default_languages.json'
-BACKUP_LANGUAGES_JSON = {
+ALL_KEY = 'all'
+LANGUAGES_KEY, NAME_KEY, COMMAND_KEY = 'languages', 'name', 'command'
+DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
+DEFAULT_LANGUAGES_JSON = {
     ALL_KEY: "All",
-    LANGUAGES_KEY: {
-        "Python": "python"
-    },
-    STRIP_BLANK_LINES_KEY: True
+    LANGUAGES_KEY: [],
 }
 
 
@@ -36,7 +29,14 @@ def removesuffix(string: str, suffix: str) -> str:
     return string[:-len(suffix)] if string.endswith(suffix) else string
 
 
-SectionType = Enum('SectionType', ['CODE', 'ARGV', 'STDIN'])
+def normalize_name(name: str) -> str:
+    return name.strip().lower()
+
+
+class SectionType(Enum):
+    CODE = auto()
+    ARGV = auto()
+    STDIN = auto()
 
 
 class Section:
@@ -60,10 +60,10 @@ class Section:
             self.languages = []
         else:
             header = removesuffix(removeprefix(header, start), end)
-            self.languages = [lang.strip() for lang in header.split(LANGUAGE_DIVIDER)]
+            self.languages = [normalize_name(language) for language in header.split(LANGUAGE_DIVIDER)]
 
     def __str__(self) -> str:
-        return self.header
+        return f"{self.header}\n{self.content}"
 
     def __repr__(self) -> str:
         return f"{'//' if self.commented else ''}{self.type.name} " \
@@ -72,16 +72,7 @@ class Section:
     @staticmethod
     def line_is_header(line: str) -> bool:
         line = removeprefix(line.rstrip(), COMMENT_PREFIX)
-        return line in SEPS or \
-            any(line.startswith(start) and line.endswith(end) for start, end in zip(STARTS, ENDS))
-
-
-def load_languages_json(languages_json: str) -> Any:
-    try:
-        with open(languages_json) as file:
-            return json.load(file)
-    except (OSError, json.JSONDecodeError):
-        return BACKUP_LANGUAGES_JSON
+        return line in SEPS or any(line.startswith(s) and line.endswith(e) for s, e in zip(STARTS, ENDS))
 
 
 def section_iterator(file: TextIO) -> Iterator[Section]:
@@ -102,18 +93,109 @@ def section_iterator(file: TextIO) -> Iterator[Section]:
         yield Section(header, ''.join(section_lines), header_line_number)
 
 
-def runmany(manyfile: str,
-            languages_json: str = DEFAULT_LANGUAGES_JSON) -> None:
-    languages_json = load_languages_json(languages_json)
-    with open(manyfile) as file:
-        for section in section_iterator(file):
-            # print(section)
-            print(repr(section))
+def runone(language: str, command: str, code: str, argv: str, stdin: str) -> None:
+    print(f'Running {language}.')
+
+
+# TODO NOW - refactor json to use list of langs, the redo map to objects, then fix all, then fix runone
+
+# def runall(languages: List[str], argvs: DefaultDict[str, List[str]], stdins: DefaultDict[str, List[str]], code: str) -> None:
+#     for lang in languages:
+#     if lang not in languages_lower:
+#         print(f'Unknown language {lang}. Be sure to add it to languages.json')
+#         continue
+#     for argv in argvs[lang] if argvs[lang] else ['']:
+#         for stdin in stdins[lang] if stdins[lang] else ['']:
+#             language_obj = language_dict[lang]
+#             runone(language_obj[NAME_KEY], language_obj[COMMAND_KEY],
+#                    section.content, argv, stdin)
+
+# def run_iterator(languages)
+
+
+def output_iterator(file: TextIO, languages_json: Any, languages_dict: Dict[str, Any]) -> Iterator[str]:
+    # TODO yield Output class (to make), not str
+    lead_section: Optional[Section] = None
+    argvs: DefaultDict[str, List[str]] = defaultdict(list)
+    stdins: DefaultDict[str, List[str]] = defaultdict(list)
+
+    def update(argvs_or_stdins: DefaultDict[str, List[str]]) -> None:
+        for language in cast(Section, lead_section).languages:
+            if not section.is_sep:
+                argvs_or_stdins[language].clear()
+            argvs_or_stdins[language].append(section.content)
+
+    for section in section_iterator(file):
+        if section.commented:
+            continue
+
+        if section.is_sep:
+            if lead_section is None:  # TODO better/optional error messages
+                print(f'Lead section missing. Skipping {repr(section)}')
+                continue
+            elif lead_section is not None and section.type is not lead_section.type:
+                print(f'No matching lead section. Skipping {repr(section)}')
+                continue
+        else:
+            lead_section = section
+
+        if section.type is SectionType.CODE:
+            print(languages_json)
+            print(languages_dict)
+            yield repr(section) + '|||' + section.content
+            pass
+            # yield from run_iterator
+            # yield runall(lead_section.languages)  # TODO
+        elif section.type is SectionType.ARGV:
+            update(argvs)
+        elif section.type is SectionType.STDIN:
+            update(stdins)
+
+
+def clean_languages_json(languages_json: Any) -> Any:
+    for key, value in DEFAULT_LANGUAGES_JSON.items():
+        languages_json.setdefault(key, value)
+    languages = []
+    for language_obj in languages_json[LANGUAGES_KEY]:
+        if NAME_KEY not in language_obj:
+            print(f'No "{NAME_KEY}" key found in {language_obj}. Ignoring language.')
+            continue
+        if COMMAND_KEY not in language_obj:
+            print(f'No "{COMMAND_KEY}" key found in {language_obj}. Ignoring language.')
+            continue
+        if language_obj[NAME_KEY] == languages_json[ALL_KEY]:
+            print(f'Language name cannot match name for all. Ignoring language.')
+            continue
+        languages.append(language_obj)
+    languages_json[LANGUAGES_KEY] = languages
+    return languages_json
+
+
+def load_languages_json(languages_json_file: str) -> Any:
+    try:
+        with open(languages_json_file) as file:
+            return clean_languages_json(json.load(file))
+    except (OSError, json.JSONDecodeError):
+        return DEFAULT_LANGUAGES_JSON
+
+
+def make_languages_dict(languages_json: Any) -> Dict[str, Any]:
+    languages_dict = {}
+    for language_obj in languages_json[LANGUAGES_KEY]:
+        languages_dict[normalize_name(language_obj[NAME_KEY])] = language_obj
+    return languages_dict
+
+
+def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FILE) -> None:
+    languages_json = load_languages_json(languages_json_file)
+    languages_dict = make_languages_dict(languages_json)
+    with open(many_file) as file:
+        for output in output_iterator(file, languages_json, languages_dict):
+            print(output)
 
 
 if __name__ == "__main__":
-    runmany('test.many')
-    print('DONE')
+    runmany('test2.many')
 
     # def get_language_commands(language_json_data):
     #     command = language_json_data.get('command')

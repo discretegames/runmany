@@ -1,3 +1,3 @@
 from runmany import *
 
-runmany('helloworld.many')
+runmany('test2.many')

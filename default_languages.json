@@ -1,9 +1,17 @@
 {
-	"all": "All",
-	"languages": {
-		"Python": "python",
-		"JavaScript": "node",
-		"TypeScript": "deno"
-	},
-	"strip_blank_lines": true
+	"all": "Hmm",
+	"languages": [
+		{
+			"name": "Python",
+			"command": "python"
+		},
+		{
+			"name": "JavaScript",
+			"command": "node"
+		},
+		{
+			"name": "TypeScript",
+			"command": "deno"
+		}
+	]
 }
