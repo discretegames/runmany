@@ -1,6 +1,6 @@
 {
 	"all": "All",
-	"strip": false,
+	"strip": true,
 	"languages": [
 		{
 			"name": "Python",
@@ -9,6 +9,10 @@
 		{
 			"name": "JavaScript",
 			"command": "node"
+		},
+		{
+			"name": "TypeScript",
+			"command": "deno"
 		}
 	]
 }

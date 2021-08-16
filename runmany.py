@@ -96,9 +96,7 @@ class SectionType(Enum):
 class Section:
     def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
         self.header = header.rstrip()
-
-        print(repr(content))
-        self.content = content  # languages_data.strip_content(content)
+        self.content = languages_data.strip_content(content)
         self.line_number = line_number
         self.commented = self.header.startswith(COMMENT_PREFIX)
 
@@ -146,7 +144,7 @@ class Run:
     output: Optional[str] = None
 
     def run(self) -> None:
-        pass  # BIG TODO
+        pass  # TODO
 
     def __str__(self) -> str:  # todo make printing prettier
         lines = []
