@@ -5,12 +5,12 @@ import json
 import enum
 import tempfile
 import subprocess
-from typing import Any, List, Type, Dict, DefaultDict, Union, Optional, TextIO, Iterator, cast
+from typing import Any, List, Tuple, Dict, DefaultDict, Union, Optional, TextIO, Iterator, cast
 from collections import defaultdict
 
-STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
-ENDS = CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
-SEPS = CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
+CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
+CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
+CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 
@@ -119,33 +119,52 @@ class LanguagesData:
 
 
 class SectionType(enum.Enum):
-    ARGV = enum.auto()
     CODE = enum.auto()
+    ARGV = enum.auto()
     STDIN = enum.auto()
 
 
 class Section:
-    def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
+    @staticmethod
+    def line_is_header(line: str) -> bool:
+        line = removeprefix(line.rstrip(), COMMENT_PREFIX)
+        starts = CODE_START, ARGV_START, STDIN_START
+        ends = CODE_END, ARGV_END, STDIN_END
+        seps = CODE_SEP, ARGV_SEP, STDIN_SEP
+        return line in seps or any(line.startswith(s) and line.endswith(e) for s, e in zip(starts, ends))
+
+    @staticmethod
+    def get_type_start_end(header: str) -> Tuple[SectionType, str, str]:
+        if header == ARGV_SEP or header.startswith(ARGV_START):
+            return SectionType.ARGV, ARGV_START, ARGV_END
+        elif header == STDIN_SEP or header.startswith(STDIN_START):
+            return SectionType.STDIN, STDIN_START, STDIN_END
+        else:
+            return SectionType.CODE, CODE_START, CODE_END
+
+    @staticmethod
+    def strip_content(content: str, section_type: SectionType) -> str:
+        if section_type is SectionType.ARGV:
+            return content.strip('\r\n')  # Always strip argv.
+        elif section_type is SectionType.STDIN:
+            return content.strip('\r\n') + '\n'  # Always strip stdin except trailing newline.
+        else:
+            return content  # Never strip code.
+
+    def __init__(self, header: str, content: str, line_number: int, languages_data: LanguagesData) -> None:
         self.header = header.rstrip()
-        # TODO smarter stripping, always for argv, kinda stdin, never for code
-        self.content = content
-        self.line_number = line_number
+        self.type, start, end = self.get_type_start_end(self.header)
         self.commented = self.header.startswith(COMMENT_PREFIX)
 
-        header = removeprefix(self.header, COMMENT_PREFIX)
-        self.is_sep = header in SEPS
-
-        if header == CODE_SEP or header.startswith(CODE_START):
-            self.type, start, end = SectionType.CODE, CODE_START, CODE_END
-        elif header == ARGV_SEP or header.startswith(ARGV_START):
-            self.type, start, end = SectionType.ARGV, ARGV_START, ARGV_END
-        elif header == STDIN_SEP or header.startswith(STDIN_START):
-            self.type, start, end = SectionType.STDIN, STDIN_START, STDIN_END
+        raw_header = removeprefix(self.header, COMMENT_PREFIX)
+        self.is_sep = raw_header in (CODE_SEP, ARGV_SEP, STDIN_SEP)
+        self.content = self.strip_content(content, self.type)
+        self.line_number = line_number
 
         self.languages = []
         if not self.is_sep:
-            header = removesuffix(removeprefix(header, start), end)
-            for language in header.split(LANGUAGE_DIVIDER):
+            raw_header = removesuffix(removeprefix(raw_header, start), end)
+            for language in raw_header.split(LANGUAGE_DIVIDER):
                 try:
                     self.languages.extend(languages_data.unpack_language(language))
                 except KeyError:
@@ -157,11 +176,6 @@ class Section:
     def __repr__(self) -> str:
         return f"{'//' if self.commented else ''}{self.type.name} " \
                f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
-
-    @ staticmethod
-    def line_is_header(line: str) -> bool:
-        line = removeprefix(line.rstrip(), COMMENT_PREFIX)
-        return line in SEPS or any(line.startswith(s) and line.endswith(e) for s, e in zip(STARTS, ENDS))
 
 
 class Run:
@@ -191,12 +205,6 @@ class Run:
 
         return command
 
-    def get_stdin(self) -> Optional[str]:
-        if self.stdin_section:
-            stdin = self.stdin_section.content
-            return stdin if stdin.endswith('\n') else stdin + '\n'
-        return None
-
     def run(self) -> None:
         # todo probably put this in a try
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as code_file:
@@ -204,8 +212,9 @@ class Run:
             code_file_name = code_file.name
 
         try:
-            result = subprocess.run(self.fill_command(code_file_name), shell=True, text=True, timeout=self.language.timeout,
-                                    input=self.get_stdin(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            stdin = self.stdin_section.content if self.stdin_section else None
+            result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
+                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo format nicer?
@@ -229,7 +238,7 @@ class Run:
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
     def current_section() -> Section:
-        return Section(cast(str, header), ''.join(section_lines), languages_data, header_line_number)
+        return Section(cast(str, header), ''.join(section_lines), header_line_number, languages_data)
 
     header: Optional[str] = None
     header_line_number = 0
