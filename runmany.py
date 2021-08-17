@@ -25,6 +25,7 @@ class JsonKeys(ABC):
 
 
 class Placeholders(ABC):
+    prefix = '$'
     ARGV = '$argv'
     # For file .../dir/file.ext the parts are:
     FILE = '$file'        # ".../dir/file.ext"
@@ -184,6 +185,19 @@ class Section:
                f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
 
 
+class PathParts:
+    def __init__(self, path: str) -> None:
+        p = PurePath(path)
+        self.rawfile = str(p)
+        self.file = f'"{self.rawfile}"'
+        self.rawdir = f'{p.parent}{os.sep}'
+        self.dir = f'"{self.rawdir}"'
+        self.name = p.name
+        self.stem = p.stem
+        self.branch = f'{self.rawdir}{self.stem}'
+        self.ext = p.suffix
+
+
 class Run:
     def __init__(self, number: int, language: Language,
                  code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section]) -> None:
@@ -210,30 +224,25 @@ class Run:
 
     def fill_command(self, code_file_name: str) -> str:
         command = self.language.command
+        pp = PathParts(code_file_name)
         argv = self.argv_section.content if self.argv_section else ''
-        path = PurePath(code_file_name)
-        rawfile = str(path)
-        file = f'"{rawfile}"'
-        rawdir = f'{path.parent}{os.sep}'
-        dir = f'"{rawdir}"'
-        name = path.name
-        stem = path.stem
-        branch = f'{rawdir}{stem}'
-        ext = path.suffix
 
-        # print([rawfile, file, rawdir, dir, name, stem, branch, ext])
-
-        # def replace(placeholder: str, string: st
-
-        if Placeholders.FILE in command:
-            command = command.replace(Placeholders.FILE, file)
+        if Placeholders.prefix not in command:  # Then assume we can tack on file and argv.
+            command += f' {pp.file}'
+            if argv:
+                command += f' {argv}'
         else:
-            command += f' {file}'
-
-        if Placeholders.ARGV in command:
-            command = command.replace(Placeholders.ARGV, argv)
-        elif argv:
-            command += f' {argv}'
+            def replace(placeholder: str, replacement: str) -> None:
+                nonlocal command
+                command = command.replace(placeholder, replacement)
+            replace(Placeholders.FILE, pp.file)
+            replace(Placeholders.RAWFILE, pp.rawfile)
+            replace(Placeholders.DIR, pp.dir)
+            replace(Placeholders.RAWDIR, pp.rawdir)
+            replace(Placeholders.NAME, pp.name)
+            replace(Placeholders.BRANCH, pp.branch)
+            replace(Placeholders.STEM, pp.stem)
+            replace(Placeholders.EXT, pp.ext)
 
         return command
 
@@ -242,10 +251,11 @@ class Run:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
-        try:
+        try:  # todo probably a verbose error option or something
             stdin = self.stdin_section.content if self.stdin_section else None
             result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
-                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                    shell=True, text=True, capture_output=True)  # stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            print(result.returncode)  # todo check rc and show stderr accordingly?
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo better text?

@@ -2,7 +2,7 @@ Comment area
 
 ~~~| Python |~~~
 
-print('Hello, World!')
+prdint('Hello, World!')
 
 ~~~| JavaScript |~~~
 
