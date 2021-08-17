@@ -1,3 +1,5 @@
+from abc import ABC
+from dataclasses import dataclass
 import os
 import json
 import enum
@@ -10,15 +12,32 @@ STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 ENDS = CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 SEPS = CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
-FILE_PLACEHOLDER, ARGV_PLACEHOLDER = '$file', '$argv'
 
-ALL_KEY, STRIP_KEY = 'all', 'strip'
-LANGUAGES_KEY, NAME_KEY, COMMAND_KEY = 'languages', 'name', 'command'
-DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
-DEFAULT_LANGUAGES_JSON = {
-    ALL_KEY: "All",
-    STRIP_KEY: True,
-    LANGUAGES_KEY: [],
+
+class JsonKeys(ABC):
+    ALL = 'all'
+    STRIP = 'strip'
+    TIMEOUT = 'timeout'
+    LANGUAGES = 'languages'
+    NAME = 'name'
+    COMMAND = 'command'
+    EXT = 'ext'
+
+
+class Placeholders(ABC):
+    ARGV = '$argv'
+    FILE = '$file'
+    STEM = '$stem'
+    EXT = '$ext'
+    DIR = '$dir'  # todo is this one needed?
+
+
+DEFAULT_JSON_FILE = 'default_languages.json'
+DEFAULT_JSON = {
+    JsonKeys.ALL: "All",
+    JsonKeys.STRIP: True,
+    JsonKeys.TIMEOUT: 1.0,
+    JsonKeys.LANGUAGES: [],
 }
 
 
@@ -31,6 +50,13 @@ def removesuffix(string: str, suffix: str) -> str:
 
 
 class LanguagesData:
+    @dataclass
+    class Language:
+        name: str
+        command: str
+        timeout: float
+        ext: str
+
     @staticmethod
     def normalize(language_name: str) -> str:
         return language_name.strip().lower()
@@ -41,33 +67,33 @@ class LanguagesData:
             with open(languages_json_file) as file:
                 return json.load(file)
         except (OSError, json.JSONDecodeError):
-            return DEFAULT_LANGUAGES_JSON
+            return DEFAULT_JSON
 
     @staticmethod
     def clean_json(languages_json: Any) -> Any:
-        for key, value in DEFAULT_LANGUAGES_JSON.items():
+        for key, value in DEFAULT_JSON.items():
             languages_json.setdefault(key, value)
         languages = []
-        for language_obj in languages_json[LANGUAGES_KEY]:
-            if NAME_KEY not in language_obj:
-                print(f'No "{NAME_KEY}" key found in {language_obj}. Ignoring language.')
+        for language_obj in languages_json[JsonKeys.LANGUAGES]:
+            if JsonKeys.NAME not in language_obj:
+                print(f'No "{JsonKeys.NAME}" key found in {language_obj}. Ignoring language.')
                 continue
-            if COMMAND_KEY not in language_obj:
-                print(f'No "{COMMAND_KEY}" key found in {language_obj}. Ignoring language.')
+            if JsonKeys.COMMAND not in language_obj:
+                print(f'No "{JsonKeys.COMMAND}" key found in {language_obj}. Ignoring language.')
                 continue
-            if LanguagesData.normalize(language_obj[NAME_KEY]) == LanguagesData.normalize(languages_json[ALL_KEY]):
+            if LanguagesData.normalize(language_obj[JsonKeys.NAME]) == LanguagesData.normalize(languages_json[JsonKeys.ALL]):
                 print(f'Language name cannot match name for all. Ignoring language.')
                 continue
             languages.append(language_obj)
-        languages_json[LANGUAGES_KEY] = languages
+        languages_json[JsonKeys.LANGUAGES] = languages
         return languages_json
 
     def __init__(self, languages_json_file: str) -> None:
         self.json = self.clean_json(self.load_json(languages_json_file))
         self.dict = {}
-        for language_obj in self.json[LANGUAGES_KEY]:
-            self.dict[self.normalize(language_obj[NAME_KEY])] = language_obj
-        self.all_name_normalized = self.normalize(cast(str, self.json[ALL_KEY]))
+        for language_obj in self.json[JsonKeys.LANGUAGES]:
+            self.dict[self.normalize(language_obj[JsonKeys.NAME])] = language_obj
+        self.all_name_normalized = self.normalize(cast(str, self.json[JsonKeys.ALL]))
         self.all_languages = list(self.dict.keys())
 
     def get_languages(self, language: str) -> List[str]:
@@ -77,13 +103,13 @@ class LanguagesData:
         return [language] if language in self.dict else []
 
     def get_name(self, language: str) -> str:
-        return cast(str, self.dict[self.normalize(language)][NAME_KEY])
+        return cast(str, self.dict[self.normalize(language)][JsonKeys.NAME])
 
     def get_command(self, language: str) -> str:
-        return cast(str, self.dict[self.normalize(language)][COMMAND_KEY])
+        return cast(str, self.dict[self.normalize(language)][JsonKeys.COMMAND])
 
     def strip_content(self, content: str) -> str:  # todo think about always stripping argv, also preformat stdin
-        return content.strip('\r\n') if self.json[STRIP_KEY] else content
+        return content.strip('\r\n') if self.json[JsonKeys.STRIP] else content
 
 
 class SectionType(enum.Enum):
@@ -148,13 +174,13 @@ class Run:
         file = f'"{code_file_name}"'
         argv = self.argv_section.content if self.argv_section else ''
 
-        if FILE_PLACEHOLDER in command:
-            command = command.replace(FILE_PLACEHOLDER, file)
+        if Placeholders.FILE in command:
+            command = command.replace(Placeholders.FILE, file)
         else:
             command += f' {file}'
 
-        if ARGV_PLACEHOLDER in command:
-            command = command.replace(ARGV_PLACEHOLDER, argv)
+        if Placeholders.ARGV in command:
+            command = command.replace(Placeholders.ARGV, argv)
         elif argv:
             command += f' {argv}'
 
@@ -260,7 +286,7 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
                         number += 1
 
 
-def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FILE) -> None:
+def runmany(many_file: str, languages_json_file: str = DEFAULT_JSON_FILE) -> None:
     with open(many_file) as file:
         for run in run_iterator(file, LanguagesData(languages_json_file)):
             print(run)

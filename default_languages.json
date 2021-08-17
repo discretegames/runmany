@@ -1,6 +1,7 @@
 {
 	"all": "All",
 	"strip": true,
+	"timeout": 1.0,
 	"languages": [
 		{
 			"name": "Python",
@@ -16,7 +17,8 @@
 		},
 		{
 			"name": "Java",
-			"command": "java"
+			"command": "java",
+			"ext": ".java"
 		}
 	]
 }
