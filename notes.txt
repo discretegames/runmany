@@ -4,3 +4,8 @@ add other 7 languages to languages.json
 verbose for unknown langs and other errors?
 could be a pip package
 timeout! - json key with default
+
+need to add extensions for kotlin and java, maybe more
+$file $ext $fileNoExt $argv
+probably create temp dir that's easier to clean up
+"cd $dir && kotlinc $fileName -include-runtime -d $fileNameWithoutExt.jar && java -jar $fileNameWithoutExt.jar"
