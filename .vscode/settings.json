@@ -1,0 +1,9 @@
+{
+	"python.linting.enabled": true,
+	"python.linting.mypyEnabled": true,
+	"python.linting.mypyArgs": [
+		"--strict",
+	],
+	"python.linting.pylintEnabled": false,
+	"python.pythonPath": ".\\venv3.8\\Scripts\\python.exe",
+}
