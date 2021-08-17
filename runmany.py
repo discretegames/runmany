@@ -5,7 +5,7 @@ import json
 import enum
 import tempfile
 import subprocess
-from typing import Any, List, DefaultDict, Union, Optional, TextIO, Iterator, cast
+from typing import Any, List, Type, Dict, DefaultDict, Union, Optional, TextIO, Iterator, cast
 from collections import defaultdict
 
 STARTS = CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
@@ -16,7 +16,6 @@ LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 class JsonKeys(ABC):
     ALL = 'all'
-    STRIP = 'strip'
     TIMEOUT = 'timeout'
     LANGUAGES = 'languages'
     NAME = 'name'
@@ -35,7 +34,6 @@ class Placeholders(ABC):
 DEFAULT_JSON_FILE = 'default_languages.json'
 DEFAULT_JSON = {
     JsonKeys.ALL: "All",
-    JsonKeys.STRIP: True,
     JsonKeys.TIMEOUT: 1.0,
     JsonKeys.LANGUAGES: [],
 }
@@ -49,52 +47,68 @@ def removesuffix(string: str, suffix: str) -> str:
     return string[:-len(suffix)] if string.endswith(suffix) else string
 
 
+@dataclass
+class Language:
+    name: str
+    command: str
+    ext: str
+    timeout: float
+    # todo strict mode? thinking not, only global
+
+    @property
+    def name_norm(self) -> str:
+        return self.normalize(self.name)
+
+    @staticmethod
+    def normalize(name: str) -> str:
+        return name.strip().lower()
+
+    @staticmethod
+    def validate_language_json(language_json: Any, all_name: str) -> bool:
+        if JsonKeys.NAME not in language_json:
+            print(f'No "{JsonKeys.NAME}" key found in {language_json}. Ignoring language.')
+            return False
+        if JsonKeys.COMMAND not in language_json:
+            print(f'No "{JsonKeys.COMMAND}" key found in {language_json}. Ignoring language.')
+            return False
+        if Language.normalize(language_json[JsonKeys.NAME]) == Language.normalize(all_name):
+            print(f'Language name cannot match all name "{all_name}". Ignoring language.')
+            return False
+        return True
+
+    @staticmethod
+    def from_json(language_json: Any, default_timeout: float) -> 'Language':
+        name = language_json[JsonKeys.NAME]
+        command = language_json[JsonKeys.COMMAND]
+        ext = language_json.get(JsonKeys.EXT, '')
+        timeout = language_json.get(JsonKeys.TIMEOUT, default_timeout)
+        return Language(name, command, ext, timeout)
+
+
 class LanguagesData:
-    @dataclass
-    class Language:
-        name: str
-        command: str
-        timeout: float
-        ext: str
 
     @staticmethod
-    def normalize(language_name: str) -> str:
-        return language_name.strip().lower()
+    def from_json(languages_json: Any) -> 'LanguagesData':
+        def get_default(key: str) -> Any:
+            return languages_json.get(key, DEFAULT_JSON[key])
 
-    @staticmethod
-    def load_json(languages_json_file: str) -> Any:
-        try:
-            with open(languages_json_file) as file:
-                return json.load(file)
-        except (OSError, json.JSONDecodeError):
-            return DEFAULT_JSON
+        all_name = get_default(JsonKeys.ALL)
+        default_timeout = get_default(JsonKeys.TIMEOUT)
 
-    @staticmethod
-    def clean_json(languages_json: Any) -> Any:
-        for key, value in DEFAULT_JSON.items():
-            languages_json.setdefault(key, value)
         languages = []
-        for language_obj in languages_json[JsonKeys.LANGUAGES]:
-            if JsonKeys.NAME not in language_obj:
-                print(f'No "{JsonKeys.NAME}" key found in {language_obj}. Ignoring language.')
-                continue
-            if JsonKeys.COMMAND not in language_obj:
-                print(f'No "{JsonKeys.COMMAND}" key found in {language_obj}. Ignoring language.')
-                continue
-            if LanguagesData.normalize(language_obj[JsonKeys.NAME]) == LanguagesData.normalize(languages_json[JsonKeys.ALL]):
-                print(f'Language name cannot match name for all. Ignoring language.')
-                continue
-            languages.append(language_obj)
-        languages_json[JsonKeys.LANGUAGES] = languages
-        return languages_json
+        for language_json in get_default(JsonKeys.LANGUAGES):
+            if Language.validate_language_json(language_json, all_name):
+                languages.append(Language.from_json(language_json, default_timeout))
 
-    def __init__(self, languages_json_file: str) -> None:
-        self.json = self.clean_json(self.load_json(languages_json_file))
-        self.dict = {}
-        for language_obj in self.json[JsonKeys.LANGUAGES]:
-            self.dict[self.normalize(language_obj[JsonKeys.NAME])] = language_obj
-        self.all_name_normalized = self.normalize(cast(str, self.json[JsonKeys.ALL]))
-        self.all_languages = list(self.dict.keys())
+        return LanguagesData(all_name, languages)
+
+    def __init__(self, all_name: str, languages: List[Language]) -> None:
+        self.all_name = all_name
+        self.languages = {lang.name_norm: lang for lang in languages}
+
+    @property
+    def all_name_norm(self) -> str:
+        return Language.normalize(self.all_name)
 
     def get_languages(self, language: str) -> List[str]:
         language = self.normalize(language)
@@ -152,7 +166,7 @@ class Section:
         return f"{'//' if self.commented else ''}{self.type.name} " \
                f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
 
-    @staticmethod
+    @ staticmethod
     def line_is_header(line: str) -> bool:
         line = removeprefix(line.rstrip(), COMMENT_PREFIX)
         return line in SEPS or any(line.startswith(s) and line.endswith(e) for s, e in zip(STARTS, ENDS))
@@ -286,9 +300,18 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
                         number += 1
 
 
+def load_languages_json(languages_json_file: str) -> Any:
+    try:
+        with open(languages_json_file) as file:
+            return json.load(file)
+    except (OSError, json.JSONDecodeError):
+        return DEFAULT_JSON
+
+
 def runmany(many_file: str, languages_json_file: str = DEFAULT_JSON_FILE) -> None:
+    languages_json = load_languages_json(languages_json_file)
     with open(many_file) as file:
-        for run in run_iterator(file, LanguagesData(languages_json_file)):
+        for run in run_iterator(file, LanguagesData.from_json(languages_json)):
             print(run)
 
 

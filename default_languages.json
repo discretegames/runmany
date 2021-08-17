@@ -1,11 +1,11 @@
 {
 	"all": "All",
-	"strip": true,
-	"timeout": 1.0,
+	"timeout": 10.0,
 	"languages": [
 		{
 			"name": "Python",
-			"command": "python"
+			"command": "python",
+			"timeout": 0.1
 		},
 		{
 			"name": "JavaScript",
