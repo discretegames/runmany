@@ -53,7 +53,7 @@ class Language:
     command: str
     ext: str
     timeout: float
-    # todo strict mode? thinking not, only global
+    # todo strict mode for errors/better text?
 
     @property
     def name_norm(self) -> str:
@@ -63,7 +63,7 @@ class Language:
     def normalize(name: str) -> str:
         return name.strip().lower()
 
-    @staticmethod  # todo better error text
+    @staticmethod  # todo better text?
     def validate_language_json(language_json: Any, all_name: str) -> bool:
         if JsonKeys.NAME not in language_json:
             print(f'No "{JsonKeys.NAME}" key found in {language_json}. Ignoring language.')
@@ -217,11 +217,11 @@ class Run:
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
-            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo format nicer?
+            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo better text?
         finally:
             os.remove(code_file_name)  # todo should this be in another try?
 
-    def __str__(self) -> str:  # todo make printing prettier
+    def __str__(self) -> str:  # todo better text?
         lines = []
         lines.append(
             f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
@@ -274,7 +274,7 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
             continue
 
         if section.is_sep:
-            if not lead_section:  # TODO better/optional error messages everywhere
+            if not lead_section:  # todo better text?
                 print(f'Lead section missing. Skipping {repr(section)}')
                 continue
             elif lead_section and section.type is not lead_section.type:
