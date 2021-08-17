@@ -1,11 +1,10 @@
-from abc import ABC
-from dataclasses import dataclass
-import os
 import json
 import enum
-import tempfile
 import subprocess
-from typing import Any, List, Tuple, Dict, DefaultDict, Union, Optional, TextIO, Iterator, cast
+from abc import ABC
+from tempfile import TemporaryDirectory, NamedTemporaryFile
+from dataclasses import dataclass
+from typing import Any, List, Tuple, DefaultDict, Optional, TextIO, Iterator, cast
 from collections import defaultdict
 
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
@@ -26,13 +25,10 @@ class JsonKeys(ABC):
 class Placeholders(ABC):
     ARGV = '$argv'
     FILE = '$file'
-    STEM = '$stem'
-    EXT = '$ext'
-    DIR = '$dir'  # todo is this one needed?
 
 
-DEFAULT_JSON_FILE = 'default_languages.json'
-DEFAULT_JSON = {
+DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
+DEFAULT_LANGUAGES_JSON = {
     JsonKeys.ALL: "All",
     JsonKeys.TIMEOUT: 1.0,
     JsonKeys.LANGUAGES: [],
@@ -74,9 +70,9 @@ class Language:
         if JsonKeys.COMMAND not in language_json:
             print(f'No "{JsonKeys.COMMAND}" key found in {language_json}. Ignoring language.')
             return False
-        if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
-            print(f'No extension defined to fill placeholder "{Placeholders.EXT}". Ignoring language.')
-            return False
+        # if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
+        #     print(f'No extension defined to fill placeholder "{Placeholders.EXT}". Ignoring language.')
+        #     return False
         return True
 
     @staticmethod
@@ -93,7 +89,7 @@ class LanguagesData:
     @staticmethod
     def from_json(languages_json: Any) -> 'LanguagesData':
         def get_default(key: str) -> Any:
-            return languages_json.get(key, DEFAULT_JSON[key])
+            return languages_json.get(key, DEFAULT_LANGUAGES_JSON[key])
 
         all_ = get_default(JsonKeys.ALL)
         default_timeout = get_default(JsonKeys.TIMEOUT)
@@ -188,7 +184,21 @@ class Run:
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
 
-    def fill_command(self, code_file_name: str) -> str:
+    def __str__(self) -> str:  # todo better text?
+        lines = []
+        lines.append(
+            f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
+        if self.argv_section:
+            lines.append(self.argv_section.content)
+            lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
+        if self.stdin_section:
+            lines.append(self.stdin_section.content)
+            lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
+        lines.append(self.stdout)
+
+        return ''.join(lines)
+
+    def fill_command(self, code_file_name: str) -> str:  # todo expand $ext etc
         command = self.language.command
         file = f'"{code_file_name}"'
         argv = self.argv_section.content if self.argv_section else ''
@@ -205,9 +215,8 @@ class Run:
 
         return command
 
-    def run(self) -> None:
-        # todo probably put this in a try
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as code_file:
+    def run(self, tmp_dir: str) -> None:
+        with NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=tmp_dir, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
@@ -218,22 +227,6 @@ class Run:
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo better text?
-        finally:
-            os.remove(code_file_name)  # todo should this be in another try?
-
-    def __str__(self) -> str:  # todo better text?
-        lines = []
-        lines.append(
-            f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
-        if self.argv_section:
-            lines.append(self.argv_section.content)
-            lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
-        if self.stdin_section:
-            lines.append(self.stdin_section.content)
-            lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
-        lines.append(self.stdout)
-
-        return ''.join(lines)
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
@@ -257,7 +250,7 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
         yield current_section()
 
 
-def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
+def run_iterator(file: TextIO, tmp_dir: str, languages_data: LanguagesData) -> Iterator[Run]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
@@ -292,7 +285,7 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
                         run = Run(number, languages_data[language], section, argv_section, stdin_section)
-                        run.run()
+                        run.run(tmp_dir)
                         yield run
                         number += 1
 
@@ -302,14 +295,15 @@ def load_languages_json(languages_json_file: str) -> Any:
         with open(languages_json_file) as file:
             return json.load(file)
     except (OSError, json.JSONDecodeError):
-        return DEFAULT_JSON
+        return DEFAULT_LANGUAGES_JSON
 
 
-def runmany(many_file: str, languages_json_file: str = DEFAULT_JSON_FILE) -> None:
+def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FILE) -> None:
     languages_json = load_languages_json(languages_json_file)
     with open(many_file) as file:
-        for run in run_iterator(file, LanguagesData.from_json(languages_json)):
-            print(run)
+        with TemporaryDirectory() as tmp_dir:
+            for run in run_iterator(file, tmp_dir, LanguagesData.from_json(languages_json)):
+                print(run)  # todo more options, like send to file
 
 
 if __name__ == "__main__":
