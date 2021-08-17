@@ -4,6 +4,9 @@ Comment area
 
 print('Hello, World!')
 
+import time
+time.sleep(1)
+
 ~~~| JavaScript |~~~
 
 console.log("Hello, World!")

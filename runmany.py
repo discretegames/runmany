@@ -63,16 +63,19 @@ class Language:
     def normalize(name: str) -> str:
         return name.strip().lower()
 
-    @staticmethod
+    @staticmethod  # todo better error text
     def validate_language_json(language_json: Any, all_name: str) -> bool:
         if JsonKeys.NAME not in language_json:
             print(f'No "{JsonKeys.NAME}" key found in {language_json}. Ignoring language.')
             return False
+        if Language.normalize(language_json[JsonKeys.NAME]) == Language.normalize(all_name):
+            print(f'Language name cannot match all name "{all_name}". Ignoring language.')
+            return False
         if JsonKeys.COMMAND not in language_json:
             print(f'No "{JsonKeys.COMMAND}" key found in {language_json}. Ignoring language.')
             return False
-        if Language.normalize(language_json[JsonKeys.NAME]) == Language.normalize(all_name):
-            print(f'Language name cannot match all name "{all_name}". Ignoring language.')
+        if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
+            print(f'No extension defined to fill placeholder "{Placeholders.EXT}". Ignoring language.')
             return False
         return True
 
@@ -92,38 +95,27 @@ class LanguagesData:
         def get_default(key: str) -> Any:
             return languages_json.get(key, DEFAULT_JSON[key])
 
-        all_name = get_default(JsonKeys.ALL)
+        all_ = get_default(JsonKeys.ALL)
         default_timeout = get_default(JsonKeys.TIMEOUT)
 
         languages = []
         for language_json in get_default(JsonKeys.LANGUAGES):
-            if Language.validate_language_json(language_json, all_name):
+            if Language.validate_language_json(language_json, all_):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_name, languages)
+        return LanguagesData(all_, languages)
 
-    def __init__(self, all_name: str, languages: List[Language]) -> None:
-        self.all_name = all_name
-        self.languages = {lang.name_norm: lang for lang in languages}
+    def __init__(self, all_: str, languages: List[Language]) -> None:
+        self.all = all_
+        self.dict = {language.name_norm: language for language in languages}
 
-    @property
-    def all_name_norm(self) -> str:
-        return Language.normalize(self.all_name)
+    def unpack_language(self, language: str) -> List[str]:
+        if Language.normalize(language) == Language.normalize(self.all):
+            return list(self.dict.keys())
+        return [self[language].name_norm]
 
-    def get_languages(self, language: str) -> List[str]:
-        language = self.normalize(language)
-        if language == self.all_name_normalized:
-            return self.all_languages
-        return [language] if language in self.dict else []
-
-    def get_name(self, language: str) -> str:
-        return cast(str, self.dict[self.normalize(language)][JsonKeys.NAME])
-
-    def get_command(self, language: str) -> str:
-        return cast(str, self.dict[self.normalize(language)][JsonKeys.COMMAND])
-
-    def strip_content(self, content: str) -> str:  # todo think about always stripping argv, also preformat stdin
-        return content.strip('\r\n') if self.json[JsonKeys.STRIP] else content
+    def __getitem__(self, language: str) -> Language:
+        return self.dict[Language.normalize(language)]
 
 
 class SectionType(enum.Enum):
@@ -135,7 +127,8 @@ class SectionType(enum.Enum):
 class Section:
     def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
         self.header = header.rstrip()
-        self.content = languages_data.strip_content(content)
+        # TODO smarter stripping, always for argv, kinda stdin, never for code
+        self.content = content
         self.line_number = line_number
         self.commented = self.header.startswith(COMMENT_PREFIX)
 
@@ -153,11 +146,10 @@ class Section:
         if not self.is_sep:
             header = removesuffix(removeprefix(header, start), end)
             for language in header.split(LANGUAGE_DIVIDER):
-                languages = languages_data.get_languages(language)
-                if languages:
-                    self.languages.extend(languages)
-                else:
-                    print(f'Language "{language}" not found. Skipping.')
+                try:
+                    self.languages.extend(languages_data.unpack_language(language))
+                except KeyError:
+                    print(f'Language "{language.strip()}" not found. Skipping.')
 
     def __str__(self) -> str:
         return f"{self.header}\n{self.content}"
@@ -173,18 +165,17 @@ class Section:
 
 
 class Run:
-    def __init__(self, number: int, language: str, command: str,
+    def __init__(self, number: int, language: Language,
                  code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section]) -> None:
         self.number = number
         self.language = language
-        self.command = command
         self.code_section = code_section
         self.argv_section = argv_section
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
 
     def fill_command(self, code_file_name: str) -> str:
-        command = self.command
+        command = self.language.command
         file = f'"{code_file_name}"'
         argv = self.argv_section.content if self.argv_section else ''
 
@@ -212,21 +203,19 @@ class Run:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
-        timeout = 1  # todo add to json
-
         try:
-            result = subprocess.run(self.fill_command(code_file_name), shell=True, text=True, timeout=timeout,
+            result = subprocess.run(self.fill_command(code_file_name), shell=True, text=True, timeout=self.language.timeout,
                                     input=self.get_stdin(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
-            self.stdout = f'TIMED OUT OF {timeout}s LIMIT'  # todo format nicer?
+            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo format nicer?
         finally:
             os.remove(code_file_name)  # todo should this be in another try?
 
     def __str__(self) -> str:  # todo make printing prettier
         lines = []
         lines.append(
-            f'{CODE_START} {self.language} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
+            f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
         if self.argv_section:
             lines.append(self.argv_section.content)
             lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
@@ -291,10 +280,9 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
             update(stdins)
         elif section.type is SectionType.CODE:
             for language in lead_section.languages:
-                name, command = languages_data.get_name(language), languages_data.get_command(language)
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        run = Run(number, name, command, section, argv_section, stdin_section)
+                        run = Run(number, languages_data[language], section, argv_section, stdin_section)
                         run.run()
                         yield run
                         number += 1
