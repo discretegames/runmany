@@ -1,11 +1,13 @@
 import json
 import enum
 import subprocess
+import os
 from abc import ABC
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 from dataclasses import dataclass
 from typing import Any, List, Tuple, DefaultDict, Optional, TextIO, Iterator, cast
 from collections import defaultdict
+from pathlib import PurePath
 
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
@@ -24,7 +26,15 @@ class JsonKeys(ABC):
 
 class Placeholders(ABC):
     ARGV = '$argv'
-    FILE = '$file'
+    # For file .../dir/file.ext the parts are:
+    FILE = '$file'        # ".../dir/file.ext"
+    RAWFILE = '$rawfile'  # .../dir/file.ext
+    DIR = '$dir'          # ".../dir/"
+    RAWDIR = '$rawdir'    # .../dir/
+    NAME = '$name'        # file.ext
+    BRANCH = '$branch'    # .../dir/file
+    STEM = '$stem'        # file
+    EXT = '$ext'          # .ext
 
 
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
@@ -70,9 +80,9 @@ class Language:
         if JsonKeys.COMMAND not in language_json:
             print(f'No "{JsonKeys.COMMAND}" key found in {language_json}. Ignoring language.')
             return False
-        # if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
-        #     print(f'No extension defined to fill placeholder "{Placeholders.EXT}". Ignoring language.')
-        #     return False
+        if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
+            print(f'No extension defined to fill placeholder "{Placeholders.EXT}". Ignoring language.')
+            return False
         return True
 
     @staticmethod
@@ -91,18 +101,18 @@ class LanguagesData:
         def get_default(key: str) -> Any:
             return languages_json.get(key, DEFAULT_LANGUAGES_JSON[key])
 
-        all_ = get_default(JsonKeys.ALL)
+        all = get_default(JsonKeys.ALL)
         default_timeout = get_default(JsonKeys.TIMEOUT)
 
         languages = []
         for language_json in get_default(JsonKeys.LANGUAGES):
-            if Language.validate_language_json(language_json, all_):
+            if Language.validate_language_json(language_json, all):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_, languages)
+        return LanguagesData(all, languages)
 
-    def __init__(self, all_: str, languages: List[Language]) -> None:
-        self.all = all_
+    def __init__(self, all: str, languages: List[Language]) -> None:
+        self.all = all
         self.dict = {language.name_norm: language for language in languages}
 
     def unpack_language(self, language: str) -> List[str]:
@@ -198,10 +208,22 @@ class Run:
 
         return ''.join(lines)
 
-    def fill_command(self, code_file_name: str) -> str:  # todo expand $ext etc
+    def fill_command(self, code_file_name: str) -> str:
         command = self.language.command
-        file = f'"{code_file_name}"'
         argv = self.argv_section.content if self.argv_section else ''
+        path = PurePath(code_file_name)
+        rawfile = str(path)
+        file = f'"{rawfile}"'
+        rawdir = f'{path.parent}{os.sep}'
+        dir = f'"{rawdir}"'
+        name = path.name
+        stem = path.stem
+        branch = f'{rawdir}{stem}'
+        ext = path.suffix
+
+        # print([rawfile, file, rawdir, dir, name, stem, branch, ext])
+
+        # def replace(placeholder: str, string: st
 
         if Placeholders.FILE in command:
             command = command.replace(Placeholders.FILE, file)
