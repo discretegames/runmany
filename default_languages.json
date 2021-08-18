@@ -22,8 +22,13 @@
 		},
 		{
 			"name": "Kotlin",
-			"command": "kotlinc $file -include-runtime -d \"$branch.jar\" && java -jar \"$branch.jar\"",
+			"command": "kotlinc $file -include-runtime -d \"$branch.jar\" && java -jar \"$rawbranch.jar\"",
 			"ext": ".kt"
+		},
+		{
+			"name": "Rust",
+			"command": "rustc $file --out-dir $dir && $branch",
+			"ext": ".rs"
 		}
 	]
 }

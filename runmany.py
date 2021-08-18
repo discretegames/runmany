@@ -28,14 +28,16 @@ class Placeholders(ABC):
     prefix = '$'
     ARGV = '$argv'
     # For file .../dir/file.ext the parts are:
-    FILE = '$file'        # ".../dir/file.ext"
-    RAWFILE = '$rawfile'  # .../dir/file.ext
-    DIR = '$dir'          # ".../dir/"
-    RAWDIR = '$rawdir'    # .../dir/
-    NAME = '$name'        # file.ext
-    BRANCH = '$branch'    # .../dir/file
-    STEM = '$stem'        # file
-    EXT = '$ext'          # .ext
+    RAWDIR = '$rawdir'        # .../dir
+    DIR = '$dir'              # ".../dir"
+    RAWFILE = '$rawfile'      # .../dir/file.ext
+    FILE = '$file'            # ".../dir/file.ext"
+    RAWBRANCH = '$rawbranch'  # .../dir/file
+    BRANCH = '$branch'        # ".../dir/file"
+    NAME = '$name'            # file.ext
+    STEM = '$stem'            # file
+    EXT = '$ext'              # .ext
+    SEP = '$sep'              # /
 
 
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
@@ -187,15 +189,19 @@ class Section:
 
 class PathParts:
     def __init__(self, path: str) -> None:
+        def quote(s: str) -> str:
+            return f'"{s}"'
         p = PurePath(path)
+        self.rawdir = str(p.parent)
+        self.dir = quote(self.rawdir)
         self.rawfile = str(p)
-        self.file = f'"{self.rawfile}"'
-        self.rawdir = f'{p.parent}{os.sep}'
-        self.dir = f'"{self.rawdir}"'
+        self.file = quote(self.rawfile)
+        self.rawbranch = str(p.with_suffix(''))
+        self.branch = quote(self.rawbranch)
         self.name = p.name
         self.stem = p.stem
-        self.branch = f'{self.rawdir}{self.stem}'
         self.ext = p.suffix
+        self.sep = os.sep
 
 
 class Run:
@@ -235,15 +241,18 @@ class Run:
             def replace(placeholder: str, replacement: str) -> None:
                 nonlocal command
                 command = command.replace(placeholder, replacement)
-            replace(Placeholders.FILE, pp.file)
-            replace(Placeholders.RAWFILE, pp.rawfile)
-            replace(Placeholders.DIR, pp.dir)
             replace(Placeholders.RAWDIR, pp.rawdir)
-            replace(Placeholders.NAME, pp.name)
+            replace(Placeholders.DIR, pp.dir)
+            replace(Placeholders.RAWFILE, pp.rawfile)
+            replace(Placeholders.FILE, pp.file)
+            replace(Placeholders.RAWBRANCH, pp.rawbranch)
             replace(Placeholders.BRANCH, pp.branch)
+            replace(Placeholders.NAME, pp.name)
             replace(Placeholders.STEM, pp.stem)
             replace(Placeholders.EXT, pp.ext)
+            replace(Placeholders.SEP, pp.sep)
 
+        print(command)  # todo option to display command
         return command
 
     def run(self, tmp_dir: str) -> None:
@@ -254,11 +263,14 @@ class Run:
         try:  # todo probably a verbose error option or something
             stdin = self.stdin_section.content if self.stdin_section else None
             result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
-                                    shell=True, text=True, capture_output=True)  # stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # , capture_output=True)
             print(result.returncode)  # todo check rc and show stderr accordingly?
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo better text?
+        finally:
+            os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
