@@ -1,6 +1,6 @@
 {
 	"all_name": "All",
-	"timeout": 10.0,
+	"timeout": 1.0,
 	"languages": [
 		{
 			"name": "Python",

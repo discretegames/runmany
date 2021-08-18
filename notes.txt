@@ -1,0 +1,118 @@
+Thinking 3 options for showing stderr of code run show_stderr
+- not at all "never" or false
+- only if return code nonzero "nzec" (default)
+- always "always" or true
+still undecided here
+could also have option to suppress code with nonzero exit code
+
+could 2 bools handle all the scenarios? NO
+show_nzec: bool = true NO
+show_stderr: bool = true NO not like this
+
+nzec stderr NO
+t t = show all regardless of ec and show stderr with stdouts
+t f = show all regardless of ec but hide stderr
+f t = hide nzec runs but show stderr in others (not that useful)
+f f = hide all and all
+
+nah, this misses the case of showing stderr in everything that has a nzec
+which seems the most useful
+
+could have suppress_nzec bool = false
+which suppresses all programs that give a nzec
+aka show_nzec = true
+
+always show exit code (if nonzero?) e.g. [#4 line 8 ec 1]
+
+show_command: bool = false
+for showing the command used or not, just below header
+
+all runmany local errors except timeout should be sent to stderr
+print("error", file=sys.stderr)
+don't need an option for this
+
+check_equal: bool = false
+when true, checks that all the stdouts match at the end and displays like
+"Not all stdouts match! Matching groups: [Python Ruby Go] [JS TS]"
+or "All stdouts match!"
+would need to find the largest group of stdouts that match for comparison
+
+
+command line stuff - with argparse
+runmany file.many -j (--json) languages.json -o (--output) output.txt
+runmany -h (--help)
+could have more options to override json but meh
+
+thinking %%%|%%% for exit separator, can be commented, no block comments
+maybe ^^^|^^^
+
+80 dashes for separator? way more visible than ~~~| nonsense
+--------------------------------------------------------------------------------
+
+error message?
+!!!| error |!!!
+
+exit maybe
+&&&|&&&
+or %%%|%%% - this one
+not ^^^|^^^, too hard to see
+
+comment maybe
+!!!| text |!!!
+but then can you comment a comment? !!!!| |!!! ? thinking no
+always 3 ! is fine
+and matches usage of ! for comment already
+
+
+say, should multiple comments work?
+
+!!~~~| Python |~~~
+print('never run')
+
+thinking nah
+
+
+things that timeout have no return code, use 'T'
+
+
+so final option decisions
+bool show_command
+str/bool show_stderr = "nzec" or null
+bool show_nzec = true
+
+
+output format
+--------------------------------------------------------------------------------
+1. Python Output [line 10 ec 0] python "C:\Users\r\AppData\Local\Temp\tmpp649n902\tmpalhy4vr9.py"
+--some --args
+[line 2 argv]
+Bob
+[line 4 stdin]
+Hello Bob!
+
+--------------------------------------------------------------------------------
+2. Python Output [line 10 ec 0] python "C:\Users\r\AppData\Local\Temp\tmpp649n902\tmpalhy4vr9.py"
+--some --args
+[line 2 argv]
+Alice
+[line 8 stdin]
+Hello Alice
+
+--------------------------------------------------------------------------------
+3. Ruby Output [line 18 ec T] python "C:\Users\r\AppData\Local\Temp\tmpp649n902\tmpalhy4vr9.py"
+Alice
+[line 8 stdin]
+TIMED OUT OF 8s LIMIT. Add larger "timeout": <float> to json
+
+--------------------------------------------------------------------------------
+4. Go Output
+stdout
+
+--------------------------------------------------------------------------------
+3/4 programs successfully run. 1 failed due to timeout or nzec
+
+
+
+could have run counters per language? meh
+
+ok, think mostly decides on path forward

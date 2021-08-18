@@ -40,7 +40,7 @@ class Placeholders(ABC):
     SEP = '$sep'              # /
 
 
-DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
+LANGUAGES_JSON_FILE = 'languages.json'
 DEFAULT_LANGUAGES_JSON = {
     JsonKeys.ALL_NAME: "All",
     JsonKeys.TIMEOUT: 1.0,
@@ -264,7 +264,7 @@ class Run:
             result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # , capture_output=True)
-            # print(result.returncode) # todo clean up
+            print(result.returncode)  # todo clean up
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
@@ -341,7 +341,7 @@ def load_languages_json(languages_json_file: str) -> Any:
         return DEFAULT_LANGUAGES_JSON
 
 
-def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FILE) -> None:
+def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> None:
     languages_json = load_languages_json(languages_json_file)
     with open(many_file) as file:
         with TemporaryDirectory() as tmp_dir:
