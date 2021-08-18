@@ -36,6 +36,21 @@
 			"name": "Go",
 			"command": "go run",
 			"ext": ".go"
+		},
+		{
+			"name": "C",
+			"command": "g++ $file -o $branch && $branch",
+			"ext": ".c"
+		},
+		{
+			"name": "C++",
+			"command": "g++ $file -o $branch && $branch",
+			"ext": ".cpp"
+		},
+		{
+			"name": "C#",
+			"command": "csc /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\"",
+			"ext": ".cs"
 		}
 	]
 }

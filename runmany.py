@@ -14,6 +14,8 @@ CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
+# TODO a special "exit here" line like `%%%|%%%` would be nice, block comments even? |||!|||
+
 
 class JsonKeys(ABC):
     ALL = 'all'
@@ -252,7 +254,7 @@ class Run:
             replace(Placeholders.EXT, pp.ext)
             replace(Placeholders.SEP, pp.sep)
 
-        # print(command) # todo option to display command
+        print(command)  # todo option to display command
         return command
 
     def run(self, tmp_dir: str) -> None:
@@ -348,6 +350,8 @@ def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FI
         with TemporaryDirectory() as tmp_dir:
             for run in run_iterator(file, tmp_dir, LanguagesData.from_json(languages_json)):
                 print(run)  # todo more options, like send to file
+
+# Todo think an option that looks for matching stdouts like someone on discord said
 
 
 if __name__ == "__main__":
