@@ -14,8 +14,6 @@ CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
-# TODO a special "exit here" line like `%%%|%%%` would be nice, block comments even? |||!|||
-
 
 class JsonKeys(ABC):
     ALL = 'all'
@@ -64,7 +62,6 @@ class Language:
     command: str
     ext: str
     timeout: float
-    # todo strict mode for errors/better text?
 
     @property
     def name_norm(self) -> str:
@@ -74,7 +71,7 @@ class Language:
     def normalize(name: str) -> str:
         return name.strip().lower()
 
-    @staticmethod  # todo better text?
+    @staticmethod
     def validate_language_json(language_json: Any, all_name: str) -> bool:
         if JsonKeys.NAME not in language_json:
             print(f'No "{JsonKeys.NAME}" key found in {language_json}. Ignoring language.')
@@ -216,7 +213,7 @@ class Run:
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
 
-    def __str__(self) -> str:  # todo better text?
+    def __str__(self) -> str:
         lines = []
         lines.append(
             f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
@@ -254,7 +251,7 @@ class Run:
             replace(Placeholders.EXT, pp.ext)
             replace(Placeholders.SEP, pp.sep)
 
-        print(command)  # todo option to display command
+        print(command)
         return command
 
     def run(self, tmp_dir: str) -> None:
@@ -262,15 +259,15 @@ class Run:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
-        try:  # todo probably a verbose error option or something
+        try:
             stdin = self.stdin_section.content if self.stdin_section else None
             result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # , capture_output=True)
-            # print(result.returncode)  # todo check rc and show stderr accordingly?
+            # print(result.returncode) # todo clean up
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
-            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo better text?
+            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
         finally:
             os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
 
@@ -313,7 +310,7 @@ def run_iterator(file: TextIO, tmp_dir: str, languages_data: LanguagesData) -> I
             continue
 
         if section.is_sep:
-            if not lead_section:  # todo better text?
+            if not lead_section:
                 print(f'Lead section missing. Skipping {repr(section)}')
                 continue
             elif lead_section and section.type is not lead_section.type:
@@ -349,9 +346,7 @@ def runmany(many_file: str, languages_json_file: str = DEFAULT_LANGUAGES_JSON_FI
     with open(many_file) as file:
         with TemporaryDirectory() as tmp_dir:
             for run in run_iterator(file, tmp_dir, LanguagesData.from_json(languages_json)):
-                print(run)  # todo more options, like send to file
-
-# Todo think an option that looks for matching stdouts like someone on discord said
+                print(run)
 
 
 if __name__ == "__main__":
