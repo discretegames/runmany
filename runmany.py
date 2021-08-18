@@ -19,6 +19,8 @@ LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 class JsonKeys(ABC):
     ALL_NAME = 'all_name'
+    STDERR = 'stderr'
+    SHOW_COMMAND = 'show_command'
     TIMEOUT = 'timeout'
     LANGUAGES = 'languages'
     NAME = 'name'
@@ -45,6 +47,8 @@ class Placeholders(ABC):
 LANGUAGES_JSON_FILE = 'languages.json'
 DEFAULT_LANGUAGES_JSON = {
     JsonKeys.ALL_NAME: "All",
+    JsonKeys.STDERR: "nzec",
+    JsonKeys.SHOW_COMMAND: False,
     JsonKeys.TIMEOUT: 1.0,
     JsonKeys.LANGUAGES: [],
 }
@@ -104,6 +108,21 @@ class Language:
         return Language(name, command, ext, timeout)
 
 
+class StderrOption(enum.Enum):
+    ALWAYS = enum.auto()
+    NEVER = enum.auto()
+    NZEC = enum.auto()
+
+    @staticmethod
+    def from_json(stderr_json: Any) -> 'StderrOption':
+        if stderr_json is True or stderr_json == 'always':
+            return StderrOption.NEVER
+        elif stderr_json is False or stderr_json == 'never':
+            return StderrOption.ALWAYS
+        else:
+            return StderrOption.NZEC
+
+
 class LanguagesData:
     @staticmethod
     def from_json(languages_json: Any) -> 'LanguagesData':
@@ -111,6 +130,8 @@ class LanguagesData:
             return languages_json.get(key, DEFAULT_LANGUAGES_JSON[key])
 
         all_name = get_default(JsonKeys.ALL_NAME)
+        stderr = StderrOption.from_json(get_default(JsonKeys.STDERR))
+        show_command = get_default(JsonKeys.SHOW_COMMAND)
         default_timeout = get_default(JsonKeys.TIMEOUT)
 
         languages = []
@@ -118,10 +139,12 @@ class LanguagesData:
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_name, languages)
+        return LanguagesData(all_name, stderr, show_command, languages)
 
-    def __init__(self, all_name: str, languages: List[Language]) -> None:
+    def __init__(self, all_name: str, stderr: StderrOption, show_command: bool, languages: List[Language]) -> None:
         self.all_name = all_name
+        self.stderr = stderr
+        self.show_command = show_command
         self.dict = {language.name_norm: language for language in languages}
 
     def unpack_language(self, language: str) -> List[str]:
@@ -231,20 +254,7 @@ class Run:
         self.argv_section = argv_section
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
-
-    def __str__(self) -> str:
-        lines = []
-        lines.append(
-            f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
-        if self.argv_section:
-            lines.append(self.argv_section.content)
-            lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
-        if self.stdin_section:
-            lines.append(self.stdin_section.content)
-            lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
-        lines.append(self.stdout)
-
-        return ''.join(lines)
+        self.command = self.language.command
 
     def fill_command(self, code_file_name: str) -> str:
         command = self.language.command
@@ -269,8 +279,6 @@ class Run:
             replace(Placeholders.STEM, pp.stem)
             replace(Placeholders.EXT, pp.ext)
             replace(Placeholders.SEP, pp.sep)
-
-        print(command)
         return command
 
     def run(self, tmp_dir: str) -> None:
@@ -280,15 +288,34 @@ class Run:
 
         try:
             stdin = self.stdin_section.content if self.stdin_section else None
-            result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
+            self.command = self.fill_command(code_file_name)
+            result = subprocess.run(self.command, input=stdin, timeout=self.language.timeout,
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # , capture_output=True)
             print(result.returncode)  # todo clean up
             self.stdout = result.stdout
+            self.exit_code = str(result.returncode)
         except subprocess.TimeoutExpired:
-            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo T exit code
+            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
+            self.exit_code = 'T'
         finally:
             os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
+
+    def output(self, show_command: bool) -> str:
+        lines = []
+        lines.append(
+            f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
+        if show_command:
+            lines.append(self.command + '\n')
+        if self.argv_section:
+            lines.append(self.argv_section.content)
+            lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
+        if self.stdin_section:
+            lines.append(self.stdin_section.content)
+            lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
+        lines.append(self.stdout)
+
+        return ''.join(lines)
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
@@ -364,10 +391,11 @@ def load_languages_json(languages_json_file: str) -> Any:
 
 def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> None:
     languages_json = load_languages_json(languages_json_file)
+    languages_data = LanguagesData.from_json(languages_json)
     with open(many_file) as file:
         with TemporaryDirectory() as tmp_dir:
-            for run in run_iterator(file, tmp_dir, LanguagesData.from_json(languages_json)):
-                print(run)
+            for run in run_iterator(file, tmp_dir, languages_data):
+                print(run.output(languages_data.show_command))
 
 
 if __name__ == "__main__":
