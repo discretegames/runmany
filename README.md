@@ -18,19 +18,12 @@ Soon:
   - command
   - return code
 - Put errors into section stdout when possible. (Strict/silent mode option?)
-- Better, more descriptive error text in general for:
-  - No lang name found (no natural output)
-  - No lang command found (no natural output)
-  - $ext missing (no natural output)
-  - Language in header not found (no natural output exactly)
-  - Timed out
-  - Missing lead section (no natural output)
-  - No matching lead section (no natural output)
-  - special error line like !!!| RunMany error: Missing language |!!!
+- Timed out msg and exit code
 - Option to check for stdout equality. Display success at the end and differing ones.
 - Command line runnable with input+output+json file options. (Maybe inner json options too?)
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
+- Just ignore commented sections. More efficient.
 
 Less Soon:
 

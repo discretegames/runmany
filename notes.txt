@@ -51,6 +51,10 @@ maybe ^^^|^^^
 
 error message?
 !!!| error |!!!
+no that's comment now
+
+error could be
+???| RunMany Error: <message> |???
 
 exit maybe
 &&&|&&&

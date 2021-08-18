@@ -2,6 +2,7 @@ import json
 import enum
 import subprocess
 import os
+import sys
 from abc import ABC
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 from dataclasses import dataclass
@@ -57,6 +58,10 @@ def removesuffix(string: str, suffix: str) -> str:
     return string[:-len(suffix)] if string.endswith(suffix) else string
 
 
+def print_err(message: str) -> None:
+    print(f"***| Runmany Error: {message} |***", file=sys.stderr)
+
+
 @dataclass
 class Language:
     name: str
@@ -74,17 +79,19 @@ class Language:
 
     @staticmethod
     def validate_language_json(language_json: Any, all_name: str) -> bool:
+        name = language_json[JsonKeys.NAME]
         if JsonKeys.NAME not in language_json:
-            print(f'No "{JsonKeys.NAME}" key found in {language_json}. Ignoring language.')
+            print_err(f'No "{JsonKeys.NAME}" key found in {json.dumps(language_json)}. Ignoring language.')
             return False
-        if Language.normalize(language_json[JsonKeys.NAME]) == Language.normalize(all_name):
-            print(f'Language name cannot match all name "{all_name}". Ignoring language.')
+        if Language.normalize(name) == Language.normalize(all_name):
+            print_err(f'Language name "{name}" cannot match {JsonKeys.ALL_NAME} "{all_name}". Ignoring language.')
             return False
         if JsonKeys.COMMAND not in language_json:
-            print(f'No "{JsonKeys.COMMAND}" key found in {language_json}. Ignoring language.')
+            print_err(f'No "{JsonKeys.COMMAND}" key found for {name}. Ignoring language.')
             return False
         if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
-            print(f'No extension defined to fill placeholder "{Placeholders.EXT}". Ignoring language.')
+            print_err(f'No "{JsonKeys.EXT}" key found to fill "{Placeholders.EXT}" placeholder for {name} command.'
+                      ' Ignoring language.')
             return False
         return True
 
@@ -187,7 +194,8 @@ class Section:
                     self.languages.extend(languages_data.unpack_language(language))
                 except KeyError:
                     if not self.commented:
-                        print(f'Language "{language.strip()}" not found. Skipping.')
+                        print_err(f'Language "{language.strip()}" in section header at line {self.line_number}'
+                                  ' not found in json. Skipping language.')
 
     def __str__(self) -> str:
         return f"{self.header}\n{self.content}"
@@ -278,7 +286,7 @@ class Run:
             print(result.returncode)  # todo clean up
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
-            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
+            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo T exit code
         finally:
             os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
 
@@ -325,11 +333,9 @@ def run_iterator(file: TextIO, tmp_dir: str, languages_data: LanguagesData) -> I
             continue
 
         if section.is_sep:
-            if not lead_section:
-                print(f'Lead section missing. Skipping {repr(section)}')
-                continue
-            elif lead_section and section.type is not lead_section.type:
-                print(f'No matching lead section. Skipping {repr(section)}')
+            if not lead_section or section.type is not lead_section.type:
+                print_err(
+                    f'No matching lead section for "{section.header}" on line {section.line_number}. Skipping section.')
                 continue
         else:
             lead_section = section
