@@ -98,7 +98,6 @@ class Language:
 
 
 class LanguagesData:
-
     @staticmethod
     def from_json(languages_json: Any) -> 'LanguagesData':
         def get_default(key: str) -> Any:
@@ -177,7 +176,8 @@ class Section:
                 try:
                     self.languages.extend(languages_data.unpack_language(language))
                 except KeyError:
-                    print(f'Language "{language.strip()}" not found. Skipping.')
+                    if not self.commented:
+                        print(f'Language "{language.strip()}" not found. Skipping.')
 
     def __str__(self) -> str:
         return f"{self.header}\n{self.content}"
@@ -252,7 +252,7 @@ class Run:
             replace(Placeholders.EXT, pp.ext)
             replace(Placeholders.SEP, pp.sep)
 
-        print(command)  # todo option to display command
+        # print(command) # todo option to display command
         return command
 
     def run(self, tmp_dir: str) -> None:
@@ -265,7 +265,7 @@ class Run:
             result = subprocess.run(self.fill_command(code_file_name), input=stdin, timeout=self.language.timeout,
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # , capture_output=True)
-            print(result.returncode)  # todo check rc and show stderr accordingly?
+            # print(result.returncode)  # todo check rc and show stderr accordingly?
             self.stdout = result.stdout
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'  # todo better text?

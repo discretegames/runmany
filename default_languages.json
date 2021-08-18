@@ -5,15 +5,17 @@
 		{
 			"name": "Python",
 			"command": "python",
-			"timeout": 0.1
+			"ext": ".py"
 		},
 		{
 			"name": "JavaScript",
-			"command": "node"
+			"command": "node",
+			"ext": ".js"
 		},
 		{
 			"name": "TypeScript",
-			"command": "deno run"
+			"command": "deno run",
+			"ext": ".ts"
 		},
 		{
 			"name": "Java",
@@ -22,13 +24,18 @@
 		},
 		{
 			"name": "Kotlin",
-			"command": "kotlinc $file -include-runtime -d \"$branch.jar\" && java -jar \"$rawbranch.jar\"",
+			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\"",
 			"ext": ".kt"
 		},
 		{
 			"name": "Rust",
 			"command": "rustc $file --out-dir $dir && $branch",
 			"ext": ".rs"
+		},
+		{
+			"name": "Go",
+			"command": "go run",
+			"ext": ".go"
 		}
 	]
 }

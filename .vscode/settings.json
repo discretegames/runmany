@@ -11,4 +11,9 @@
 		"rawdir",
 		"rawfile",
 	],
+	"files.exclude": {
+		".mypy_cache/": true,
+		"__pycache__/": true,
+		"desktop.ini": true,
+	}
 }
