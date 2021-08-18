@@ -1,3 +1,12 @@
 ~~~| Python |~~~
 
-print('helloooo')
+import sys
+print('hello')
+
+print('ON ERR', file=sys.stderr)
+
+print('goodbye')
+print(1/1)
+
+
+

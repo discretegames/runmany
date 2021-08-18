@@ -116,9 +116,9 @@ class StderrOption(enum.Enum):
     @staticmethod
     def from_json(stderr_json: Any) -> 'StderrOption':
         if stderr_json is True or stderr_json == 'always':
-            return StderrOption.NEVER
-        elif stderr_json is False or stderr_json == 'never':
             return StderrOption.ALWAYS
+        elif stderr_json is False or stderr_json == 'never':
+            return StderrOption.NEVER
         else:
             return StderrOption.NZEC
 
@@ -130,7 +130,7 @@ class LanguagesData:
             return languages_json.get(key, DEFAULT_LANGUAGES_JSON[key])
 
         all_name = get_default(JsonKeys.ALL_NAME)
-        stderr = StderrOption.from_json(get_default(JsonKeys.STDERR))
+        stderr_op = StderrOption.from_json(get_default(JsonKeys.STDERR))
         show_command = get_default(JsonKeys.SHOW_COMMAND)
         default_timeout = get_default(JsonKeys.TIMEOUT)
 
@@ -139,11 +139,11 @@ class LanguagesData:
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_name, stderr, show_command, languages)
+        return LanguagesData(all_name, stderr_op, show_command, languages)
 
-    def __init__(self, all_name: str, stderr: StderrOption, show_command: bool, languages: List[Language]) -> None:
+    def __init__(self, all_name: str, stderr_op: StderrOption, show_command: bool, languages: List[Language]) -> None:
         self.all_name = all_name
-        self.stderr = stderr
+        self.stderr_op = stderr_op
         self.show_command = show_command
         self.dict = {language.name_norm: language for language in languages}
 
@@ -254,6 +254,7 @@ class Run:
         self.argv_section = argv_section
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
+        self.exit_code = 'N'
         self.command = self.language.command
 
     def fill_command(self, code_file_name: str) -> str:
@@ -281,19 +282,27 @@ class Run:
             replace(Placeholders.SEP, pp.sep)
         return command
 
-    def run(self, tmp_dir: str) -> None:
+    def run(self, tmp_dir: str, stderr_op: StderrOption) -> None:
         with NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=tmp_dir, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
+        self.command = self.fill_command(code_file_name)
+        stdin = self.stdin_section.content if self.stdin_section else None
+
+        if stderr_op is StderrOption.ALWAYS:
+            stderr = subprocess.STDOUT
+        elif stderr_op is StderrOption.NEVER:
+            stderr = subprocess.DEVNULL
+        elif stderr_op is StderrOption.NZEC:
+            stderr = subprocess.PIPE
+
         try:
-            stdin = self.stdin_section.content if self.stdin_section else None
-            self.command = self.fill_command(code_file_name)
             result = subprocess.run(self.command, input=stdin, timeout=self.language.timeout,
-                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            # , capture_output=True)
-            print(result.returncode)  # todo clean up
+                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=stderr)
             self.stdout = result.stdout
+            if stderr_op is StderrOption.NZEC and result.returncode:
+                self.stdout += result.stderr
             self.exit_code = str(result.returncode)
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
@@ -376,7 +385,7 @@ def run_iterator(file: TextIO, tmp_dir: str, languages_data: LanguagesData) -> I
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
                         run = Run(number, languages_data[language], section, argv_section, stdin_section)
-                        run.run(tmp_dir)
+                        run.run(tmp_dir, languages_data.stderr_op)
                         yield run
                         number += 1
 
