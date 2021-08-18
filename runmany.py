@@ -16,7 +16,7 @@ LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 
 class JsonKeys(ABC):
-    ALL = 'all'
+    ALL_NAME = 'all_name'
     TIMEOUT = 'timeout'
     LANGUAGES = 'languages'
     NAME = 'name'
@@ -42,7 +42,7 @@ class Placeholders(ABC):
 
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
 DEFAULT_LANGUAGES_JSON = {
-    JsonKeys.ALL: "All",
+    JsonKeys.ALL_NAME: "All",
     JsonKeys.TIMEOUT: 1.0,
     JsonKeys.LANGUAGES: [],
 }
@@ -102,22 +102,22 @@ class LanguagesData:
         def get_default(key: str) -> Any:
             return languages_json.get(key, DEFAULT_LANGUAGES_JSON[key])
 
-        all = get_default(JsonKeys.ALL)
+        all_name = get_default(JsonKeys.ALL_NAME)
         default_timeout = get_default(JsonKeys.TIMEOUT)
 
         languages = []
         for language_json in get_default(JsonKeys.LANGUAGES):
-            if Language.validate_language_json(language_json, all):
+            if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all, languages)
+        return LanguagesData(all_name, languages)
 
-    def __init__(self, all: str, languages: List[Language]) -> None:
-        self.all = all
+    def __init__(self, all_name: str, languages: List[Language]) -> None:
+        self.all_name = all_name
         self.dict = {language.name_norm: language for language in languages}
 
     def unpack_language(self, language: str) -> List[str]:
-        if Language.normalize(language) == Language.normalize(self.all):
+        if Language.normalize(language) == Language.normalize(self.all_name):
             return list(self.dict.keys())
         return [self[language].name_norm]
 
