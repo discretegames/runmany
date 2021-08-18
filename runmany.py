@@ -12,6 +12,7 @@ from pathlib import PurePath
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
+COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 
@@ -132,6 +133,16 @@ class SectionType(enum.Enum):
 
 
 class Section:
+    @staticmethod
+    def line_is_exit(line: str) -> bool:
+        return line.rstrip() == EXIT_SEP
+
+    @staticmethod
+    def line_is_comment(line: str) -> bool:
+        line = line.rstrip()
+        return removeprefix(line, COMMENT_PREFIX) == EXIT_SEP or \
+            line.startswith(COMMENT_START) and line.endswith(COMMENT_END)
+
     @staticmethod
     def line_is_header(line: str) -> bool:
         line = removeprefix(line.rstrip(), COMMENT_PREFIX)
@@ -280,6 +291,10 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
     header_line_number = 0
     section_lines: List[str] = []
     for line_number, line in enumerate(file, 1):
+        if Section.line_is_exit(line):
+            break
+        if Section.line_is_comment(line):
+            continue
         if Section.line_is_header(line):
             if header:
                 yield current_section()
@@ -350,4 +365,4 @@ def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> N
 
 
 if __name__ == "__main__":
-    runmany('helloworld.many')
+    runmany('test.many')

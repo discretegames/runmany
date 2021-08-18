@@ -28,8 +28,6 @@ Soon:
   - No matching lead section (no natural output)
   - special error line like !!!| RunMany error: Missing language |!!!
 - Option to check for stdout equality. Display success at the end and differing ones.
-- Block comment or "exit here" construct e.g. |||!|||
-- A single line comment syntax like !!!| general comment here, line totally ignored |!!! ?
 - Command line runnable with input+output+json file options. (Maybe inner json options too?)
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.

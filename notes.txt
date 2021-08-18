@@ -77,8 +77,9 @@ things that timeout have no return code, use 'T'
 
 so final option decisions
 bool show_command
-str/bool show_stderr = "nzec" or null
+str/bool show_stderr = "nzec" or null (?)
 bool show_nzec = true
+check_equal = false
 
 
 output format

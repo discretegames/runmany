@@ -50,6 +50,7 @@ int main() {
    printf("Hello, C!\n");
    return 0;
 }
+
 ~~~| C++ |~~~
 
 #include <iostream>
@@ -69,3 +70,5 @@ namespace Hello {
 		}
 	}
 }
+
+!!!| foo |!!!
