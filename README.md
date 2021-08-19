@@ -8,23 +8,18 @@ Readme is just a todo list for now.
 
 Soon:
 
-- inherit default languages option
+- inherit default languages option (remove backup?)
 
-- clean up imports a bit
-
-- Option to check for stdout equality. Display success at the end and differing ones.
+- Option to check for stdout equality. Display success at the end and differing ones. ?
 
 - Add $argv to all json commands and test
 
-- should xxx|xxx seps be ignored when their header is correct type but commented? kinda probably
-
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
-
-- update c# csc compiler 4.8? roslyn?
 
 Less Soon:
 
 - Docstrings.
 - Automated testing.
 - A vscode plugin for syntax highlighting and running .many files??
+- update c# csc compiler 4.8? roslyn?

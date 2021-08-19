@@ -4,6 +4,7 @@
 	"stderr": "nzec",
 	"show_command": false,
 	"show_code": false,
+	"silent": false,
 	"languages": [
 		{
 			"name": "Python",

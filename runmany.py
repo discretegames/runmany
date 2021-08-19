@@ -1,16 +1,16 @@
 import os
+import io
 import sys
+import abc
 import json
 import enum
+import pathlib
+import tempfile
 import argparse
 import subprocess
-from abc import ABC
-from io import StringIO
-from tempfile import TemporaryDirectory, NamedTemporaryFile
-from dataclasses import dataclass
+import dataclasses
+import collections
 from typing import Any, List, Tuple, DefaultDict, Union, Optional, TextIO, Iterator, cast
-from collections import defaultdict
-from pathlib import Path, PurePath
 
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
@@ -19,12 +19,15 @@ COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 
+silence_errors = False  # The only mutating global.
 
-class JsonKeys(ABC):
+
+class JsonKeys(abc.ABC):
     ALL_NAME = 'all_name'
     STDERR = 'stderr'
     SHOW_COMMAND = 'show_command'
     SHOW_CODE = 'show_code'
+    SILENT = 'silent'
     TIMEOUT = 'timeout'
     LANGUAGES = 'languages'
     NAME = 'name'
@@ -32,7 +35,7 @@ class JsonKeys(ABC):
     EXT = 'ext'
 
 
-class Placeholders(ABC):
+class Placeholders(abc.ABC):
     prefix = '$'
     ARGV = '$argv'
     # For file .../dir/file.ext the parts are:
@@ -54,6 +57,7 @@ BACKUP_LANGUAGES_JSON = {
     JsonKeys.STDERR: "nzec",
     JsonKeys.SHOW_COMMAND: False,
     JsonKeys.SHOW_CODE: False,
+    JsonKeys.SILENT: False,
     JsonKeys.TIMEOUT: 10.0,
     JsonKeys.LANGUAGES: [{JsonKeys.NAME: 'Python', JsonKeys.COMMAND: 'python'}],
 }
@@ -68,10 +72,11 @@ def removesuffix(string: str, suffix: str) -> str:
 
 
 def print_err(message: str) -> None:
-    print(f"***| Runmany Error: {message} |***", file=sys.stderr)
+    if not silence_errors:
+        print(f"***| Runmany Error: {message} |***", file=sys.stderr)
 
 
-@dataclass
+@dataclasses.dataclass
 class Language:
     name: str
     command: str
@@ -138,6 +143,7 @@ class LanguagesData:
         stderr_op = StderrOption.from_json(get_backup(JsonKeys.STDERR))
         show_command = get_backup(JsonKeys.SHOW_COMMAND)
         show_code = get_backup(JsonKeys.SHOW_CODE)
+        silent = get_backup(JsonKeys.SILENT)
         default_timeout = get_backup(JsonKeys.TIMEOUT)
 
         languages = []
@@ -145,15 +151,17 @@ class LanguagesData:
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_name, stderr_op, show_command, show_code, languages)
+        return LanguagesData(all_name, stderr_op, show_command, show_code, silent, languages)
 
-    def __init__(self, all_name: str, stderr_op: StderrOption, show_command: bool, show_code: bool,
+    def __init__(self, all_name: str, stderr_op: StderrOption, show_command: bool, show_code: bool, silent: bool,
                  languages: List[Language]) -> None:
         self.all_name = all_name
         self.stderr_op = stderr_op
         self.show_command = show_command
         self.show_code = show_code
         self.dict = {language.name_norm: language for language in languages}
+        global silence_errors
+        silence_errors = silent
 
     def unpack_language(self, language: str) -> List[str]:
         if Language.normalize(language) == Language.normalize(self.all_name):
@@ -240,7 +248,7 @@ class PathParts:
     def __init__(self, path: str) -> None:
         def quote(s: str) -> str:
             return f'"{s}"'
-        p = PurePath(path)
+        p = pathlib.PurePath(path)
         self.rawdir = str(p.parent)
         self.dir = quote(self.rawdir)
         self.rawfile = str(p)
@@ -292,7 +300,7 @@ class Run:
         return command
 
     def run(self, tmp_dir: str, stderr_op: StderrOption) -> None:
-        with NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=tmp_dir, delete=False) as code_file:
+        with tempfile.NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=tmp_dir, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
@@ -350,7 +358,7 @@ class Run:
 
     @ staticmethod
     def summary(total: int, successful: int) -> str:
-        info = f'{successful}/{total} programs successfully run'
+        info = f'{successful}/{total} program{"" if total == 1 else "s"} successfully run'
         if successful < total:
             info += f'. {total - successful} failed due to non-zero exit code or timeout.'
         else:
@@ -386,8 +394,8 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
 
 def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
     lead_section: Optional[Section] = None
-    argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
-    stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
+    argvs: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
+    stdins: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
     number = 1
 
     def update(argvs_or_stdins: DefaultDict[str, List[Optional[Section]]]) -> None:
@@ -425,7 +433,7 @@ def load_languages_json(languages_json: Any) -> Any:
         return languages_json
     try:
         if languages_json is None:
-            languages_json = Path(__file__).resolve().parent.joinpath(DEFAULT_LANGUAGES_JSON_FILE)
+            languages_json = pathlib.Path(__file__).resolve().parent.joinpath(DEFAULT_LANGUAGES_JSON_FILE)
         with open(os.fspath(languages_json)) as file:
             return json.load(file)
     except (OSError, json.JSONDecodeError, TypeError):
@@ -438,8 +446,8 @@ def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[A
     languages_data = LanguagesData.from_json(load_languages_json(languages_json))
     total, successful = 0, 0
 
-    with StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
-        with TemporaryDirectory() as tmp_dir:
+    with io.StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
+        with tempfile.TemporaryDirectory() as tmp_dir:
             for run in run_iterator(file, languages_data):
                 run.run(tmp_dir, languages_data.stderr_op)
                 print(run.output(languages_data.show_command, languages_data.show_code), file=outfile)
@@ -460,7 +468,7 @@ def runmany(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: An
 
 def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
              from_string: bool = False) -> str:
-    string_io = StringIO()
+    string_io = io.StringIO()
     runmany_to_file(string_io, many_file, languages_json, from_string)
     string_io.seek(0)
     return string_io.read()

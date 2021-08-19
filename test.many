@@ -1,26 +1,9 @@
-@@@| All |@@@
-
---args
-
-$$$| All |$$$
-
-Apple
-Bear
-Cow
-
+!$$$| Python |$$$
+A
 $$$|$$$
+B
 
-foo fi fo
+~~~| Python |~~~
 
-~~~| Python | Python 2 |~~~
-
-import sys
-print(' '.join(sys.argv))
-print('Done.', end=9)
-
-~~~| Javascript |~~~
-
-console.log(process.argv);
-console.log('hello!\nfarewell')
-
+print(999)
 
