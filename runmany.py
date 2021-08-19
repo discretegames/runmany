@@ -280,6 +280,7 @@ class Run:
             replace(Placeholders.STEM, pp.stem)
             replace(Placeholders.EXT, pp.ext)
             replace(Placeholders.SEP, pp.sep)
+            replace(Placeholders.ARGV, argv)
         return command
 
     def run(self, tmp_dir: str, stderr_op: StderrOption) -> None:
@@ -314,7 +315,7 @@ class Run:
         out = []
         out.append('-' * 80)
 
-        header = f'{self.number}. {self.language.name} [line {self.code_section.line_number}'
+        header = f'{self.number}. {self.language.name} Output [line {self.code_section.line_number}'
         header += f', exit code {self.exit_code}]' if self.exit_code else ']'
         header += f' {self.command}' if show_command else ''
         out.append(header)
@@ -429,4 +430,4 @@ def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> N
 
 
 if __name__ == "__main__":
-    runmany('test.many')
+    runmany('sample.many')

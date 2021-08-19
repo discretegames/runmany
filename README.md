@@ -18,6 +18,10 @@ Soon:
 
 - update c# csc compiler 4.8? roslyn?
 
+- should xxx|xxx seps be ignored when their header is correct type but commented? kinda probably
+
+- number each run of a language? like 4. C++ Output #2 ...
+
 Less Soon:
 
 - Docstrings.

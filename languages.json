@@ -2,7 +2,7 @@
 	"all_name": "All",
 	"timeout": 10.0,
 	"stderr": "nzec",
-	"show_command": true,
+	"show_command": false,
 	"languages": [
 		{
 			"name": "Python",
@@ -51,7 +51,7 @@
 		},
 		{
 			"name": "C++",
-			"command": "g++ $file -o $branch && $branch",
+			"command": "g++ $file -o $branch && $branch $argv",
 			"ext": ".cpp"
 		},
 		{

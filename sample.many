@@ -1,0 +1,40 @@
+Python and C++ programs that multiply the first argv and stdin input and print the result.
+
+@@@ section is for argv inputs (a = @)
+$$$ section is for stdin inputs (s = $)
+all possible combos in a @@@|@@@ or $$$|$$$ list of sections are run for each language specified in the header
+
+@@@| All |@@@
+10
+@@@|@@@
+100
+
+$$$| All |$$$
+1
+$$$|$$$
+2
+$$$|$$$
+3
+
+~~~| Python |~~~
+
+import sys
+
+a = int(sys.argv[1])
+s = int(input())
+
+print(a * s)
+
+~~~| C++ |~~~
+
+using namespace std;
+#include <iostream>
+
+int main(int argc, char *argv[]) {
+	int a = stoi(argv[1]);
+	int s;
+	cin >> s;
+
+	cout << s * a << endl;
+    return 0;
+}
