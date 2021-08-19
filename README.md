@@ -11,16 +11,14 @@ Soon:
 - Option to check for stdout equality. Display success at the end and differing ones.
 - Command line runnable with input+output+json file options.
 
-- Add $argv to json commands and test
+- Add $argv to all json commands and test
+
+- should xxx|xxx seps be ignored when their header is correct type but commented? kinda probably
 
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
 
 - update c# csc compiler 4.8? roslyn?
-
-- should xxx|xxx seps be ignored when their header is correct type but commented? kinda probably
-
-- number each run of a language? like 4. C++ Output #2 ...
 
 Less Soon:
 

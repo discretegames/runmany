@@ -121,3 +121,17 @@ stdout
 could have run counters per language? meh
 
 ok, think mostly decides on path forward
+
+
+need better output format
+
+11. C++ [exit code 1]
+[code at line 28=--------------
+cout << stuff
+--- argv at line 18 ----------
+-foo
+[stdin at line 2]-------------------------
+bob
+[output] #################################
+my name is bob -foo
+

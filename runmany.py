@@ -15,12 +15,14 @@ CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
+OUTPUT_FILL, OUTPUT_FILL_WIDTH = '#', 60
 
 
 class JsonKeys(ABC):
     ALL_NAME = 'all_name'
     STDERR = 'stderr'
     SHOW_COMMAND = 'show_command'
+    SHOW_CODE = 'show_code'
     TIMEOUT = 'timeout'
     LANGUAGES = 'languages'
     NAME = 'name'
@@ -49,6 +51,7 @@ DEFAULT_LANGUAGES_JSON = {
     JsonKeys.ALL_NAME: "All",
     JsonKeys.STDERR: "nzec",
     JsonKeys.SHOW_COMMAND: False,
+    JsonKeys.SHOW_CODE: False,
     JsonKeys.TIMEOUT: 1.0,
     JsonKeys.LANGUAGES: [],
 }
@@ -132,6 +135,7 @@ class LanguagesData:
         all_name = get_default(JsonKeys.ALL_NAME)
         stderr_op = StderrOption.from_json(get_default(JsonKeys.STDERR))
         show_command = get_default(JsonKeys.SHOW_COMMAND)
+        show_code = get_default(JsonKeys.SHOW_CODE)
         default_timeout = get_default(JsonKeys.TIMEOUT)
 
         languages = []
@@ -139,12 +143,14 @@ class LanguagesData:
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_name, stderr_op, show_command, languages)
+        return LanguagesData(all_name, stderr_op, show_command, show_code, languages)
 
-    def __init__(self, all_name: str, stderr_op: StderrOption, show_command: bool, languages: List[Language]) -> None:
+    def __init__(self, all_name: str, stderr_op: StderrOption, show_command: bool, show_code: bool,
+                 languages: List[Language]) -> None:
         self.all_name = all_name
         self.stderr_op = stderr_op
         self.show_command = show_command
+        self.show_code = show_code
         self.dict = {language.name_norm: language for language in languages}
 
     def unpack_language(self, language: str) -> List[str]:
@@ -311,37 +317,43 @@ class Run:
         finally:
             os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
 
-    def output(self, show_command: bool) -> str:
-        out = []
-        out.append('-' * 80)
-
-        header = f'{self.number}. {self.language.name} Output [line {self.code_section.line_number}'
-        header += f', exit code {self.exit_code}]' if self.exit_code else ']'
-        header += f' {self.command}' if show_command else ''
-        out.append(header)
-
-        if self.argv_section:
-            out.append(self.argv_section.content)
-            footer = f'[line {self.argv_section.line_number} argv]'
-            out.append(f'{footer:-^40}')
-
-        if self.stdin_section:
-            out.append(self.stdin_section.content.rstrip('\n'))
-            footer = f'[line {self.stdin_section.line_number} stdin]'
-            out.append(f'{footer:-^40}')
-
-        out.append(removesuffix(self.stdout, '\n') + '\n\n')
-
-        return '\n'.join(out)
-
     @staticmethod
+    def output_section(name: str, section: Optional[Section] = None) -> str:
+        content = ''
+        if section:
+            name += f' at line {section.line_number + 1}'
+            content = '\n' + section.content.strip('\r\n')
+        return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
+
+    def output(self, show_command: bool, show_code: bool) -> str:
+        parts = []
+
+        header = f'{self.number}. {self.language.name}'
+        if self.exit_code:
+            header += f' [exit code {self.exit_code}]'
+        if show_command:
+            header += f' {self.command}'
+        parts.append(header)
+
+        if show_code:
+            parts.append(self.output_section('code', self.code_section))
+        if self.argv_section:
+            parts.append(self.output_section('argv', self.argv_section))
+        if self.stdin_section:
+            parts.append(self.output_section('stdin', self.stdin_section))
+        parts.append(self.output_section('output'))
+        parts.append(self.stdout + '\n')
+
+        return '\n'.join(parts)
+
+    @ staticmethod
     def summary(total: int, successful: int) -> str:
         info = f'{successful}/{total} programs successfully run'
         if successful < total:
             info += f'. {total - successful} failed due to non-zero exit code or timeout.'
         else:
             info += '!'
-        divider = '-' * 80
+        divider = OUTPUT_FILL * len(info)
         return f'{divider}\n{info}\n{divider}'
 
 
@@ -422,7 +434,7 @@ def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> N
         with TemporaryDirectory() as tmp_dir:
             for run in run_iterator(file, languages_data):
                 run.run(tmp_dir, languages_data.stderr_op)
-                print(run.output(languages_data.show_command))
+                print(run.output(languages_data.show_command, languages_data.show_code))
                 total += 1
                 if run.exit_code == 0:
                     successful += 1
