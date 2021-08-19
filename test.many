@@ -1,12 +1,26 @@
-~~~| Python |~~~
+@@@| All |@@@
+
+--args
+
+$$$| All |$$$
+
+Apple
+Bear
+Cow
+
+$$$|$$$
+
+foo fi fo
+
+~~~| Python | Python 2 |~~~
 
 import sys
-print('hello')
+print(' '.join(sys.argv))
+print('Done.', end=9)
 
-print('ON ERR', file=sys.stderr)
+~~~| Javascript |~~~
 
-print('goodbye')
-print(1/1)
-
+console.log(process.argv);
+console.log('hello!\nfarewell')
 
 

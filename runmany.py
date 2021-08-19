@@ -6,7 +6,7 @@ import sys
 from abc import ABC
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 from dataclasses import dataclass
-from typing import Any, List, Tuple, DefaultDict, Optional, TextIO, Iterator, cast
+from typing import Any, List, Tuple, DefaultDict, Union, Optional, TextIO, Iterator, cast
 from collections import defaultdict
 from pathlib import PurePath
 
@@ -254,7 +254,7 @@ class Run:
         self.argv_section = argv_section
         self.stdin_section = stdin_section
         self.stdout = 'NOT YET RUN'
-        self.exit_code = 'N'
+        self.exit_code: Union[int, str] = 'N'
         self.command = self.language.command
 
     def fill_command(self, code_file_name: str) -> str:
@@ -303,7 +303,7 @@ class Run:
             self.stdout = result.stdout
             if stderr_op is StderrOption.NZEC and result.returncode:
                 self.stdout += result.stderr
-            self.exit_code = str(result.returncode)
+            self.exit_code = result.returncode
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
             self.exit_code = 'T'
@@ -311,20 +311,37 @@ class Run:
             os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
 
     def output(self, show_command: bool) -> str:
-        lines = []
-        lines.append(
-            f'{CODE_START} {self.language.name} Output [#{self.number} line {self.code_section.line_number}] {CODE_END}\n')
-        if show_command:
-            lines.append(self.command + '\n')
-        if self.argv_section:
-            lines.append(self.argv_section.content)
-            lines.append(f'\n[line {self.argv_section.line_number} argv]\n')
-        if self.stdin_section:
-            lines.append(self.stdin_section.content)
-            lines.append(f'\n[line {self.stdin_section.line_number} stdin]\n')
-        lines.append(self.stdout)
+        out = []
+        out.append('-' * 80)
 
-        return ''.join(lines)
+        header = f'{self.number}. {self.language.name} [line {self.code_section.line_number}'
+        header += f', exit code {self.exit_code}]' if self.exit_code else ']'
+        header += f' {self.command}' if show_command else ''
+        out.append(header)
+
+        if self.argv_section:
+            out.append(self.argv_section.content)
+            footer = f'[line {self.argv_section.line_number} argv]'
+            out.append(f'{footer:-^40}')
+
+        if self.stdin_section:
+            out.append(self.stdin_section.content.rstrip('\n'))
+            footer = f'[line {self.stdin_section.line_number} stdin]'
+            out.append(f'{footer:-^40}')
+
+        out.append(removesuffix(self.stdout, '\n') + '\n\n')
+
+        return '\n'.join(out)
+
+    @staticmethod
+    def summary(total: int, successful: int) -> str:
+        info = f'{successful}/{total} programs successfully run'
+        if successful < total:
+            info += f'. {total - successful} failed due to non-zero exit code or timeout.'
+        else:
+            info += '!'
+        divider = '-' * 80
+        return f'{divider}\n{info}\n{divider}'
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
@@ -352,7 +369,7 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
         yield current_section()
 
 
-def run_iterator(file: TextIO, tmp_dir: str, languages_data: LanguagesData) -> Iterator[Run]:
+def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
@@ -384,9 +401,7 @@ def run_iterator(file: TextIO, tmp_dir: str, languages_data: LanguagesData) -> I
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        run = Run(number, languages_data[language], section, argv_section, stdin_section)
-                        run.run(tmp_dir, languages_data.stderr_op)
-                        yield run
+                        yield Run(number, languages_data[language], section, argv_section, stdin_section)
                         number += 1
 
 
@@ -401,10 +416,16 @@ def load_languages_json(languages_json_file: str) -> Any:
 def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> None:
     languages_json = load_languages_json(languages_json_file)
     languages_data = LanguagesData.from_json(languages_json)
+    total, successful = 0, 0
     with open(many_file) as file:
         with TemporaryDirectory() as tmp_dir:
-            for run in run_iterator(file, tmp_dir, languages_data):
+            for run in run_iterator(file, languages_data):
+                run.run(tmp_dir, languages_data.stderr_op)
                 print(run.output(languages_data.show_command))
+                total += 1
+                if run.exit_code == 0:
+                    successful += 1
+            print(Run.summary(total, successful))
 
 
 if __name__ == "__main__":

@@ -2,11 +2,16 @@
 	"all_name": "All",
 	"timeout": 10.0,
 	"stderr": "nzec",
-	"show_command": false,
+	"show_command": true,
 	"languages": [
 		{
 			"name": "Python",
 			"command": "python",
+			"ext": ".py"
+		},
+		{
+			"name": "Python 2",
+			"command": "py -2.7",
 			"ext": ".py"
 		},
 		{
