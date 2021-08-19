@@ -10,7 +10,8 @@
 		"rawbranch",
 		"rawdir",
 		"rawfile",
-		"runmany"
+		"runmany",
+		"runmanys"
 	],
 	"files.exclude": {
 		".mypy_cache/": true,

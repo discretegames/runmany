@@ -8,8 +8,9 @@ Readme is just a todo list for now.
 
 Soon:
 
-- Option to check for stdout equality. Display success at the end and differing ones.
 - Command line runnable with input+output+json file options.
+
+- Option to check for stdout equality. Display success at the end and differing ones.
 
 - Add $argv to all json commands and test
 

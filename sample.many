@@ -1,3 +1,5 @@
+Python and C++ programs that multiply the int on stdin by the int in argv, printing the result.
+
 !!!| argvs to use for both Python and C++ |!!!
 @@@| Python | C++ |@@@
 10
@@ -7,16 +9,16 @@
 
 !!!| stdins to use for both Python and C++ |!!!
 $$$| Python | C++ |$$$
-1
-$$$|$$$
 2
 $$$|$$$
 3
+$$$|$$$
+4
 
 
 ~~~| Python |~~~
 
-import sysd
+import sys
 
 a = int(sys.argv[1])
 s = int(input())

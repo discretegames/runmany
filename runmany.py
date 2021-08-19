@@ -4,18 +4,19 @@ import subprocess
 import os
 import sys
 from abc import ABC
+from io import StringIO
 from tempfile import TemporaryDirectory, NamedTemporaryFile
 from dataclasses import dataclass
 from typing import Any, List, Tuple, DefaultDict, Union, Optional, TextIO, Iterator, cast
 from collections import defaultdict
-from pathlib import PurePath
+from pathlib import Path, PurePath
 
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
-OUTPUT_FILL, OUTPUT_FILL_WIDTH = '#', 60
+OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 
 
 class JsonKeys(ABC):
@@ -46,14 +47,14 @@ class Placeholders(ABC):
     SEP = '$sep'              # /
 
 
-LANGUAGES_JSON_FILE = 'languages.json'
-DEFAULT_LANGUAGES_JSON = {
+DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
+BACKUP_LANGUAGES_JSON = {
     JsonKeys.ALL_NAME: "All",
     JsonKeys.STDERR: "nzec",
     JsonKeys.SHOW_COMMAND: False,
     JsonKeys.SHOW_CODE: False,
     JsonKeys.TIMEOUT: 1.0,
-    JsonKeys.LANGUAGES: [],
+    JsonKeys.LANGUAGES: [{JsonKeys.NAME: 'Python', JsonKeys.COMMAND: 'python'}],
 }
 
 
@@ -129,17 +130,17 @@ class StderrOption(enum.Enum):
 class LanguagesData:
     @staticmethod
     def from_json(languages_json: Any) -> 'LanguagesData':
-        def get_default(key: str) -> Any:
-            return languages_json.get(key, DEFAULT_LANGUAGES_JSON[key])
+        def get_backup(key: str) -> Any:
+            return languages_json.get(key, BACKUP_LANGUAGES_JSON[key])
 
-        all_name = get_default(JsonKeys.ALL_NAME)
-        stderr_op = StderrOption.from_json(get_default(JsonKeys.STDERR))
-        show_command = get_default(JsonKeys.SHOW_COMMAND)
-        show_code = get_default(JsonKeys.SHOW_CODE)
-        default_timeout = get_default(JsonKeys.TIMEOUT)
+        all_name = get_backup(JsonKeys.ALL_NAME)
+        stderr_op = StderrOption.from_json(get_backup(JsonKeys.STDERR))
+        show_command = get_backup(JsonKeys.SHOW_COMMAND)
+        show_code = get_backup(JsonKeys.SHOW_CODE)
+        default_timeout = get_backup(JsonKeys.TIMEOUT)
 
         languages = []
-        for language_json in get_default(JsonKeys.LANGUAGES):
+        for language_json in get_backup(JsonKeys.LANGUAGES):
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
@@ -342,7 +343,7 @@ class Run:
         if self.stdin_section:
             parts.append(self.output_section('stdin', self.stdin_section))
         parts.append(self.output_section('output'))
-        parts.append(self.stdout + '\n')
+        parts.append(self.stdout + '\n\n')
 
         return '\n'.join(parts)
 
@@ -353,7 +354,7 @@ class Run:
             info += f'. {total - successful} failed due to non-zero exit code or timeout.'
         else:
             info += '!'
-        divider = OUTPUT_FILL * len(info)
+        divider = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
         return f'{divider}\n{info}\n{divider}'
 
 
@@ -418,28 +419,54 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
                         number += 1
 
 
-def load_languages_json(languages_json_file: str) -> Any:
+def load_languages_json(languages_json: Any) -> Any:
+    if isinstance(languages_json, dict):
+        return languages_json
     try:
-        with open(languages_json_file) as file:
+        if languages_json is None:
+            languages_json = Path(__file__).resolve().parent.joinpath(DEFAULT_LANGUAGES_JSON_FILE)
+        with open(os.fspath(languages_json)) as file:
             return json.load(file)
-    except (OSError, json.JSONDecodeError):
-        return DEFAULT_LANGUAGES_JSON
+    except (OSError, json.JSONDecodeError, TypeError):
+        print_err(f'Unable to load JSON "{languages_json}". Using backup JSON with limited functionality.')
+        return BACKUP_LANGUAGES_JSON
 
 
-def runmany(many_file: str, languages_json_file: str = LANGUAGES_JSON_FILE) -> None:
-    languages_json = load_languages_json(languages_json_file)
-    languages_data = LanguagesData.from_json(languages_json)
+def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
+                    from_string: bool = False) -> None:
+    languages_data = LanguagesData.from_json(load_languages_json(languages_json))
     total, successful = 0, 0
-    with open(many_file) as file:
+
+    with StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
         with TemporaryDirectory() as tmp_dir:
             for run in run_iterator(file, languages_data):
                 run.run(tmp_dir, languages_data.stderr_op)
-                print(run.output(languages_data.show_command, languages_data.show_code))
+                print(run.output(languages_data.show_command, languages_data.show_code), file=outfile)
                 total += 1
                 if run.exit_code == 0:
                     successful += 1
-            print(Run.summary(total, successful))
+            print(Run.summary(total, successful), file=outfile)
+
+
+def runmany(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
+            output_file: Optional[Union[str, bytes, 'os.PathLike[Any]']] = None, from_string: bool = False) -> None:
+    if output_file is None:
+        runmany_to_file(sys.stdout, many_file, languages_json, from_string)
+    else:
+        with open(os.fspath(output_file), 'w') as outfile:
+            runmany_to_file(outfile, many_file, languages_json, from_string)
+
+
+def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
+             from_string: bool = False) -> str:
+    string_io = StringIO()
+    runmany_to_file(string_io, many_file, languages_json, from_string)
+    string_io.seek(0)
+    return string_io.read()
 
 
 if __name__ == "__main__":
-    runmany('sample.many')
+    print(runmanys('sample.many'))
+    # with open('sample.many') as f:
+    #     s = f.read()
+    #     print(runmanys(s, from_string=True))
