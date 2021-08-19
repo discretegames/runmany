@@ -8,7 +8,9 @@ Readme is just a todo list for now.
 
 Soon:
 
-- Command line runnable with input+output+json file options.
+- inherit default languages option
+
+- clean up imports a bit
 
 - Option to check for stdout equality. Display success at the end and differing ones.
 

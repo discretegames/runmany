@@ -1,8 +1,9 @@
-import json
-import enum
-import subprocess
 import os
 import sys
+import json
+import enum
+import argparse
+import subprocess
 from abc import ABC
 from io import StringIO
 from tempfile import TemporaryDirectory, NamedTemporaryFile
@@ -53,7 +54,7 @@ BACKUP_LANGUAGES_JSON = {
     JsonKeys.STDERR: "nzec",
     JsonKeys.SHOW_COMMAND: False,
     JsonKeys.SHOW_CODE: False,
-    JsonKeys.TIMEOUT: 1.0,
+    JsonKeys.TIMEOUT: 10.0,
     JsonKeys.LANGUAGES: [{JsonKeys.NAME: 'Python', JsonKeys.COMMAND: 'python'}],
 }
 
@@ -428,7 +429,7 @@ def load_languages_json(languages_json: Any) -> Any:
         with open(os.fspath(languages_json)) as file:
             return json.load(file)
     except (OSError, json.JSONDecodeError, TypeError):
-        print_err(f'Unable to load JSON "{languages_json}". Using backup JSON with limited functionality.')
+        print_err(f'Unable to load json "{languages_json}". Using backup json with limited functionality.')
         return BACKUP_LANGUAGES_JSON
 
 
@@ -466,7 +467,9 @@ def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: A
 
 
 if __name__ == "__main__":
-    print(runmanys('sample.many'))
-    # with open('sample.many') as f:
-    #     s = f.read()
-    #     print(runmanys(s, from_string=True))
+    parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
+    parser.add_argument('input', help='the .many file to be run')
+    parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')
+    parser.add_argument('-o', '--output', help='the file the output is redirected to', metavar='<file>')
+    args = parser.parse_args()
+    runmany(args.input, args.json, args.output)
