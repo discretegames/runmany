@@ -66,6 +66,23 @@ def removesuffix(string: str, suffix: str) -> str:
     return string[:-len(suffix)] if string.endswith(suffix) else string
 
 
+class LanguageData:
+    def __init__(self, language_obj: Any, parent: 'LanguagesData') -> None:
+        self.obj = language_obj
+        self.default_obj = None
+        self.parent = parent
+
+    def update_obj(self, language_obj: Any) -> None:
+        self.obj, self.default_obj = language_obj, self.obj
+
+    def __getattr__(self, name: str) -> Any:
+        if hasattr(self.obj, name):
+            return getattr(self.obj, name)
+        if hasattr(self.default_obj, name):
+            return getattr(self.default_obj, name)
+        return getattr(self.parent, name)
+
+
 class LanguagesData:
     @staticmethod
     def normalize(language: str) -> str:
@@ -82,25 +99,24 @@ class LanguagesData:
         elif isinstance(languages_json, dict):  # Assume already valid json dict.
             return json.dumps(languages_json)
         with open(languages_json) as file:  # Assume path like.
-            return file.read()
+            return file.read() or str({})
 
     def language_obj_valid(self, language_obj: Any, is_default: bool) -> bool:
-        # todo if already in name.dict?
-        # valid if in dict unless
-        # TODO TODO
+        end = ". Ignoring language."
 
-        msg = None
         if not hasattr(language_obj, NAME_KEY):
-            msg = f'No "{NAME_KEY}" key found.'
-        elif LanguagesData.normalize(language_obj.name) == LanguagesData.normalize(self.all_name):
-            msg = f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}".'
-        elif not hasattr(language_obj, COMMAND_KEY):
-            msg = f'No "{COMMAND_KEY}" key found for {language_obj.name}.'
-        elif not hasattr(language_obj, EXT_KEY) and Placeholders.EXT in language_obj.command:
-            msg = f'No "{EXT_KEY}" key found to fill "{Placeholders.EXT}" placeholder for {language_obj.name} command.'
-        if msg:
-            print_err(f'{msg} Ignoring language.')
+            print_err(f'No "{NAME_KEY}" key found for json list item{end}')
             return False
+
+        if LanguagesData.normalize(language_obj.name) == LanguagesData.normalize(self.all_name):
+            print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
+            return False
+
+        default_obj = self[language_obj.name] if not is_default and language_obj.name in self else None
+        if not hasattr(language_obj, COMMAND_KEY) and not hasattr(default_obj, COMMAND_KEY):
+            print_err(f'No "{COMMAND_KEY}" key found for {language_obj.name}{end}')
+            return False
+
         return True
 
     def __init__(self, languages_json: JsonLike) -> None:
@@ -111,15 +127,14 @@ class LanguagesData:
         self.dict: Dict[str, LanguageData] = {}
         for language_obj in self.default_languages:
             if self.language_obj_valid(language_obj, True):
-                self.dict[self.normalize(language_obj.name)] = LanguageData(language_obj, self)
+                self[language_obj.name] = LanguageData(language_obj, self)
 
         for language_obj in self.languages:
             if self.language_obj_valid(language_obj, False):
-                key = self.normalize(language_obj.name)
-                if key in self.dict:
-                    self.dict[key].update_obj(language_obj)
+                if language_obj.name in self:
+                    self[language_obj.name].update_obj(language_obj)
                 else:
-                    self.dict[key] = LanguageData(language_obj, self)
+                    self[language_obj.name] = LanguageData(language_obj, self)
 
     def __getattr__(self, name: str) -> Any:
         if hasattr(self.data, name):
@@ -129,28 +144,19 @@ class LanguagesData:
     def __getitem__(self, language: str) -> Any:
         return self.dict[self.normalize(language)]
 
+    def __setitem__(self, language: str, language_data: LanguageData) -> None:
+        self.dict[self.normalize(language)] = language_data
+
+    def __contains__(self, language: str) -> bool:
+        return self.normalize(language) in self.dict
+
     def unpack(self, language: str) -> List[str]:
         language = self.normalize(language)
         if language == self.normalize(self.all_name):
             return list(self.dict.keys())
-        return [language]
-
-
-class LanguageData:
-    def __init__(self, language_obj: Any, parent: LanguagesData) -> None:
-        self.obj = language_obj
-        self.default_obj = None
-        self.parent = parent
-
-    def update_obj(self, language_obj: Any) -> None:
-        self.obj, self.default_obj = language_obj, self.obj
-
-    def __getattr__(self, name: str) -> Any:
-        if hasattr(self.obj, name):
-            return getattr(self.obj, name)
-        if hasattr(self.default_obj, name):
-            return getattr(self.default_obj, name)
-        return getattr(self.parent, name)
+        if language in self:
+            return [language]
+        raise KeyError
 
 
 class SectionType(enum.Enum):
@@ -216,13 +222,6 @@ class Section:
                     if not self.commented:
                         print_err(f'Language "{language.strip()}" in section header at line {self.line_number}'
                                   ' not found in json. Skipping language.')
-
-    def __str__(self) -> str:
-        return f"{self.header}\n{self.content}"
-
-    def __repr__(self) -> str:
-        return f"{'//' if self.commented else ''}{self.type.name} "
-        f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Section]]:
@@ -304,7 +303,7 @@ class Run:
             replace(Placeholders.ARGV, argv)
         return command
 
-    @staticmethod
+    @ staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
         content = ''
         if section:
@@ -319,7 +318,7 @@ class Run:
         if exit_code != 0:
             header += f' [exit code {exit_code}]'
         if self.language_data.show_command:
-            header += f' {command}'
+            header += f' > {command}'
         parts.append(header)
 
         if self.language_data.show_code:

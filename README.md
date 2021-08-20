@@ -8,8 +8,6 @@ Readme is just a todo list for now.
 
 Soon:
 
-- show_file option for prologue?
-
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
 
