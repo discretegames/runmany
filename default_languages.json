@@ -36,12 +36,12 @@
 		},
 		{
 			"name": "Kotlin",
-			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\"",
+			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\" $argv",
 			"ext": ".kt"
 		},
 		{
 			"name": "Rust",
-			"command": "rustc $file --out-dir $dir && $branch",
+			"command": "rustc $file --out-dir $dir && $branch $argv",
 			"ext": ".rs"
 		},
 		{
@@ -51,7 +51,7 @@
 		},
 		{
 			"name": "C",
-			"command": "g++ $file -o $branch && $branch",
+			"command": "g++ $file -o $branch && $branch $argv",
 			"ext": ".c"
 		},
 		{
@@ -61,7 +61,7 @@
 		},
 		{
 			"name": "C#",
-			"command": "csc /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\"",
+			"command": "csc /warn:4 /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
 			"ext": ".cs"
 		}
 	]

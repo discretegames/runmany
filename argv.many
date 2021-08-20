@@ -14,26 +14,29 @@ console.log(process.argv[2])
 
 console.log(Deno.args[0])
 
-%%%|%%%
 
 ~~~| Java |~~~
 
 public class HelloWorld {
 	public static void main(String[] args) {
-        System.out.println("Hello, Java!");
+        System.out.println(args[0]);
     }
 }
 
+
 ~~~| Kotlin |~~~
 
-fun main() { 
-    println("Hello, Kotlin!")
+fun main(args: Array<String>) { 
+    println(args[0])
 }
 
 ~~~| Rust |~~~
 
+use std::env;
+
 fn main() {
-    println!("Hello, Rust!");
+	let args: Vec<String> = env::args().collect();
+    println!("{}", &args[1]);
 }
 
 ~~~| Go |~~~
@@ -41,36 +44,38 @@ fn main() {
 package main
 
 import "fmt"
+import "os"
 
 func main() {
-	fmt.Println("Hello, Go!")
+	fmt.Println(os.Args[1])
 }
 
 ~~~| C |~~~
 
 #include <stdio.h>
 
-int main() {
-   printf("Hello, C!\n");
+int main(int argc, char *argv[]) {
+   printf("%s\n", argv[1]);
    return 0;
 }
 
 ~~~| C++ |~~~
 
+using namespace std;
 #include <iostream>
 
-int main() {
-    std::cout << "Hello, C++!\n";
+int main(int argc, char *argv[]) {
+    cout << argv[1] << endl;
     return 0;
 }
 
-!~~~| C# |~~~
+~~~| C# |~~~
 
 namespace Hello {
 	class HelloWorld {         
 		static void Main(string[] args)
 		{
-			System.Console.WriteLine("Hello, C#!");
+			System.Console.WriteLine(args[0]);
 		}
 	}
 }

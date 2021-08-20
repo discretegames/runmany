@@ -484,7 +484,7 @@ def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: A
     return string_io.read()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
     parser.add_argument('input', help='the .many file to be run')
     parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')
