@@ -61,7 +61,7 @@
 		},
 		{
 			"name": "C#",
-			"command": "csc /warn:4 /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
+			"command": "csc /nologo /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
 			"ext": ".cs"
 		}
 	]

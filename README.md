@@ -19,4 +19,3 @@ Less Soon:
 - Docstrings.
 - Automated testing.
 - A vscode plugin for syntax highlighting and running .many files??
-- update c# csc compiler 4.8? roslyn?

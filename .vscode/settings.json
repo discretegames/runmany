@@ -7,11 +7,12 @@
 	"python.linting.pylintEnabled": false,
 	"python.pythonPath": ".\\venv3.8\\Scripts\\python.exe",
 	"cSpell.words": [
+		"nologo",
 		"rawbranch",
 		"rawdir",
 		"rawfile",
 		"runmany",
-		"runmanys",
+		"runmanys"
 	],
 	"files.exclude": {
 		".mypy_cache/": true,
