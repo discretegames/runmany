@@ -15,6 +15,7 @@ import collections
 from typing import Any, List, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast, Dict
 
 # 518 lines before
+# now 447 lines, decent
 
 JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'

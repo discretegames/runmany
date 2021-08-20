@@ -6,11 +6,11 @@ import json
 import enum
 import types
 import pathlib
-import tempfile
 import argparse
 import itertools
 import subprocess
-import collections
+from collections import defaultdict
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, List, Dict, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
 
 display_errors = True  # The only mutating global.
@@ -29,6 +29,7 @@ OUTPUT_DIVIDER = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
 
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
 ALL_NAME_KEY, NAME_KEY, COMMAND_KEY, EXT_KEY = 'all_name', 'name', 'command', 'ext'
+STDERR_NZEC, STDERR_NEVER = ('nzec', None), ('never', False)
 
 
 class Placeholders(abc.ABC):
@@ -119,7 +120,6 @@ class LanguagesData:
         return [language]
 
 
-# todo pass this around, not languages_data
 class LanguageData:
     def __init__(self, language_obj: Any, parent: LanguagesData):
         self.obj = language_obj
@@ -255,9 +255,6 @@ class Run:
         self.stdin_section = stdin_section
         self.language_data = language_data
         self.number = number
-        self.stdout = 'NOT YET RUN'
-        self.exit_code: Union[int, str] = 'N'
-        self.command = ''
 
     def fill_command(self, code_file_name: str) -> str:
         command = cast(str, self.language_data.command)
@@ -286,33 +283,6 @@ class Run:
             replace(Placeholders.ARGV, argv)
         return command
 
-    def run(self, directory: str) -> Tuple[str, bool]:
-        with tempfile.NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=directory, delete=False) as code_file:
-            code_file.write(self.code_section.content)
-            code_file_name = code_file.name
-
-        self.command = self.fill_command(code_file_name)
-        stdin = self.stdin_section.content if self.stdin_section else None
-
-        # todo just do the raw check here
-        if stderr_op is StderrOption.ALWAYS:
-            stderr = subprocess.STDOUT
-        elif stderr_op is StderrOption.NEVER:
-            stderr = subprocess.DEVNULL
-        elif stderr_op is StderrOption.NZEC:
-            stderr = subprocess.PIPE
-
-        try:
-            result = subprocess.run(self.command, input=stdin, timeout=self.language.timeout,
-                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=stderr)
-            self.stdout = result.stdout
-            if stderr_op is StderrOption.NZEC and result.returncode:
-                self.stdout += result.stderr
-            self.exit_code = result.returncode
-        except subprocess.TimeoutExpired:
-            self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
-            self.exit_code = 'T'
-
     @staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
         content = ''
@@ -321,16 +291,14 @@ class Run:
             content = '\n' + section.content.strip('\r\n')
         return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
 
-    # todo reformulate into run.run
-        # yield run.output(languages_data), run.exit_code == 0
-    def output(self) -> str:  # todo can pass in language_obj and shadow all props
+    def output(self, command: str, stdout: str, exit_code: Union[int, str]) -> str:
         parts = []
 
         header = f'{self.number}. {self.language_data.name}'
-        if self.exit_code:
-            header += f' [exit code {self.exit_code}]'
+        if exit_code != 0:
+            header += f' [exit code {exit_code}]'
         if self.language_data.show_command:
-            header += f' {self.command}'
+            header += f' {command}'
         parts.append(header)
 
         if self.language_data.show_code:
@@ -341,9 +309,39 @@ class Run:
             parts.append(self.output_section('stdin', self.stdin_section))
         if self.language_data.show_output:
             parts.append(self.output_section('output'))
-            parts.append(self.stdout + '\n')
+            parts.append(stdout + '\n')
 
         return '\n'.join(parts)
+
+    def get_stderr(self) -> int:
+        if self.language_data.stderr in STDERR_NZEC:
+            return subprocess.PIPE
+        elif self.language_data.stderr in STDERR_NEVER:
+            return subprocess.DEVNULL
+        else:
+            return subprocess.STDOUT
+
+    def run(self, directory: str) -> Tuple[str, bool]:
+        with NamedTemporaryFile(mode='w', suffix=self.language_data.ext, dir=directory, delete=False) as code_file:
+            code_file.write(self.code_section.content)
+            code_file_name = code_file.name
+
+        command = self.fill_command(code_file_name)
+        stdin = self.stdin_section.content if self.stdin_section else None
+
+        try:
+            result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout,
+                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
+            stdout = result.stdout
+            exit_code: Union[int, str] = result.returncode
+            if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
+                stdout += result.stderr
+        except subprocess.TimeoutExpired:
+            stdout = f'TIMED OUT OF {self.language_data.timeout}s LIMIT'
+            exit_code = 'T'
+
+        output = self.output(command, stdout, exit_code)
+        return output, exit_code == 0
 
 
 def prologue(content: str) -> str:
@@ -361,8 +359,8 @@ def epilogue(total: int, successful: int) -> str:
 
 def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Run]]:
     lead_section: Optional[Section] = None
-    argvs: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
-    stdins: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
+    argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
+    stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     number = 1
 
     for section in section_iterator(file, languages_data):
@@ -407,7 +405,7 @@ def runmany_to_file(outfile: TextIO, many_file: PathLike, languages_json: JsonLi
     total, successful = 0, 0
 
     with io.StringIO(cast(str, many_file)) if from_string else open(many_file) as file:
-        with tempfile.TemporaryDirectory() as directory:
+        with TemporaryDirectory() as directory:
             for run in run_iterator(file, languages_data):
                 if isinstance(run, str):
                     if languages_data.show_prologue:
