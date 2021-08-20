@@ -8,10 +8,10 @@ import types
 import pathlib
 import tempfile
 import argparse
+import itertools
 import subprocess
-import dataclasses
 import collections
-from typing import Any, List, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
+from typing import Any, List, Dict, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
 
 display_errors = True  # The only mutating global.
 
@@ -23,27 +23,12 @@ CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
+
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
+
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
-
-
-class JsonKeys(abc.ABC):  # todo can mostly remove
-    ALL_NAME = 'all_name'
-    STDERR = 'stderr'
-    TIMEOUT = 'timeout'
-    LANGUAGES = 'languages'
-    NAME = 'name'
-    COMMAND = 'command'
-    EXT = 'ext'
-    SHOW_COMMAND = 'show_command'
-    SHOW_CODE = 'show_code'
-    SHOW_ARGV = 'show_argv'
-    SHOW_STDIN = 'show_stdin'
-    SHOW_OUTPUT = 'show_output'
-    SHOW_ERRORS = 'show_errors'
-    SHOW_PROLOGUE = 'show_prologue'
-    SHOW_EPILOGUE = 'show_epilogue'
+ALL_NAME_KEY, NAME_KEY, COMMAND_KEY, EXT_KEY = 'all_name', 'name', 'command', 'ext'
 
 
 class Placeholders(abc.ABC):
@@ -75,133 +60,75 @@ def print_err(message: str) -> None:
         print(f"***| RunMany Error: {message} |***", file=sys.stderr)
 
 
-@dataclasses.dataclass
-class Language:
-    name: str
-    command: str
-    ext: str
-    timeout: float
-
-    @property
-    def name_norm(self) -> str:
-        return self.normalize(self.name)
+class LanguagesData:
+    @staticmethod
+    def normalize(language: str) -> str:
+        return language.strip().lower()
 
     @staticmethod
-    def normalize(name: str) -> str:
-        return name.strip().lower()
+    def json_to_class(json_string: str) -> Any:
+        return json.loads(json_string, object_hook=lambda d: types.SimpleNamespace(**d))
 
     @staticmethod
-    def validate_language_json(language_json: Any, all_name: str) -> bool:
-        name = language_json[JsonKeys.NAME]  # todo bad anyway
-        if JsonKeys.NAME not in language_json:
-            print_err(f'No "{JsonKeys.NAME}" key found in {json.dumps(language_json)}. Ignoring language.')
-            return False
-        if Language.normalize(name) == Language.normalize(all_name):
-            print_err(f'Language name "{name}" cannot match {JsonKeys.ALL_NAME} "{all_name}". Ignoring language.')
-            return False
-        if JsonKeys.COMMAND not in language_json:
-            print_err(f'No "{JsonKeys.COMMAND}" key found for {name}. Ignoring language.')
-            return False
-        if Placeholders.EXT in language_json[JsonKeys.COMMAND] and JsonKeys.EXT not in language_json:
-            print_err(f'No "{JsonKeys.EXT}" key found to fill "{Placeholders.EXT}" placeholder for {name} command.'
-                      ' Ignoring language.')
+    def get_json_string(languages_json: JsonLike) -> str:
+        if languages_json is None:
+            return str({})
+        elif isinstance(languages_json, dict):  # Assume already valid json dict.
+            return json.dumps(languages_json)
+        with open(languages_json) as file:  # Assume path like.
+            return file.read()
+
+    @staticmethod
+    def language_obj_valid(language_obj: Any, all_name: str) -> bool:
+        msg = None
+        if not hasattr(language_obj, NAME_KEY):
+            msg = f'No "{NAME_KEY}" key found.'
+        elif LanguagesData.normalize(language_obj.name) == LanguagesData.normalize(all_name):
+            msg = f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{all_name}".'
+        elif not hasattr(language_obj, COMMAND_KEY):
+            msg = f'No "{COMMAND_KEY}" key found for {language_obj.name}.'
+        elif not hasattr(language_obj, EXT_KEY) and Placeholders.EXT in language_obj.command:
+            msg = f'No "{EXT_KEY}" key found to fill "{Placeholders.EXT}" placeholder for {language_obj.name} command.'
+        if msg:
+            print_err(f'{msg} Ignoring language.')
             return False
         return True
 
-    @staticmethod
-    def from_json(language_json: Any, default_timeout: float) -> 'Language':
-        name = language_json[JsonKeys.NAME]
-        command = language_json[JsonKeys.COMMAND]
-        ext = language_json.get(JsonKeys.EXT, '')
-        timeout = language_json.get(JsonKeys.TIMEOUT, default_timeout)
-        return Language(name, command, ext, timeout)
-
-
-class StderrOption(enum.Enum):
-    ALWAYS = enum.auto()
-    NEVER = enum.auto()
-    NZEC = enum.auto()
-
-    @staticmethod
-    def from_json(stderr_json: Any) -> 'StderrOption':
-        if stderr_json is True or stderr_json == 'always':
-            return StderrOption.ALWAYS
-        elif stderr_json is False or stderr_json == 'never':
-            return StderrOption.NEVER
-        else:
-            return StderrOption.NZEC
-
-
-class LanguagesDataA:
-    @staticmethod
-    def from_json(languages_json: Any) -> 'LanguagesData':
-        def get_backup(key: str) -> Any:
-            return languages_json.get(key, BACKUP_LANGUAGES_JSON[key])
-
-        all_name = get_backup(JsonKeys.ALL_NAME)
-        stderr_op = StderrOption.from_json(get_backup(JsonKeys.STDERR))
-        default_timeout = get_backup(JsonKeys.TIMEOUT)
-
-        languages = []
-        for language_json in get_backup(JsonKeys.LANGUAGES):
-            if Language.validate_language_json(language_json, all_name):
-                languages.append(Language.from_json(language_json, default_timeout))
-
-        shows = JsonKeys.SHOW_COMMAND, JsonKeys.SHOW_CODE, JsonKeys.SHOW_ARGV, JsonKeys.SHOW_STDIN, \
-            JsonKeys.SHOW_OUTPUT, JsonKeys.SHOW_ERRORS, JsonKeys.SHOW_PROLOGUE, JsonKeys.SHOW_EPILOGUE
-        return LanguagesData(all_name, stderr_op, languages, *map(get_backup, shows))
-
-    def __init__(self, all_name: str, stderr_op: StderrOption, languages: List[Language],
-                 show_command: bool, show_code: bool, show_argv: bool, show_stdin: bool,
-                 show_output: bool, show_errors: bool, show_prologue: bool, show_epilogue: bool) -> None:
-        global display_errors
-        display_errors = show_errors
-
-        self.all_name = all_name
-        self.stderr_op = stderr_op
-        self.dict = {language.name_norm: language for language in languages}
-
-        self.show_command = show_command
-        self.show_code = show_code
-        self.show_argv = show_argv
-        self.show_stdin = show_stdin
-        self.show_output = show_output
-        self.show_prologue = show_prologue
-        self.show_epilogue = show_epilogue
-
-    def __getitem__(self, language: str) -> Language:
-        return self.dict[Language.normalize(language)]
-
-
-def json_to_class(json_string: str) -> Any:
-    return json.loads(json_string, object_hook=lambda d: types.SimpleNamespace(**d))
-
-
-class LanguagesData:
     def __init__(self, languages_json: JsonLike) -> None:
-        if languages_json is None:
-            json_string = '{}'
-        elif isinstance(languages_json, dict):  # Assume already valid json dict.
-            json_string = json.dumps(languages_json)
-        else:  # Assume path like.
-            with open(languages_json) as file:
-                json_string = file.read()
-
-        self.settings = json_to_class(json_string)
+        self.settings = self.json_to_class(self.get_json_string(languages_json))
         with open(DEFAULT_LANGUAGES_JSON_FILE) as file:
-            self.defaults = json_to_class(file.read())
+            self.defaults = self.json_to_class(file.read())
 
-        self.dict = {}
-        print(self.)
-
-        # Todo
-        # make dict of languages with proper normalizing, validation, and shadowing
-        # set up self.stderr with enum (getattr only triggers on not found)
+        self.dict: Dict[str, LanguageData] = {}
+        for language_obj in itertools.chain(self.default_languages, self.languages):
+            if self.language_obj_valid(language_obj, self.all_name):
+                self.dict[self.normalize(language_obj.name)] = LanguageData(language_obj, self)
 
     def __getattr__(self, name: str) -> Any:
         if hasattr(self.settings, name):
             return getattr(self.settings, name)
         return getattr(self.defaults, name)
+
+    def __getitem__(self, language: str) -> Any:
+        return self.dict[self.normalize(language)]
+
+    def unpack(self, language: str) -> List[str]:
+        language = self.normalize(language)
+        if language == self.normalize(self.all_name):
+            return list(self.dict.keys())
+        return [language]
+
+
+# todo pass this around, not languages_data
+class LanguageData:
+    def __init__(self, language_obj: Any, parent: LanguagesData):
+        self.obj = language_obj
+        self.parent = parent
+
+    def __getattr__(self, name: str) -> Any:
+        if hasattr(self.obj, name):
+            return getattr(self.obj, name)
+        return getattr(self.parent, name)
 
 
 class SectionType(enum.Enum):
@@ -247,7 +174,7 @@ class Section:
         else:
             return content  # Never strip code.
 
-    def __init__(self, header: str, content: str, line_number: int, languages_data: LanguagesData) -> None:
+    def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
         self.header = header.rstrip()
         self.type, start, end = self.get_type_start_end(self.header)
         self.commented = self.header.startswith(COMMENT_PREFIX)
@@ -276,6 +203,33 @@ class Section:
                f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
 
 
+def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Section]]:
+    def current_section() -> Section:
+        return Section(cast(str, header), ''.join(section_lines), languages_data, header_line_number)
+
+    header: Optional[str] = None
+    header_line_number = 0
+    section_lines: List[str] = []
+    for line_number, line in enumerate(file, 1):
+        if Section.line_is_exit(line):
+            break
+        if Section.line_is_comment(line):
+            continue
+        if Section.line_is_header(line):
+            if not header:
+                yield ''.join(section_lines)  # Yield prologue. Only happens once.
+            else:
+                yield current_section()
+            header = line
+            header_line_number = line_number
+            section_lines = []
+        else:
+            section_lines.append(line)
+
+    if header:
+        yield current_section()
+
+
 class PathParts:
     def __init__(self, path: str) -> None:
         def quote(s: str) -> str:
@@ -294,19 +248,19 @@ class PathParts:
 
 
 class Run:
-    def __init__(self, number: int, language: Language,
-                 code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section]) -> None:
-        self.number = number
-        self.language = language
+    def __init__(self, code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section],
+                 language_data: LanguageData, number: int) -> None:
         self.code_section = code_section
         self.argv_section = argv_section
         self.stdin_section = stdin_section
+        self.language_data = language_data
+        self.number = number
         self.stdout = 'NOT YET RUN'
         self.exit_code: Union[int, str] = 'N'
-        self.command = self.language.command
+        self.command = ''
 
     def fill_command(self, code_file_name: str) -> str:
-        command = self.language.command
+        command = cast(str, self.language_data.command)
         pp = PathParts(code_file_name)
         argv = self.argv_section.content if self.argv_section else ''
 
@@ -318,6 +272,7 @@ class Run:
             def replace(placeholder: str, replacement: str) -> None:
                 nonlocal command
                 command = command.replace(placeholder, replacement)
+            # TODO shorten this up?
             replace(Placeholders.RAWDIR, pp.rawdir)
             replace(Placeholders.DIR, pp.dir)
             replace(Placeholders.RAWFILE, pp.rawfile)
@@ -331,15 +286,15 @@ class Run:
             replace(Placeholders.ARGV, argv)
         return command
 
-    def run(self, tmp_dir: str, stderr_op: StderrOption) -> None:
-        with tempfile.NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=tmp_dir, delete=False) as code_file:
+    def run(self, directory: str) -> Tuple[str, bool]:
+        with tempfile.NamedTemporaryFile(mode='w', suffix=self.language.ext, dir=directory, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
         self.command = self.fill_command(code_file_name)
         stdin = self.stdin_section.content if self.stdin_section else None
 
-        # tod just do the raw check here
+        # todo just do the raw check here
         if stderr_op is StderrOption.ALWAYS:
             stderr = subprocess.STDOUT
         elif stderr_op is StderrOption.NEVER:
@@ -366,23 +321,25 @@ class Run:
             content = '\n' + section.content.strip('\r\n')
         return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
 
-    def output(self, languages_data: LanguagesData) -> str:  # todo can pass in language_obj and shadow all props
+    # todo reformulate into run.run
+        # yield run.output(languages_data), run.exit_code == 0
+    def output(self) -> str:  # todo can pass in language_obj and shadow all props
         parts = []
 
-        header = f'{self.number}. {self.language.name}'
+        header = f'{self.number}. {self.language_data.name}'
         if self.exit_code:
             header += f' [exit code {self.exit_code}]'
-        if languages_data.show_command:
+        if self.language_data.show_command:
             header += f' {self.command}'
         parts.append(header)
 
-        if languages_data.show_code:
+        if self.language_data.show_code:
             parts.append(self.output_section('code', self.code_section))
-        if self.argv_section and languages_data.show_argv:
+        if self.argv_section and self.language_data.show_argv:
             parts.append(self.output_section('argv', self.argv_section))
-        if self.stdin_section and languages_data.show_stdin:
+        if self.stdin_section and self.language_data.show_stdin:
             parts.append(self.output_section('stdin', self.stdin_section))
-        if languages_data.show_output:
+        if self.language_data.show_output:
             parts.append(self.output_section('output'))
             parts.append(self.stdout + '\n')
 
@@ -402,35 +359,7 @@ def epilogue(total: int, successful: int) -> str:
     return f'{OUTPUT_DIVIDER}\n{info}\n{OUTPUT_DIVIDER}'
 
 
-def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Section]]:
-    def current_section() -> Section:
-        return Section(cast(str, header), ''.join(section_lines), header_line_number, languages_data)
-
-    header: Optional[str] = None
-    header_line_number = 0
-    section_lines: List[str] = []
-    for line_number, line in enumerate(file, 1):
-        if Section.line_is_exit(line):
-            break
-        if Section.line_is_comment(line):
-            continue
-        if Section.line_is_header(line):
-            if not header:
-                yield ''.join(section_lines)  # Yield prologue. Only happens once.
-            else:
-                yield current_section()
-            header = line
-            header_line_number = line_number
-            section_lines = []
-        else:
-            section_lines.append(line)
-
-    if header:
-        yield current_section()
-
-
-# turn back into Run iterator that can also be string fpr prologue? maybe
-def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -> Iterator[Tuple[str, bool]]:
+def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Run]]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
@@ -438,7 +367,7 @@ def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -
 
     for section in section_iterator(file, languages_data):
         if isinstance(section, str):
-            yield section, True
+            yield section  # Yield prologue. Only happens once.
             continue
 
         if section.commented:
@@ -468,33 +397,34 @@ def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        run = Run(number, languages_data[language], section, argv_section, stdin_section)
-                        run.run(tmp_dir, languages_data.stderr_op)
-                        yield run.output(languages_data), run.exit_code == 0
+                        yield Run(section, argv_section, stdin_section, languages_data[language], number)
                         number += 1
 
 
 def runmany_to_file(outfile: TextIO, many_file: PathLike, languages_json: JsonLike = None,
                     from_string: bool = False) -> None:
     languages_data = LanguagesData(languages_json)
-    total, successful = -1, -1  # -1 to offset prologue.
+    total, successful = 0, 0
 
     with io.StringIO(cast(str, many_file)) if from_string else open(many_file) as file:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            for output, success in output_iterator(file, languages_data, tmp_dir):
-                if total >= 0:
+        with tempfile.TemporaryDirectory() as directory:
+            for run in run_iterator(file, languages_data):
+                if isinstance(run, str):
+                    if languages_data.show_prologue:
+                        print(prologue(run), file=outfile)
+                else:
+                    output, success = run.run(directory)
                     print(output, file=outfile)
-                elif languages_data.show_prologue:
-                    print(prologue(output), file=outfile)
-                total += 1
-                if success:
-                    successful += 1
+                    total += 1
+                    if success:
+                        successful += 1
             if languages_data.show_epilogue:
                 print(epilogue(total, successful), file=outfile)
 
 
 def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
             from_string: bool = False) -> None:
+    # todo redo redo runmany with nullcontext and redirect_stdout, don't need file=outfile, or outfile at all
     if output_file is None:
         runmany_to_file(sys.stdout, many_file, languages_json, from_string)
     else:

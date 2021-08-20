@@ -3,12 +3,7 @@
 	"languages": [
 		{
 			"name": "Test",
-			"command": "shouldn't be seen",
-			"stderr": "idk"
-		},
-		{
-			"name": "JavaScript",
-			"command": "should shadow default JS"
+			"command": "$ext"
 		}
 	]
 }

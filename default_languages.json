@@ -10,6 +10,7 @@
 	"show_prologue": true,
 	"show_epilogue": true,
 	"all_name": "All",
+	"ext": "",
 	"languages": [],
 	"default_languages": [
 		{
