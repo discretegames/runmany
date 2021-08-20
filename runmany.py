@@ -35,6 +35,8 @@ class JsonKeys(abc.ABC):
     SHOW_STDIN = 'show_stdin'
     SHOW_OUTPUT = 'show_output'
     SHOW_ERRORS = 'show_errors'
+    SHOW_PROLOGUE = 'show_prologue'
+    SHOW_EPILOGUE = 'show_epilogue'
 
 
 class Placeholders(abc.ABC):
@@ -65,6 +67,8 @@ BACKUP_LANGUAGES_JSON = {
     JsonKeys.SHOW_STDIN: True,
     JsonKeys.SHOW_OUTPUT: True,
     JsonKeys.SHOW_ERRORS: True,
+    JsonKeys.SHOW_PROLOGUE: True,
+    JsonKeys.SHOW_EPILOGUE: True
 }
 
 
@@ -156,12 +160,13 @@ class LanguagesData:
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        shows = JsonKeys.SHOW_COMMAND, JsonKeys.SHOW_CODE, JsonKeys.SHOW_ARGV, \
-            JsonKeys.SHOW_STDIN, JsonKeys.SHOW_OUTPUT, JsonKeys.SHOW_ERRORS
+        shows = JsonKeys.SHOW_COMMAND, JsonKeys.SHOW_CODE, JsonKeys.SHOW_ARGV, JsonKeys.SHOW_STDIN, \
+            JsonKeys.SHOW_OUTPUT, JsonKeys.SHOW_ERRORS, JsonKeys.SHOW_PROLOGUE, JsonKeys.SHOW_EPILOGUE
         return LanguagesData(all_name, stderr_op, languages, *map(get_backup, shows))
 
-    def __init__(self, all_name: str, stderr_op: StderrOption, languages: List[Language], show_command: bool,
-                 show_code: bool, show_argv: bool, show_stdin: bool, show_output: bool, show_errors: bool) -> None:
+    def __init__(self, all_name: str, stderr_op: StderrOption, languages: List[Language],
+                 show_command: bool, show_code: bool, show_argv: bool, show_stdin: bool,
+                 show_output: bool, show_errors: bool, show_prologue: bool, show_epilogue: bool) -> None:
         global display_errors
         display_errors = show_errors
 
@@ -174,6 +179,8 @@ class LanguagesData:
         self.show_argv = show_argv
         self.show_stdin = show_stdin
         self.show_output = show_output
+        self.show_prologue = show_prologue
+        self.show_epilogue = show_epilogue
 
     def unpack_language(self, language: str) -> List[str]:
         if Language.normalize(language) == Language.normalize(self.all_name):
@@ -471,16 +478,20 @@ def load_languages_json(languages_json: Any) -> Any:
 def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
                     from_string: bool = False) -> None:
     languages_data = LanguagesData.from_json(load_languages_json(languages_json))
-    total, successful = 0, 0
+    total, successful = -1, -1  # -1 to offset prologue.
 
     with io.StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
         with tempfile.TemporaryDirectory() as tmp_dir:
             for output, success in output_iterator(file, languages_data, tmp_dir):
-                print(output if total else prologue(output), file=outfile)
+                if total >= 0:
+                    print(output, file=outfile)
+                elif languages_data.show_prologue:
+                    print(prologue(output), file=outfile)
                 total += 1
                 if success:
                     successful += 1
-            print(epilogue(total, successful), file=outfile)
+            if languages_data.show_epilogue:
+                print(epilogue(total, successful), file=outfile)
 
 
 def runmany(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
@@ -501,9 +512,6 @@ def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: A
 
 
 if __name__ == '__main__':
-    runmany('sample.many')
-    exit()  # todo
-
     parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
     parser.add_argument('input', help='the .many file to be run')
     parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')

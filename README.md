@@ -9,11 +9,11 @@ Readme is just a todo list for now.
 Soon:
 
 - inherit default languages option (remove backup?) crucial!
-
-- showing prologue would be nice with show_prolog, ditto show_epilogue
-
+- restructure LanguagesData back to json for simplicity?
+  
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
+
 - Option to check for stdout equality. Display success at the end and differing ones. ?
 
 Less Soon:
