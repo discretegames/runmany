@@ -4,7 +4,10 @@
 	"stderr": "nzec",
 	"show_command": false,
 	"show_code": false,
-	"silent": false,
+	"show_argv": true,
+	"show_stdin": true,
+	"show_output": true,
+	"show_errors": true,
 	"languages": [
 		{
 			"name": "Python",

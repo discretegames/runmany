@@ -134,4 +134,3 @@ cout << stuff
 bob
 [output] #################################
 my name is bob -foo
-

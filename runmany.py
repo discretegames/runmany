@@ -19,20 +19,21 @@ COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 
-silence_errors = False  # The only mutating global.
-
 
 class JsonKeys(abc.ABC):
     ALL_NAME = 'all_name'
     STDERR = 'stderr'
-    SHOW_COMMAND = 'show_command'
-    SHOW_CODE = 'show_code'
-    SILENT = 'silent'
     TIMEOUT = 'timeout'
     LANGUAGES = 'languages'
     NAME = 'name'
     COMMAND = 'command'
     EXT = 'ext'
+    SHOW_COMMAND = 'show_command'
+    SHOW_CODE = 'show_code'
+    SHOW_ARGV = 'show_argv'
+    SHOW_STDIN = 'show_stdin'
+    SHOW_OUTPUT = 'show_output'
+    SHOW_ERRORS = 'show_errors'
 
 
 class Placeholders(abc.ABC):
@@ -55,12 +56,18 @@ DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
 BACKUP_LANGUAGES_JSON = {
     JsonKeys.ALL_NAME: "All",
     JsonKeys.STDERR: "nzec",
-    JsonKeys.SHOW_COMMAND: False,
-    JsonKeys.SHOW_CODE: False,
-    JsonKeys.SILENT: False,
     JsonKeys.TIMEOUT: 10.0,
     JsonKeys.LANGUAGES: [{JsonKeys.NAME: 'Python', JsonKeys.COMMAND: 'python'}],
+    JsonKeys.SHOW_COMMAND: False,
+    JsonKeys.SHOW_CODE: False,
+    JsonKeys.SHOW_ARGV: True,
+    JsonKeys.SHOW_STDIN: True,
+    JsonKeys.SHOW_OUTPUT: True,
+    JsonKeys.SHOW_ERRORS: True,
 }
+
+
+display_errors = BACKUP_LANGUAGES_JSON[JsonKeys.SHOW_ERRORS]  # The only mutating global.
 
 
 def removeprefix(string: str, prefix: str) -> str:
@@ -72,7 +79,7 @@ def removesuffix(string: str, suffix: str) -> str:
 
 
 def print_err(message: str) -> None:
-    if not silence_errors:
+    if display_errors:
         print(f"***| Runmany Error: {message} |***", file=sys.stderr)
 
 
@@ -141,9 +148,6 @@ class LanguagesData:
 
         all_name = get_backup(JsonKeys.ALL_NAME)
         stderr_op = StderrOption.from_json(get_backup(JsonKeys.STDERR))
-        show_command = get_backup(JsonKeys.SHOW_COMMAND)
-        show_code = get_backup(JsonKeys.SHOW_CODE)
-        silent = get_backup(JsonKeys.SILENT)
         default_timeout = get_backup(JsonKeys.TIMEOUT)
 
         languages = []
@@ -151,17 +155,24 @@ class LanguagesData:
             if Language.validate_language_json(language_json, all_name):
                 languages.append(Language.from_json(language_json, default_timeout))
 
-        return LanguagesData(all_name, stderr_op, show_command, show_code, silent, languages)
+        shows = JsonKeys.SHOW_COMMAND, JsonKeys.SHOW_CODE, JsonKeys.SHOW_ARGV, \
+            JsonKeys.SHOW_STDIN, JsonKeys.SHOW_OUTPUT, JsonKeys.SHOW_ERRORS
+        return LanguagesData(all_name, stderr_op, languages, *map(get_backup, shows))
 
-    def __init__(self, all_name: str, stderr_op: StderrOption, show_command: bool, show_code: bool, silent: bool,
-                 languages: List[Language]) -> None:
+    def __init__(self, all_name: str, stderr_op: StderrOption, languages: List[Language], show_command: bool,
+                 show_code: bool, show_argv: bool, show_stdin: bool, show_output: bool, show_errors: bool) -> None:
+        global display_errors
+        display_errors = show_errors
+
         self.all_name = all_name
         self.stderr_op = stderr_op
+        self.dict = {language.name_norm: language for language in languages}
+
         self.show_command = show_command
         self.show_code = show_code
-        self.dict = {language.name_norm: language for language in languages}
-        global silence_errors
-        silence_errors = silent
+        self.show_argv = show_argv
+        self.show_stdin = show_stdin
+        self.show_output = show_output
 
     def unpack_language(self, language: str) -> List[str]:
         if Language.normalize(language) == Language.normalize(self.all_name):
@@ -324,8 +335,6 @@ class Run:
         except subprocess.TimeoutExpired:
             self.stdout = f'TIMED OUT OF {self.language.timeout}s LIMIT'
             self.exit_code = 'T'
-        finally:
-            os.remove(code_file_name)  # Clean up what we can. Whole directory will be cleaned up eventually.
 
     @staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
@@ -335,24 +344,25 @@ class Run:
             content = '\n' + section.content.strip('\r\n')
         return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
 
-    def output(self, show_command: bool, show_code: bool) -> str:
+    def output(self, languages_data: LanguagesData) -> str:
         parts = []
 
         header = f'{self.number}. {self.language.name}'
         if self.exit_code:
             header += f' [exit code {self.exit_code}]'
-        if show_command:
+        if languages_data.show_command:
             header += f' {self.command}'
         parts.append(header)
 
-        if show_code:
+        if languages_data.show_code:
             parts.append(self.output_section('code', self.code_section))
-        if self.argv_section:
+        if self.argv_section and languages_data.show_argv:
             parts.append(self.output_section('argv', self.argv_section))
-        if self.stdin_section:
+        if self.stdin_section and languages_data.show_stdin:
             parts.append(self.output_section('stdin', self.stdin_section))
-        parts.append(self.output_section('output'))
-        parts.append(self.stdout + '\n\n')
+        if languages_data.show_output:
+            parts.append(self.output_section('output'))
+            parts.append(self.stdout + '\n')
 
         return '\n'.join(parts)
 
@@ -450,7 +460,7 @@ def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[A
         with tempfile.TemporaryDirectory() as tmp_dir:
             for run in run_iterator(file, languages_data):
                 run.run(tmp_dir, languages_data.stderr_op)
-                print(run.output(languages_data.show_command, languages_data.show_code), file=outfile)
+                print(run.output(languages_data), file=outfile)
                 total += 1
                 if run.exit_code == 0:
                     successful += 1

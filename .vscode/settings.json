@@ -11,7 +11,7 @@
 		"rawdir",
 		"rawfile",
 		"runmany",
-		"runmanys"
+		"runmanys",
 	],
 	"files.exclude": {
 		".mypy_cache/": true,
