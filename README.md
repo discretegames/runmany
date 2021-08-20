@@ -10,6 +10,8 @@ Soon:
 
 - inherit default languages option (remove backup?) crucial!
 
+- showing prologue would be nice with show_prolog, ditto show_epilogue
+
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
 - Option to check for stdout equality. Display success at the end and differing ones. ?

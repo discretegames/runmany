@@ -10,7 +10,7 @@ import argparse
 import subprocess
 import dataclasses
 import collections
-from typing import Any, List, Tuple, DefaultDict, Union, Optional, TextIO, Iterator, cast
+from typing import Any, List, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
 
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
@@ -18,6 +18,7 @@ CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
 COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
+OUTPUT_DIVIDER = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
 
 
 class JsonKeys(abc.ABC):
@@ -367,14 +368,13 @@ class Run:
         return '\n'.join(parts)
 
     @ staticmethod
-    def summary(total: int, successful: int) -> str:
+    def epilogue(total: int, successful: int) -> str:
         info = f'{successful}/{total} program{"" if total == 1 else "s"} successfully run'
         if successful < total:
             info += f'. {total - successful} failed due to non-zero exit code or timeout.'
         else:
             info += '!'
-        divider = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
-        return f'{divider}\n{info}\n{divider}'
+        return f'{OUTPUT_DIVIDER}\n{info}\n{OUTPUT_DIVIDER}'
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
@@ -390,6 +390,7 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
         if Section.line_is_comment(line):
             continue
         if Section.line_is_header(line):
+            # todo yield prolog here?
             if header:
                 yield current_section()
             header = line
@@ -402,7 +403,7 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
         yield current_section()
 
 
-def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
+def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -> Iterator[Tuple[str, bool]]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
@@ -434,7 +435,9 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Run]:
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        yield Run(number, languages_data[language], section, argv_section, stdin_section)
+                        run = Run(number, languages_data[language], section, argv_section, stdin_section)
+                        run.run(tmp_dir, languages_data.stderr_op)
+                        yield run.output(languages_data), run.exit_code == 0
                         number += 1
 
 
@@ -458,13 +461,12 @@ def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[A
 
     with io.StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
         with tempfile.TemporaryDirectory() as tmp_dir:
-            for run in run_iterator(file, languages_data):
-                run.run(tmp_dir, languages_data.stderr_op)
-                print(run.output(languages_data), file=outfile)
+            for output, success in output_iterator(file, languages_data, tmp_dir):
+                print(output, file=outfile)
                 total += 1
-                if run.exit_code == 0:
+                if success:
                     successful += 1
-            print(Run.summary(total, successful), file=outfile)
+            print(Run.epilogue(total, successful), file=outfile)
 
 
 def runmany(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
