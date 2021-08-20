@@ -4,6 +4,7 @@ import sys
 import abc
 import json
 import enum
+import types
 import pathlib
 import tempfile
 import argparse
@@ -19,6 +20,9 @@ COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
+DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
+
+display_errors = True  # The only mutating global.
 
 
 class JsonKeys(abc.ABC):
@@ -53,26 +57,6 @@ class Placeholders(abc.ABC):
     STEM = '$stem'            # file
     EXT = '$ext'              # .ext
     SEP = '$sep'              # /
-
-
-DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
-BACKUP_LANGUAGES_JSON = {
-    JsonKeys.ALL_NAME: "All",
-    JsonKeys.STDERR: "nzec",
-    JsonKeys.TIMEOUT: 10.0,
-    JsonKeys.LANGUAGES: [{JsonKeys.NAME: 'Python', JsonKeys.COMMAND: 'python'}],
-    JsonKeys.SHOW_COMMAND: False,
-    JsonKeys.SHOW_CODE: False,
-    JsonKeys.SHOW_ARGV: True,
-    JsonKeys.SHOW_STDIN: True,
-    JsonKeys.SHOW_OUTPUT: True,
-    JsonKeys.SHOW_ERRORS: True,
-    JsonKeys.SHOW_PROLOGUE: True,
-    JsonKeys.SHOW_EPILOGUE: True
-}
-
-
-display_errors = BACKUP_LANGUAGES_JSON[JsonKeys.SHOW_ERRORS]  # The only mutating global.
 
 
 def removeprefix(string: str, prefix: str) -> str:
@@ -145,7 +129,7 @@ class StderrOption(enum.Enum):
             return StderrOption.NZEC
 
 
-class LanguagesData:
+class LanguagesDataA:
     @staticmethod
     def from_json(languages_json: Any) -> 'LanguagesData':
         def get_backup(key: str) -> Any:

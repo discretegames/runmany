@@ -1,0 +1,10 @@
+{
+	"timeout": 0,
+	"languages": [
+		{
+			"name": "Python",
+			"command": "py -2.7",
+			"ext": ".py"
+		}
+	]
+}

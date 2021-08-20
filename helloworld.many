@@ -1,5 +1,3 @@
-Comment area
-
 ~~~| Python |~~~
 
 print('Hello, Python!')
@@ -60,7 +58,7 @@ int main() {
     return 0;
 }
 
-!~~~| C# |~~~
+~~~| C# |~~~
 
 namespace Hello {
 	class HelloWorld {         
