@@ -2,12 +2,12 @@ import os
 import io
 import sys
 import abc
+import ast
 import json
 import enum
 import types
 import pathlib
 import argparse
-import itertools
 import subprocess
 from collections import defaultdict
 from contextlib import nullcontext, redirect_stdout
@@ -49,17 +49,21 @@ class Placeholders(abc.ABC):
     SEP = '$sep'              # /
 
 
+def debugging() -> bool:
+    return 'DEBUG' in os.environ and bool(ast.literal_eval(os.environ['DEBUG']))
+
+
+def print_err(message: str) -> None:
+    if display_errors:
+        print(f"***| RunMany Error: {message} |***", file=sys.stderr)
+
+
 def removeprefix(string: str, prefix: str) -> str:
     return string[len(prefix):] if string.startswith(prefix) else string
 
 
 def removesuffix(string: str, suffix: str) -> str:
     return string[:-len(suffix)] if string.endswith(suffix) else string
-
-
-def print_err(message: str) -> None:
-    if display_errors:
-        print(f"***| RunMany Error: {message} |***", file=sys.stderr)
 
 
 class LanguagesData:
@@ -80,13 +84,16 @@ class LanguagesData:
         with open(languages_json) as file:  # Assume path like.
             return file.read()
 
-    @staticmethod
-    def language_obj_valid(language_obj: Any, all_name: str) -> bool:
+    def language_obj_valid(self, language_obj: Any, is_default: bool) -> bool:
+        # todo if already in name.dict?
+        # valid if in dict unless
+        # TODO TODO
+
         msg = None
         if not hasattr(language_obj, NAME_KEY):
             msg = f'No "{NAME_KEY}" key found.'
-        elif LanguagesData.normalize(language_obj.name) == LanguagesData.normalize(all_name):
-            msg = f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{all_name}".'
+        elif LanguagesData.normalize(language_obj.name) == LanguagesData.normalize(self.all_name):
+            msg = f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}".'
         elif not hasattr(language_obj, COMMAND_KEY):
             msg = f'No "{COMMAND_KEY}" key found for {language_obj.name}.'
         elif not hasattr(language_obj, EXT_KEY) and Placeholders.EXT in language_obj.command:
@@ -97,19 +104,27 @@ class LanguagesData:
         return True
 
     def __init__(self, languages_json: JsonLike) -> None:
-        self.settings = self.json_to_class(self.get_json_string(languages_json))
+        self.data = self.json_to_class(self.get_json_string(languages_json))
         with open(DEFAULT_LANGUAGES_JSON_FILE) as file:
-            self.defaults = self.json_to_class(file.read())
+            self.default_data = self.json_to_class(file.read())
 
         self.dict: Dict[str, LanguageData] = {}
-        for language_obj in itertools.chain(self.default_languages, self.languages):
-            if self.language_obj_valid(language_obj, self.all_name):
+        for language_obj in self.default_languages:
+            if self.language_obj_valid(language_obj, True):
                 self.dict[self.normalize(language_obj.name)] = LanguageData(language_obj, self)
 
+        for language_obj in self.languages:
+            if self.language_obj_valid(language_obj, False):
+                key = self.normalize(language_obj.name)
+                if key in self.dict:
+                    self.dict[key].update_obj(language_obj)
+                else:
+                    self.dict[key] = LanguageData(language_obj, self)
+
     def __getattr__(self, name: str) -> Any:
-        if hasattr(self.settings, name):
-            return getattr(self.settings, name)
-        return getattr(self.defaults, name)
+        if hasattr(self.data, name):
+            return getattr(self.data, name)
+        return getattr(self.default_data, name)
 
     def __getitem__(self, language: str) -> Any:
         return self.dict[self.normalize(language)]
@@ -121,15 +136,20 @@ class LanguagesData:
         return [language]
 
 
-# Todo? inherit from default_languages too
 class LanguageData:
-    def __init__(self, language_obj: Any, parent: LanguagesData):
+    def __init__(self, language_obj: Any, parent: LanguagesData) -> None:
         self.obj = language_obj
+        self.default_obj = None
         self.parent = parent
+
+    def update_obj(self, language_obj: Any) -> None:
+        self.obj, self.default_obj = language_obj, self.obj
 
     def __getattr__(self, name: str) -> Any:
         if hasattr(self.obj, name):
             return getattr(self.obj, name)
+        if hasattr(self.default_obj, name):
+            return getattr(self.default_obj, name)
         return getattr(self.parent, name)
 
 
@@ -140,17 +160,17 @@ class SectionType(enum.Enum):
 
 
 class Section:
-    @staticmethod
+    @ staticmethod
     def line_is_exit(line: str) -> bool:
         return line.rstrip() == EXIT_SEP
 
-    @staticmethod
+    @ staticmethod
     def line_is_comment(line: str) -> bool:
         line = line.rstrip()
         return removeprefix(line, COMMENT_PREFIX) == EXIT_SEP or \
             line.startswith(COMMENT_START) and line.endswith(COMMENT_END)
 
-    @staticmethod
+    @ staticmethod
     def line_is_header(line: str) -> bool:
         line = removeprefix(line.rstrip(), COMMENT_PREFIX)
         starts = CODE_START, ARGV_START, STDIN_START
@@ -158,7 +178,7 @@ class Section:
         seps = CODE_SEP, ARGV_SEP, STDIN_SEP
         return line in seps or any(line.startswith(s) and line.endswith(e) for s, e in zip(starts, ends))
 
-    @staticmethod
+    @ staticmethod
     def get_type_start_end(header: str) -> Tuple[SectionType, str, str]:
         if header == ARGV_SEP or header.startswith(ARGV_START):
             return SectionType.ARGV, ARGV_START, ARGV_END
@@ -167,7 +187,7 @@ class Section:
         else:
             return SectionType.CODE, CODE_START, CODE_END
 
-    @staticmethod
+    @ staticmethod
     def strip_content(content: str, section_type: SectionType) -> str:
         if section_type is SectionType.ARGV:
             return content.strip('\r\n')  # Always strip argv.
@@ -201,8 +221,8 @@ class Section:
         return f"{self.header}\n{self.content}"
 
     def __repr__(self) -> str:
-        return f"{'//' if self.commented else ''}{self.type.name} " \
-               f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
+        return f"{'//' if self.commented else ''}{self.type.name} "
+        f"{'SEP' if self.is_sep else self.languages} line {self.line_number}"
 
 
 def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Section]]:
@@ -435,6 +455,10 @@ def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: O
 
 
 if __name__ == '__main__':
+    if debugging():
+        runmany('sample.many', 'languages.json')
+        sys.exit()
+
     parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
     parser.add_argument('input', help='the .many file to be run')
     parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')

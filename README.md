@@ -15,8 +15,6 @@ Soon:
 
 - Option to check for stdout equality. Display success at the end and differing ones. ?
 
-- redo runmany with nullcontext and redirect_stdout
-
 Less Soon:
 
 - Docstrings.
