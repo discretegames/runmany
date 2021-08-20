@@ -400,15 +400,14 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
                         number += 1
 
 
-def runmany_to_file(outfile: TextIO, many_file: PathLike, languages_json: JsonLike = None,
-                    string: bool = False) -> None:
-    with redirect_stdout(outfile):
+def runmanyf(file: TextIO, many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> None:
+    with redirect_stdout(file):
         languages_data = LanguagesData(languages_json)
         total, successful = 0, 0
 
         context_manager = io.StringIO(cast(str, many_file)) if string else open(many_file)
-        with context_manager as file, TemporaryDirectory() as directory:
-            for run in run_iterator(file, languages_data):
+        with context_manager as manyfile, TemporaryDirectory() as directory:
+            for run in run_iterator(manyfile, languages_data):
                 if isinstance(run, str):
                     if languages_data.show_prologue:
                         print(prologue(run))
@@ -422,17 +421,17 @@ def runmany_to_file(outfile: TextIO, many_file: PathLike, languages_json: JsonLi
                 print(epilogue(total, successful))
 
 
+def runmanys(many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> str:
+    file = io.StringIO()
+    runmanyf(file, many_file, languages_json, string)
+    file.seek(0)
+    return file.read()
+
+
 def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
             string: bool = False) -> None:
-    with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as outfile:
-        runmany_to_file(outfile, many_file, languages_json, string)
-
-
-def runmanys(many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> str:
-    string_io = io.StringIO()
-    runmany_to_file(string_io, many_file, languages_json, string)
-    string_io.seek(0)
-    return string_io.read()
+    with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as file:
+        runmanyf(file, many_file, languages_json, string)
 
 
 if __name__ == '__main__':
