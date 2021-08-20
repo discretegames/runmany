@@ -367,17 +367,24 @@ class Run:
 
         return '\n'.join(parts)
 
-    @ staticmethod
-    def epilogue(total: int, successful: int) -> str:
-        info = f'{successful}/{total} program{"" if total == 1 else "s"} successfully run'
-        if successful < total:
-            info += f'. {total - successful} failed due to non-zero exit code or timeout.'
-        else:
-            info += '!'
-        return f'{OUTPUT_DIVIDER}\n{info}\n{OUTPUT_DIVIDER}'
+
+def prologue(content: str) -> str:
+    content = content.strip()
+    if not content:
+        content = 'RunMany Result'
+    return f'{OUTPUT_DIVIDER}\n{content}\n{OUTPUT_DIVIDER}\n\n'
 
 
-def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Section]:
+def epilogue(total: int, successful: int) -> str:
+    info = f'{successful}/{total} program{"" if total == 1 else "s"} successfully run'
+    if successful < total:
+        info += f'. {total - successful} failed due to non-zero exit code or timeout.'
+    else:
+        info += '!'
+    return f'{OUTPUT_DIVIDER}\n{info}\n{OUTPUT_DIVIDER}'
+
+
+def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Section]]:
     def current_section() -> Section:
         return Section(cast(str, header), ''.join(section_lines), header_line_number, languages_data)
 
@@ -390,8 +397,9 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Se
         if Section.line_is_comment(line):
             continue
         if Section.line_is_header(line):
-            # todo yield prolog here?
-            if header:
+            if not header:
+                yield ''.join(section_lines)  # Yield prologue. Only happens once.
+            else:
                 yield current_section()
             header = line
             header_line_number = line_number
@@ -409,13 +417,11 @@ def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -
     stdins: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
     number = 1
 
-    def update(argvs_or_stdins: DefaultDict[str, List[Optional[Section]]]) -> None:
-        for language in cast(Section, lead_section).languages:
-            if not section.is_sep:
-                argvs_or_stdins[language].clear()
-            argvs_or_stdins[language].append(section)
-
     for section in section_iterator(file, languages_data):
+        if isinstance(section, str):
+            yield section, True
+            continue
+
         if section.commented:
             continue
 
@@ -428,9 +434,17 @@ def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -
             lead_section = section
 
         if section.type is SectionType.ARGV:
-            update(argvs)
+            for language in lead_section.languages:
+                if not section.is_sep:
+                    argvs[language].clear()
+                argvs[language].append(section)
+
         elif section.type is SectionType.STDIN:
-            update(stdins)
+            for language in lead_section.languages:
+                if not section.is_sep:
+                    stdins[language].clear()
+                stdins[language].append(section)
+
         elif section.type is SectionType.CODE:
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
@@ -462,11 +476,11 @@ def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[A
     with io.StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
         with tempfile.TemporaryDirectory() as tmp_dir:
             for output, success in output_iterator(file, languages_data, tmp_dir):
-                print(output, file=outfile)
+                print(output if total else prologue(output), file=outfile)
                 total += 1
                 if success:
                     successful += 1
-            print(Run.epilogue(total, successful), file=outfile)
+            print(epilogue(total, successful), file=outfile)
 
 
 def runmany(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
@@ -487,6 +501,9 @@ def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: A
 
 
 if __name__ == '__main__':
+    runmany('sample.many')
+    exit()  # todo
+
     parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
     parser.add_argument('input', help='the .many file to be run')
     parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')

@@ -1,9 +1,9 @@
-!$$$| Python |$$$
-A
-$$$|$$$
-B
-
 ~~~| Python |~~~
 
 print(999)
+
+
+~~~| Python |~~~
+
+print(666)
 

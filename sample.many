@@ -1,6 +1,4 @@
-Python and C++ programs that multiply the int on stdin by the int in argv, printing the result.
-
-woo
+Python and C++ programs that output the product of the ints on stdin and argv.
 !!!| argvs to use for both Python and C++ |!!!
 @@@| Python | C++ |@@@
 10
