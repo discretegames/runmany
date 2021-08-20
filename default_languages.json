@@ -1,5 +1,4 @@
 {
-	"all_name": "All",
 	"timeout": 10.0,
 	"stderr": "nzec",
 	"show_command": false,
@@ -10,6 +9,7 @@
 	"show_errors": true,
 	"show_prologue": true,
 	"show_epilogue": true,
+	"all_name": "All",
 	"languages": [],
 	"default_languages": [
 		{

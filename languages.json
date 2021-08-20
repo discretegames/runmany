@@ -2,9 +2,16 @@
 	"timeout": 0,
 	"languages": [
 		{
-			"name": "Python",
-			"command": "py -2.7",
-			"ext": ".py"
+			"name": "Py",
+			"command": "$ext"
+		},
+		{
+			"name": "JavaScript",
+			"command": "shouldn't be seen"
+		},
+		{
+			"name": "JavaScript",
+			"command": "should shadow default JS"
 		}
 	]
 }

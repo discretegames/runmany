@@ -13,6 +13,11 @@ import dataclasses
 import collections
 from typing import Any, List, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
 
+display_errors = True  # The only mutating global.
+
+PathLike = Union[str, bytes, os.PathLike[Any]]
+JsonLike = Union[None, str, bytes, os.PathLike[Any], Any]
+
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
@@ -22,10 +27,8 @@ OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
 DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
 
-display_errors = True  # The only mutating global.
 
-
-class JsonKeys(abc.ABC):
+class JsonKeys(abc.ABC):  # todo can mostly remove
     ALL_NAME = 'all_name'
     STDERR = 'stderr'
     TIMEOUT = 'timeout'
@@ -89,7 +92,7 @@ class Language:
 
     @staticmethod
     def validate_language_json(language_json: Any, all_name: str) -> bool:
-        name = language_json[JsonKeys.NAME]
+        name = language_json[JsonKeys.NAME] # todo bad anyway
         if JsonKeys.NAME not in language_json:
             print_err(f'No "{JsonKeys.NAME}" key found in {json.dumps(language_json)}. Ignoring language.')
             return False
@@ -173,6 +176,40 @@ class LanguagesDataA:
 
     def __getitem__(self, language: str) -> Language:
         return self.dict[Language.normalize(language)]
+
+
+def json_to_class(json_string: str) -> Any:
+    return json.loads(json_string, object_hook=lambda d: types.SimpleNamespace(**d))
+
+
+class LanguagesData:
+    def __init__(self, languages_json: JsonLike) -> None:
+        if languages_json is None:
+            json_string = '{}'
+        elif isinstance(languages_json, dict):  # Assume already valid json dict.
+            json_string = json.dumps(languages_json)
+        else:  # Assume path like.
+            with open(languages_json) as file:
+                json_string = file.read()
+
+        self.settings = json_to_class(json_string)
+        with open(DEFAULT_LANGUAGES_JSON_FILE) as file:
+            self.defaults = json_to_class(file.read())
+
+        self.dict = {}
+        print(self.)
+
+        # Todo
+        # make dict of languages with proper normalizing, validation, and shadowing
+        # set up self.stderr with enum (getattr only triggers on not found)
+
+    def __getattr__(self, name: str) -> Any:
+        if hasattr(self.settings, name):
+            return getattr(self.settings, name)
+        return getattr(self.defaults, name)
+
+    # todo getitem for language lookup
+    # todo unpacking All
 
 
 class SectionType(enum.Enum):
@@ -336,7 +373,7 @@ class Run:
             content = '\n' + section.content.strip('\r\n')
         return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
 
-    def output(self, languages_data: LanguagesData) -> str:
+    def output(self, languages_data: LanguagesData) -> str:  # todo can pass in language_obj and shadow all props
         parts = []
 
         header = f'{self.number}. {self.language.name}'
@@ -399,6 +436,7 @@ def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Un
         yield current_section()
 
 
+# turn back into Run iterator that can also be string fpr prologue? maybe
 def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -> Iterator[Tuple[str, bool]]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = collections.defaultdict(lambda: [None])
@@ -443,25 +481,12 @@ def output_iterator(file: TextIO, languages_data: LanguagesData, tmp_dir: str) -
                         number += 1
 
 
-def load_languages_json(languages_json: Any) -> Any:
-    if isinstance(languages_json, dict):
-        return languages_json
-    try:
-        if languages_json is None:
-            languages_json = pathlib.Path(__file__).resolve().parent.joinpath(DEFAULT_LANGUAGES_JSON_FILE)
-        with open(os.fspath(languages_json)) as file:
-            return json.load(file)
-    except (OSError, json.JSONDecodeError, TypeError):
-        print_err(f'Unable to load json "{languages_json}". Using backup json with limited functionality.')
-        return BACKUP_LANGUAGES_JSON
-
-
-def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
+def runmany_to_file(outfile: TextIO, many_file: PathLike, languages_json: JsonLike = None,
                     from_string: bool = False) -> None:
-    languages_data = LanguagesData.from_json(load_languages_json(languages_json))
+    languages_data = LanguagesData(languages_json)
     total, successful = -1, -1  # -1 to offset prologue.
 
-    with io.StringIO(cast(str, many_file)) if from_string else open(os.fspath(many_file)) as file:
+    with io.StringIO(cast(str, many_file)) if from_string else open(many_file) as file:
         with tempfile.TemporaryDirectory() as tmp_dir:
             for output, success in output_iterator(file, languages_data, tmp_dir):
                 if total >= 0:
@@ -475,17 +500,16 @@ def runmany_to_file(outfile: TextIO, many_file: Union[str, bytes, 'os.PathLike[A
                 print(epilogue(total, successful), file=outfile)
 
 
-def runmany(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
-            output_file: Optional[Union[str, bytes, 'os.PathLike[Any]']] = None, from_string: bool = False) -> None:
+def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
+            from_string: bool = False) -> None:
     if output_file is None:
         runmany_to_file(sys.stdout, many_file, languages_json, from_string)
     else:
-        with open(os.fspath(output_file), 'w') as outfile:
+        with open(output_file, 'w') as outfile:
             runmany_to_file(outfile, many_file, languages_json, from_string)
 
 
-def runmanys(many_file: Union[str, bytes, 'os.PathLike[Any]'], languages_json: Any = None,
-             from_string: bool = False) -> str:
+def runmanys(many_file: PathLike, languages_json: JsonLike = None, from_string: bool = False) -> str:
     string_io = io.StringIO()
     runmany_to_file(string_io, many_file, languages_json, from_string)
     string_io.seek(0)

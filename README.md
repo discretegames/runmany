@@ -8,6 +8,8 @@ Readme is just a todo list for now.
 
 Soon:
 
+- use language_obj for language objects, better naming convention
+
 - inherit default languages option (remove backup?) crucial!
 - restructure LanguagesData back to json for simplicity?
   
@@ -15,6 +17,8 @@ Soon:
   - Make sure correct path to language.json is used in pip version.
 
 - Option to check for stdout equality. Display success at the end and differing ones. ?
+
+- redo runmany with nullcontext and redirect_stdout
 
 Less Soon:
 
