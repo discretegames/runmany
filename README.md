@@ -8,7 +8,7 @@ Readme is just a todo list for now.
 
 Soon:
 
-- use language_obj for language objects, better naming convention
+- use language_data for language objects, better naming convention
 
 - inherit default languages option (remove backup?) crucial!
 - restructure LanguagesData back to json for simplicity?

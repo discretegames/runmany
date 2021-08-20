@@ -2,12 +2,9 @@
 	"timeout": 0,
 	"languages": [
 		{
-			"name": "Py",
-			"command": "$ext"
-		},
-		{
-			"name": "JavaScript",
-			"command": "shouldn't be seen"
+			"name": "Test",
+			"command": "shouldn't be seen",
+			"stderr": "idk"
 		},
 		{
 			"name": "JavaScript",

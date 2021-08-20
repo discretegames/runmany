@@ -92,7 +92,7 @@ class Language:
 
     @staticmethod
     def validate_language_json(language_json: Any, all_name: str) -> bool:
-        name = language_json[JsonKeys.NAME] # todo bad anyway
+        name = language_json[JsonKeys.NAME]  # todo bad anyway
         if JsonKeys.NAME not in language_json:
             print_err(f'No "{JsonKeys.NAME}" key found in {json.dumps(language_json)}. Ignoring language.')
             return False
@@ -169,11 +169,6 @@ class LanguagesDataA:
         self.show_prologue = show_prologue
         self.show_epilogue = show_epilogue
 
-    def unpack_language(self, language: str) -> List[str]:
-        if Language.normalize(language) == Language.normalize(self.all_name):
-            return list(self.dict.keys())
-        return [self[language].name_norm]
-
     def __getitem__(self, language: str) -> Language:
         return self.dict[Language.normalize(language)]
 
@@ -207,9 +202,6 @@ class LanguagesData:
         if hasattr(self.settings, name):
             return getattr(self.settings, name)
         return getattr(self.defaults, name)
-
-    # todo getitem for language lookup
-    # todo unpacking All
 
 
 class SectionType(enum.Enum):
@@ -270,7 +262,7 @@ class Section:
             raw_header = removesuffix(removeprefix(raw_header, start), end)
             for language in raw_header.split(LANGUAGE_DIVIDER):
                 try:
-                    self.languages.extend(languages_data.unpack_language(language))
+                    self.languages.extend(languages_data.unpack(language))
                 except KeyError:
                     if not self.commented:
                         print_err(f'Language "{language.strip()}" in section header at line {self.line_number}'
@@ -347,6 +339,7 @@ class Run:
         self.command = self.fill_command(code_file_name)
         stdin = self.stdin_section.content if self.stdin_section else None
 
+        # tod just do the raw check here
         if stderr_op is StderrOption.ALWAYS:
             stderr = subprocess.STDOUT
         elif stderr_op is StderrOption.NEVER:
