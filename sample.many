@@ -1,18 +1,20 @@
 Python and C++ programs that output the product of the ints on stdin and argv.
-!!!| argvs to use for both Python and C++ |!!!
-@@@| Python | C++ |@@@
-10
+
+!!!| argvs ("All" matches all languages, so just Python and C++ in this case) |!!!
+@@@| All |@@@
+2
 @@@|@@@
+3
+@@@|@@@
+4
+
+
+!!!| stdins |!!!
+$$$| All |$$$
+10
+$$$|$$$
 100
 
-
-!!!| stdins to use for both Python and C++ |!!!
-$$$| Python | C++ |$$$
-2
-$$$|$$$
-3
-$$$|$$$
-4
 
 
 ~~~| Python |~~~
@@ -21,7 +23,6 @@ import sys
 
 a = int(sys.argv[1])
 s = int(input())
-
 print(a * s)
 
 
@@ -31,10 +32,8 @@ using namespace std;
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-    int a = stoi(argv[1]);
     int s;
     cin >> s;
-
-    cout << s * a << endl;
+    cout << s * stoi(argv[1]) << endl;
     return 0;
 }

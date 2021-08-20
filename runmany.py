@@ -85,7 +85,7 @@ def removesuffix(string: str, suffix: str) -> str:
 
 def print_err(message: str) -> None:
     if display_errors:
-        print(f"***| Runmany Error: {message} |***", file=sys.stderr)
+        print(f"***| RunMany Error: {message} |***", file=sys.stderr)
 
 
 @dataclasses.dataclass
@@ -376,10 +376,7 @@ class Run:
 
 
 def prologue(content: str) -> str:
-    content = content.strip()
-    if not content:
-        content = 'RunMany Result'
-    return f'{OUTPUT_DIVIDER}\n{content}\n{OUTPUT_DIVIDER}\n\n'
+    return f'{OUTPUT_DIVIDER}\nRunMany Result: {content.strip()}\n{OUTPUT_DIVIDER}\n\n'
 
 
 def epilogue(total: int, successful: int) -> str:
