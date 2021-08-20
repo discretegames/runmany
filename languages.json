@@ -1,9 +1,11 @@
 {
-	"timeout": 0,
+	"timeout": 1,
 	"languages": [
 		{
-			"name": "Test",
-			"command": "$ext"
+			"name": "Python",
+			"show_argv": false,
+			"show_stdin": false,
+			"show_output": false
 		}
 	]
 }

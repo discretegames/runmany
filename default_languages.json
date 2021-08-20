@@ -2,7 +2,7 @@
 	"timeout": 10.0,
 	"stderr": "nzec",
 	"show_command": false,
-	"show_code": true,
+	"show_code": false,
 	"show_argv": true,
 	"show_stdin": true,
 	"show_output": true,

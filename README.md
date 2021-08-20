@@ -8,11 +8,8 @@ Readme is just a todo list for now.
 
 Soon:
 
-- use language_data for language objects, better naming convention
+- show_file option for prologue?
 
-- inherit default languages option (remove backup?) crucial!
-- restructure LanguagesData back to json for simplicity?
-  
 - Turn into a pip package. "pip install runmany" then "runmany example.many".
   - Make sure correct path to language.json is used in pip version.
 

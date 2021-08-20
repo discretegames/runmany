@@ -10,13 +10,14 @@ import argparse
 import itertools
 import subprocess
 from collections import defaultdict
+from contextlib import nullcontext, redirect_stdout
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, List, Dict, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
 
 display_errors = True  # The only mutating global.
 
-PathLike = Union[str, bytes, os.PathLike[Any]]
-JsonLike = Union[None, str, bytes, os.PathLike[Any], Any]
+PathLike = Union[str, bytes, 'os.PathLike[Any]']
+JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
 
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
@@ -120,6 +121,7 @@ class LanguagesData:
         return [language]
 
 
+# Todo? inherit from default_languages too
 class LanguageData:
     def __init__(self, language_obj: Any, parent: LanguagesData):
         self.obj = language_obj
@@ -269,7 +271,6 @@ class Run:
             def replace(placeholder: str, replacement: str) -> None:
                 nonlocal command
                 command = command.replace(placeholder, replacement)
-            # TODO shorten this up?
             replace(Placeholders.RAWDIR, pp.rawdir)
             replace(Placeholders.DIR, pp.dir)
             replace(Placeholders.RAWFILE, pp.rawfile)
@@ -400,39 +401,36 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
 
 
 def runmany_to_file(outfile: TextIO, many_file: PathLike, languages_json: JsonLike = None,
-                    from_string: bool = False) -> None:
-    languages_data = LanguagesData(languages_json)
-    total, successful = 0, 0
+                    string: bool = False) -> None:
+    with redirect_stdout(outfile):
+        languages_data = LanguagesData(languages_json)
+        total, successful = 0, 0
 
-    with io.StringIO(cast(str, many_file)) if from_string else open(many_file) as file:
-        with TemporaryDirectory() as directory:
+        context_manager = io.StringIO(cast(str, many_file)) if string else open(many_file)
+        with context_manager as file, TemporaryDirectory() as directory:
             for run in run_iterator(file, languages_data):
                 if isinstance(run, str):
                     if languages_data.show_prologue:
-                        print(prologue(run), file=outfile)
+                        print(prologue(run))
                 else:
                     output, success = run.run(directory)
-                    print(output, file=outfile)
+                    print(output)
                     total += 1
                     if success:
                         successful += 1
             if languages_data.show_epilogue:
-                print(epilogue(total, successful), file=outfile)
+                print(epilogue(total, successful))
 
 
 def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
-            from_string: bool = False) -> None:
-    # todo redo redo runmany with nullcontext and redirect_stdout, don't need file=outfile, or outfile at all
-    if output_file is None:
-        runmany_to_file(sys.stdout, many_file, languages_json, from_string)
-    else:
-        with open(output_file, 'w') as outfile:
-            runmany_to_file(outfile, many_file, languages_json, from_string)
+            string: bool = False) -> None:
+    with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as outfile:
+        runmany_to_file(outfile, many_file, languages_json, string)
 
 
-def runmanys(many_file: PathLike, languages_json: JsonLike = None, from_string: bool = False) -> str:
+def runmanys(many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> str:
     string_io = io.StringIO()
-    runmany_to_file(string_io, many_file, languages_json, from_string)
+    runmany_to_file(string_io, many_file, languages_json, string)
     string_io.seek(0)
     return string_io.read()
 
