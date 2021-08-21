@@ -19,6 +19,7 @@ display_errors = True  # The only mutating global.
 PathLike = Union[str, bytes, 'os.PathLike[Any]']
 JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
 
+DEBUG_ENV_VAR = 'DEBUG_RUNMANY'
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
@@ -50,7 +51,7 @@ class Placeholders(abc.ABC):
 
 
 def debugging() -> bool:
-    return 'DEBUG' in os.environ and bool(ast.literal_eval(os.environ['DEBUG']))
+    return DEBUG_ENV_VAR in os.environ and bool(ast.literal_eval(os.environ[DEBUG_ENV_VAR]))
 
 
 def print_err(message: str) -> None:
