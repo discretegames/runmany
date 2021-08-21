@@ -30,6 +30,10 @@ check_equal
 ------------------------------------------------------------------------------------------
 4/4 program successfully run!
 6/10 gave the same stdout. The outliers were runs 4, 5, 8, and 9.
-9/10 gave the same stdout. The outlier was run 4, 5, 8, and 9.
+9/10 gave the same stdout. The outlier was run [4 5 6]
 10/10 gave the same stdout!
+0/0 gave the same stdout
+6 gave the exact same stdout. Equality groups: 
+(6 is max len group)
+
 ------------------------------------------------------------------------------------------

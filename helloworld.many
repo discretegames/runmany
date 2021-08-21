@@ -22,7 +22,7 @@ public class HelloWorld {
 
 ~~~| Kotlin |~~~
 
-fun main() { 
+fun main() {
     println("Hello, World!")
 }
 

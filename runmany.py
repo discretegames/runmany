@@ -270,12 +270,11 @@ class PathParts:
 
 class Run:
     def __init__(self, code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section],
-                 language_data: LanguageData, number: int) -> None:
+                 language_data: LanguageData) -> None:
         self.code_section = code_section
         self.argv_section = argv_section
         self.stdin_section = stdin_section
         self.language_data = language_data
-        self.number = number
 
     def fill_command(self, code_file_name: str) -> str:
         command = cast(str, self.language_data.command)
@@ -311,10 +310,10 @@ class Run:
             content = '\n' + section.content.strip('\r\n')
         return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
 
-    def output(self, command: str, stdout: str, exit_code: Union[int, str]) -> str:
+    def output(self, command: str, stdout: str, exit_code: Union[int, str], run_number: int) -> str:
         parts = []
 
-        header = f'{self.number}. {self.language_data.name}'
+        header = f'{run_number}. {self.language_data.name}'
         if exit_code != 0:
             header += f' [exit code {exit_code}]'
         if self.language_data.show_command:
@@ -341,7 +340,7 @@ class Run:
         else:
             return subprocess.STDOUT
 
-    def run(self, directory: str) -> Tuple[str, str, bool]:
+    def run(self, directory: str, run_number: int) -> Tuple[str, str, bool]:
         with NamedTemporaryFile(mode='w', suffix=self.language_data.ext, dir=directory, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
@@ -360,7 +359,7 @@ class Run:
             stdout = f'TIMED OUT OF {self.language_data.timeout}s LIMIT'
             exit_code = 'T'
 
-        output = self.output(command, stdout, exit_code)
+        output = self.output(command, stdout, exit_code, run_number)
         return output, stdout, exit_code == 0
 
 
@@ -369,20 +368,30 @@ def prologue(content: str) -> str:
     return f'{OUTPUT_DIVIDER}\n{content}\n{OUTPUT_DIVIDER}\n\n'
 
 
-def epilogue(total: int, successful: int) -> str:
-    info = f'{successful}/{total} program{"" if total == 1 else "s"} successfully run'
-    if successful < total:
-        info += f'. {total - successful} failed due to non-zero exit code or timeout.'
+def epilogue(total_runs: int, successful_runs: int, equal_stdouts: Optional[DefaultDict[str, List[int]]]) -> str:
+    line1 = f'{successful_runs}/{total_runs} program{"" if total_runs == 1 else "s"} successfully run'
+    if successful_runs < total_runs:
+        line1 += f'. {total_runs - successful_runs} failed due to non-zero exit code or timeout.'
     else:
-        info += '!'
-    return f'{OUTPUT_DIVIDER}\n{info}\n{OUTPUT_DIVIDER}'
+        line1 += '!'
+
+    line2 = ''
+    if equal_stdouts is not None:
+        groups = sorted(equal_stdouts.values(), key=len)
+        biggest = len(groups[-1]) if groups else 0
+        line2 = f'\n{biggest}/{total_runs} had the exact same stdout'
+        if biggest != total_runs:
+            line2 += '. Equal runs grouped: ' + ' '.join('[' + ' '.join(map(str, group)) + ']' for group in groups)
+        else:
+            line2 += '!'
+
+    return f'{OUTPUT_DIVIDER}\n{line1}{line2}\n{OUTPUT_DIVIDER}'
 
 
 def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Run]]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
-    number = 1
 
     for section in section_iterator(file, languages_data):
         if isinstance(section, str):
@@ -416,14 +425,14 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        yield Run(section, argv_section, stdin_section, languages_data[language], number)
-                        number += 1
+                        yield Run(section, argv_section, stdin_section, languages_data[language])
 
 
 def runmanyf(file: TextIO, many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> None:
     with redirect_stdout(file):
         languages_data = LanguagesData(languages_json)
-        total, successful = 0, 0
+        total_runs, successful_runs = 0, 0
+        equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
 
         context_manager = io.StringIO(cast(str, many_file)) if string else open(many_file)
         with context_manager as manyfile, TemporaryDirectory() as directory:
@@ -432,13 +441,15 @@ def runmanyf(file: TextIO, many_file: PathLike, languages_json: JsonLike = None,
                     if languages_data.show_prologue:
                         print(prologue(run))
                 else:
-                    output, stdout, success = run.run(directory)
+                    run_number = total_runs + 1
+                    output, stdout, success = run.run(directory, run_number)
+                    total_runs += 1
+                    successful_runs += success
                     print(output)
-                    total += 1
-                    if success:
-                        successful += 1
+                    if languages_data.check_equal:
+                        equal_stdouts[stdout].append(run_number)
             if languages_data.show_epilogue:
-                print(epilogue(total, successful))
+                print(epilogue(total_runs, successful_runs, equal_stdouts if languages_data.check_equal else None))
 
 
 def runmanys(many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> str:
