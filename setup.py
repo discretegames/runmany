@@ -8,7 +8,7 @@ with open(path.join(directory, 'README.md'), encoding='utf-8') as file:
     long_description = file.read()
 
 setup(
-    name='RunMany',
+    name='runmany',
     version=version,
     author='discretegames',
     author_email='discretizedgames@gmail.com',
