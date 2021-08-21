@@ -18,3 +18,18 @@ Less Soon:
 - Docstrings.
 - Automated testing.
 - A vscode plugin for syntax highlighting and running .many files??
+
+
+
+show_equal
+
+check_equal
+
+
+
+------------------------------------------------------------------------------------------
+4/4 program successfully run!
+6/10 gave the same stdout. The outliers were runs 4, 5, 8, and 9.
+9/10 gave the same stdout. The outlier was run 4, 5, 8, and 9.
+10/10 gave the same stdout!
+------------------------------------------------------------------------------------------

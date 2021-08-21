@@ -1,17 +1,18 @@
 {
+	"all_name": "All",
+	"check_equal": false,
+	"languages": [],
 	"timeout": 10.0,
 	"stderr": "nzec",
+	"ext": "",
+	"show_prologue": true,
 	"show_command": false,
 	"show_code": false,
 	"show_argv": true,
 	"show_stdin": true,
 	"show_output": true,
 	"show_errors": true,
-	"show_prologue": true,
 	"show_epilogue": true,
-	"all_name": "All",
-	"ext": "",
-	"languages": [],
 	"default_languages": [
 		{
 			"name": "Python",

@@ -341,7 +341,7 @@ class Run:
         else:
             return subprocess.STDOUT
 
-    def run(self, directory: str) -> Tuple[str, bool]:
+    def run(self, directory: str) -> Tuple[str, str, bool]:
         with NamedTemporaryFile(mode='w', suffix=self.language_data.ext, dir=directory, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
@@ -361,11 +361,12 @@ class Run:
             exit_code = 'T'
 
         output = self.output(command, stdout, exit_code)
-        return output, exit_code == 0
+        return output, stdout, exit_code == 0
 
 
 def prologue(content: str) -> str:
-    return f'{OUTPUT_DIVIDER}\nRunMany Result: {content.strip()}\n{OUTPUT_DIVIDER}\n\n'
+    content = content.strip() or 'RunMany Result'
+    return f'{OUTPUT_DIVIDER}\n{content}\n{OUTPUT_DIVIDER}\n\n'
 
 
 def epilogue(total: int, successful: int) -> str:
@@ -431,7 +432,7 @@ def runmanyf(file: TextIO, many_file: PathLike, languages_json: JsonLike = None,
                     if languages_data.show_prologue:
                         print(prologue(run))
                 else:
-                    output, success = run.run(directory)
+                    output, stdout, success = run.run(directory)
                     print(output)
                     total += 1
                     if success:
@@ -454,13 +455,12 @@ def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: O
 
 
 if __name__ == '__main__':
-    if debugging():
-        runmany('sample.many', 'languages.json')
-        sys.exit()
-
-    parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
-    parser.add_argument('input', help='the .many file to be run')
-    parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')
-    parser.add_argument('-o', '--output', help='the file the output is redirected to', metavar='<file>')
-    args = parser.parse_args()
-    runmany(args.input, args.json, args.output)
+    if not debugging():
+        parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
+        parser.add_argument('input', help='the .many file to be run')
+        parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')
+        parser.add_argument('-o', '--output', help='the file the output is redirected to', metavar='<file>')
+        args = parser.parse_args()
+        runmany(args.input, args.json, args.output)
+    else:
+        runmany('helloworld.many', 'languages.json')

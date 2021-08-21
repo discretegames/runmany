@@ -1,35 +1,33 @@
-"Hello, World!" Programs
-
 ~~~| Python |~~~
 
-print('Hello, World!')
+print('Hello, Python!')
 
 ~~~| JavaScript |~~~
 
-console.log("Hello, World!")
+console.log("Hello, JavaScript!")
 
 ~~~| TypeScript |~~~
 
-console.log("Hello, World!")
+console.log("Hello, TypeScript!")
 
 ~~~| Java |~~~
 
 public class HelloWorld {
 	public static void main(String[] args) {
-        System.out.println("Hello, World!");
+        System.out.println("Hello, Java!");
     }
 }
 
 ~~~| Kotlin |~~~
 
 fun main() { 
-    println("Hello, World!")
+    println("Hello, Kotlin!")
 }
 
 ~~~| Rust |~~~
 
 fn main() {
-    println!("Hello, World!");
+    println!("Hello, Rust!");
 }
 
 ~~~| Go |~~~
@@ -39,7 +37,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("Hello, World!")
+	fmt.Println("Hello, Go!")
 }
 
 ~~~| C |~~~
@@ -47,7 +45,7 @@ func main() {
 #include <stdio.h>
 
 int main() {
-   printf("Hello, World!\n");
+   printf("Hello, C!\n");
    return 0;
 }
 
@@ -56,7 +54,7 @@ int main() {
 #include <iostream>
 
 int main() {
-    std::cout << "Hello, World!\n";
+    std::cout << "Hello, C++!\n";
     return 0;
 }
 
@@ -66,7 +64,7 @@ namespace Hello {
 	class HelloWorld {         
 		static void Main(string[] args)
 		{
-			System.Console.WriteLine("Hello, World!");
+			System.Console.WriteLine("Hello, C#!");
 		}
 	}
 }
