@@ -1,7 +1,6 @@
 import os
 import io
 import sys
-import abc
 import ast
 import json
 import enum
@@ -34,20 +33,20 @@ ALL_NAME_KEY, NAME_KEY, COMMAND_KEY, EXT_KEY = 'all_name', 'name', 'command', 'e
 STDERR_NZEC, STDERR_NEVER = ('nzec', None), ('never', False)
 
 
-class Placeholders(abc.ABC):
+class Placeholders:
     prefix = '$'
-    ARGV = '$argv'
+    ARGV = 'argv'
     # For file .../dir/file.ext the parts are:
-    RAWDIR = '$rawdir'        # .../dir
-    DIR = '$dir'              # ".../dir"
-    RAWFILE = '$rawfile'      # .../dir/file.ext
-    FILE = '$file'            # ".../dir/file.ext"
-    RAWBRANCH = '$rawbranch'  # .../dir/file
-    BRANCH = '$branch'        # ".../dir/file"
-    NAME = '$name'            # file.ext
-    STEM = '$stem'            # file
-    EXT = '$ext'              # .ext
-    SEP = '$sep'              # /
+    RAWDIR = 'rawdir'        # .../dir
+    DIR = 'dir'              # ".../dir"
+    RAWFILE = 'rawfile'      # .../dir/file.ext
+    FILE = 'file'            # ".../dir/file.ext"
+    RAWBRANCH = 'rawbranch'  # .../dir/file
+    BRANCH = 'branch'        # ".../dir/file"
+    NAME = 'name'            # file.ext
+    STEM = 'stem'            # file
+    EXT = 'ext'              # .ext
+    SEP = 'sep'              # /
 
 
 def debugging() -> bool:
@@ -257,16 +256,31 @@ class PathParts:
         def quote(s: str) -> str:
             return f'"{s}"'
         p = pathlib.PurePath(path)
-        self.rawdir = str(p.parent)
-        self.dir = quote(self.rawdir)
-        self.rawfile = str(p)
-        self.file = quote(self.rawfile)
-        self.rawbranch = str(p.with_suffix(''))
-        self.branch = quote(self.rawbranch)
-        self.name = p.name
-        self.stem = p.stem
-        self.ext = p.suffix
-        self.sep = os.sep
+        self.parts: Dict[str, str] = {}
+        self.parts[Placeholders.RAWDIR] = str(p.parent)
+        self.parts[Placeholders.DIR] = quote(self.parts[Placeholders.RAWDIR])
+        self.parts[Placeholders.RAWFILE] = str(p)
+        self.parts[Placeholders.FILE] = quote(self.parts[Placeholders.RAWFILE])
+        self.parts[Placeholders.RAWBRANCH] = str(p.with_suffix(''))
+        self.parts[Placeholders.BRANCH] = quote(self.parts[Placeholders.RAWBRANCH])
+        self.parts[Placeholders.NAME] = p.name
+        self.parts[Placeholders.STEM] = p.stem
+        self.parts[Placeholders.EXT] = p.suffix
+        self.parts[Placeholders.SEP] = os.sep
+
+    def fill_part(self, command: str, part: str, fill: str) -> str:
+        return command.replace(f'{Placeholders.prefix}{part}', fill)
+
+    def fill_command(self, command: str, argv: str) -> str:
+        if Placeholders.prefix not in command:
+            command += f' {self.parts[Placeholders.FILE]}'
+            if argv:
+                command += f' {argv}'
+        else:
+            for part, fill in self.parts.items():
+                command = self.fill_part(command, part, fill)
+            command = self.fill_part(command, Placeholders.ARGV, argv)
+        return command
 
 
 class Run:
@@ -276,32 +290,6 @@ class Run:
         self.argv_section = argv_section
         self.stdin_section = stdin_section
         self.language_data = language_data
-
-    def fill_command(self, code_file_name: str) -> str:
-        command = cast(str, self.language_data.command)
-        pp = PathParts(code_file_name)
-        argv = self.argv_section.content if self.argv_section else ''
-
-        if Placeholders.prefix not in command:  # Then assume we can tack on file and argv.
-            command += f' {pp.file}'
-            if argv:
-                command += f' {argv}'
-        else:
-            def replace(placeholder: str, replacement: str) -> None:
-                nonlocal command
-                command = command.replace(placeholder, replacement)
-            replace(Placeholders.RAWDIR, pp.rawdir)
-            replace(Placeholders.DIR, pp.dir)
-            replace(Placeholders.RAWFILE, pp.rawfile)
-            replace(Placeholders.FILE, pp.file)
-            replace(Placeholders.RAWBRANCH, pp.rawbranch)
-            replace(Placeholders.BRANCH, pp.branch)
-            replace(Placeholders.NAME, pp.name)
-            replace(Placeholders.STEM, pp.stem)
-            replace(Placeholders.EXT, pp.ext)
-            replace(Placeholders.SEP, pp.sep)
-            replace(Placeholders.ARGV, argv)
-        return command
 
     @ staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
@@ -346,8 +334,9 @@ class Run:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
-        command = self.fill_command(code_file_name)
+        argv = self.argv_section.content if self.argv_section else ''
         stdin = self.stdin_section.content if self.stdin_section else None
+        command = PathParts(code_file_name).fill_command(cast(str, self.language_data.command), argv)
 
         try:
             result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout,
@@ -475,4 +464,4 @@ if __name__ == '__main__':
         args = parser.parse_args()
         runmany(args.input, args.json, args.output)
     else:
-        runmany('helloworld.many', 'languages.json')
+        runmany('argv.many', 'languages.json')
