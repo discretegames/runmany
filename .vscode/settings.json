@@ -3,9 +3,10 @@
 	"python.linting.mypyEnabled": true,
 	"python.linting.mypyArgs": [
 		"--strict",
+		"--no-implicit-reexport"
 	],
 	"python.linting.pylintEnabled": false,
-	"python.pythonPath": ".\\venv3.8\\Scripts\\python.exe",
+	"python.pythonPath": "venv\\Scripts\\python.exe",
 	"cSpell.words": [
 		"nologo",
 		"rawbranch",
