@@ -12,8 +12,6 @@
 		"rawbranch",
 		"rawdir",
 		"rawfile",
-		"runmany",
-		"runmanyf",
 		"runmanys"
 	],
 	"files.exclude": {

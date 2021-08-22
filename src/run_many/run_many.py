@@ -122,7 +122,7 @@ class LanguagesData:
 
     def __init__(self, languages_json: JsonLike) -> None:
         self.data = self.json_to_class(self.get_json_string(languages_json))
-        with open(DEFAULT_LANGUAGES_JSON_FILE) as file:
+        with open(pathlib.Path(__file__).with_name(DEFAULT_LANGUAGES_JSON_FILE)) as file:
             self.default_data = self.json_to_class(file.read())
 
         self.dict: Dict[str, LanguageData] = {}
@@ -419,13 +419,14 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
                         yield Run(section, argv_section, stdin_section, languages_data[language])
 
 
-def runmanyf(file: TextIO, many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> None:
+def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: JsonLike = None,
+                 from_string: bool = False) -> None:
     with redirect_stdout(file):
         languages_data = LanguagesData(languages_json)
         total_runs, successful_runs = 0, 0
         equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
 
-        context_manager = io.StringIO(cast(str, many_file)) if string else open(many_file)
+        context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
         with context_manager as manyfile, TemporaryDirectory() as directory:
             for run in run_iterator(manyfile, languages_data):
                 if isinstance(run, str):
@@ -443,17 +444,17 @@ def runmanyf(file: TextIO, many_file: PathLike, languages_json: JsonLike = None,
                 print(epilogue(total_runs, successful_runs, equal_stdouts if languages_data.check_equal else None))
 
 
-def runmanys(many_file: PathLike, languages_json: JsonLike = None, string: bool = False) -> str:
+def runmany_to_s(many_file: Union[PathLike, str], languages_json: JsonLike = None, from_string: bool = False) -> str:
     file = io.StringIO()
-    runmanyf(file, many_file, languages_json, string)
+    runmany_to_f(file, many_file, languages_json, from_string)
     file.seek(0)
     return file.read()
 
 
-def runmany(many_file: PathLike, languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
-            string: bool = False) -> None:
+def runmany(many_file: Union[PathLike, str], languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
+            from_string: bool = False) -> None:
     with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as file:
-        runmanyf(file, many_file, languages_json, string)
+        runmany_to_f(file, many_file, languages_json, from_string)
 
 
 if __name__ == '__main__':
@@ -465,4 +466,5 @@ if __name__ == '__main__':
         args = parser.parse_args()
         runmany(args.input, args.json, args.output)
     else:
-        runmany('argv.many', 'languages.json')
+        example = 'helloworld'
+        runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('examples').joinpath(f'{example}.many'))
