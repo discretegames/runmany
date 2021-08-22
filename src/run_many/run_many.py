@@ -419,7 +419,7 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
                         yield Run(section, argv_section, stdin_section, languages_data[language])
 
 
-def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: JsonLike = None,
+def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: JsonLike = None, *,
                  from_string: bool = False) -> None:
     with redirect_stdout(file):
         languages_data = LanguagesData(languages_json)
@@ -444,17 +444,17 @@ def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: 
                 print(epilogue(total_runs, successful_runs, equal_stdouts if languages_data.check_equal else None))
 
 
-def runmany_to_s(many_file: Union[PathLike, str], languages_json: JsonLike = None, from_string: bool = False) -> str:
+def runmany_to_s(many_file: Union[PathLike, str], languages_json: JsonLike = None, *, from_string: bool = False) -> str:
     file = io.StringIO()
-    runmany_to_f(file, many_file, languages_json, from_string)
+    runmany_to_f(file, many_file, languages_json, from_string=from_string)
     file.seek(0)
     return file.read()
 
 
-def runmany(many_file: Union[PathLike, str], languages_json: JsonLike = None, output_file: Optional[PathLike] = None,
+def runmany(many_file: Union[PathLike, str], languages_json: JsonLike = None, output_file: Optional[PathLike] = None, *,
             from_string: bool = False) -> None:
     with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as file:
-        runmany_to_f(file, many_file, languages_json, from_string)
+        runmany_to_f(file, many_file, languages_json, from_string=from_string)
 
 
 if __name__ == '__main__':
