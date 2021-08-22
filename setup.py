@@ -1,7 +1,7 @@
 from os import path
 from setuptools import setup, find_packages
 
-version = "0.0.7"
+version = "0.0.8"
 
 directory = path.abspath(path.dirname(__file__))
 with open(path.join(directory, 'README.md'), encoding='utf-8') as file:
@@ -18,6 +18,7 @@ setup(
     url='https://github.com/discretegames/runmany',
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    package_data={'run_many': ['default_languages.json']},
     license="MIT",
     keywords=['python', 'data structure', 'algorithm', 'dsa'],
     project_urls={"GitHub": "https://github.com/discretegames/runmany",
