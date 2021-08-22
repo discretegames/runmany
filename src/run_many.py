@@ -13,6 +13,7 @@ from contextlib import nullcontext, redirect_stdout
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, List, Dict, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
 
+
 display_errors = True  # The only mutating global.
 
 PathLike = Union[str, bytes, 'os.PathLike[Any]']
