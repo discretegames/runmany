@@ -1,14 +1,14 @@
 from os import path
 from setuptools import setup, find_packages
 
-version = "0.0.1"
+version = "0.0.2"
 
 directory = path.abspath(path.dirname(__file__))
 with open(path.join(directory, 'README.md'), encoding='utf-8') as file:
     long_description = file.read()
 
 setup(
-    name='runmany',
+    name='run_many',
     version=version,
     author='discretegames',
     author_email='discretizedgames@gmail.com',
