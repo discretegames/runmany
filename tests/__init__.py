@@ -1,1 +1,0 @@
-"""RunMany tests package."""

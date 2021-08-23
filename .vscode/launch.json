@@ -13,6 +13,13 @@
 			"env": {
 				"DEBUG_RUNMANY": "True"
 			}
-		}
+		},
+		{
+			"name": "Debug Tox Tests",
+			"type": "python",
+			"request": "launch",
+			"program": "${workspaceFolder}/debugtox.py",
+			"console": "integratedTerminal"
+		},
 	]
 }
