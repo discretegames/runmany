@@ -1,11 +1,30 @@
 # RunMany
 
-Tool to run many programs written in many languages from one file.
+A tool to run many programs written in many languages from one file.
 
-Readme is just a todo list for now.
+```console
+pip install run-many
+```
+
+then
+
+```console
+runmany myfile.many
+```
+
+or, in Python
+
+```py
+from run_many import runmany
+runmany('myfile.many')
+```  
+
+See [the examples](https://github.com/discretegames/runmany/tree/main/examples) for some file to try.
+
+This readme is mostly a todo list for now.
 
 ## TODO
 
-- Automated testing with tox
-- Docstrings.
+- Readme with examples, .many syntax spec, etc.
+- Automated testing with tox and pytest.
 - A vscode plugin for syntax highlighting and running .many files?

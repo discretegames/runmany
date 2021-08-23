@@ -1,6 +1,6 @@
 {
 	"all_name": "All",
-	"check_equal": false,
+	"check_equal": true,
 	"languages": [],
 	"timeout": 10.0,
 	"stderr": "nzec",

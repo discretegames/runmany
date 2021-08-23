@@ -1,3 +1,5 @@
+"""The core code of the Python 3 run-many package: https://pypi.org/project/run-many/"""
+
 import os
 import io
 import sys
@@ -51,7 +53,7 @@ class Placeholders:
 
 
 def debugging() -> bool:
-    return DEBUG_ENV_VAR in os.environ and bool(ast.literal_eval(os.environ[DEBUG_ENV_VAR]))
+    return os.environ.get(DEBUG_ENV_VAR) == 'True'
 
 
 def print_err(message: str) -> None:
@@ -421,6 +423,16 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
 
 def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: JsonLike = None, *,
                  from_string: bool = False) -> None:
+    """Runs `many_file` with the settings from `languages_json`, writing the results to the open file object `file`.
+
+    Args:
+        - `file` (TextIO): The opened file object to write the run results to.
+        - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
+        - `languages_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
+Undefined settings fallback to [default_languages.json](https://git.io/JEmzM).
+        - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
+Defaults to False.
+    """
     with redirect_stdout(file):
         languages_data = LanguagesData(languages_json)
         total_runs, successful_runs = 0, 0
@@ -445,6 +457,18 @@ def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: 
 
 
 def runmany_to_s(many_file: Union[PathLike, str], languages_json: JsonLike = None, *, from_string: bool = False) -> str:
+    """Runs `many_file` with the settings from `languages_json`, returning the results as a string.
+
+    Args:
+        - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
+        - `languages_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
+Undefined settings fallback to [default_languages.json](https://git.io/JEmzM).
+        - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
+Defaults to False.
+
+    Returns:
+        str: The results of the run that would normally appear on stdout.
+    """
     file = io.StringIO()
     runmany_to_f(file, many_file, languages_json, from_string=from_string)
     file.seek(0)
@@ -453,18 +477,33 @@ def runmany_to_s(many_file: Union[PathLike, str], languages_json: JsonLike = Non
 
 def runmany(many_file: Union[PathLike, str], languages_json: JsonLike = None, output_file: Optional[PathLike] = None, *,
             from_string: bool = False) -> None:
+    """Runs `many_file` with the settings from `languages_json`, outputting the results to `output_file` or stdout.
+
+    Args:
+        - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
+        - `languages_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
+Undefined settings fallback to[default_languages.json](https: // git.io/JEmzM).
+        - `output_file` (optional None | PathLike): The path to the file to send output to, or None for stdout. \
+Defaults to None.
+        - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
+Defaults to False.
+    """
     with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as file:
         runmany_to_f(file, many_file, languages_json, from_string=from_string)
 
 
+def main() -> None:
+    parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
+    parser.add_argument('input', help='the .many file to run')
+    parser.add_argument('-j', '--json', help='the languages .json settings file to use', metavar='<file>')
+    parser.add_argument('-o', '--output', help='the file output is redirected to', metavar='<file>')
+    args = parser.parse_args()
+    runmany(args.input, args.json, args.output)
+
+
 if __name__ == '__main__':
     if not debugging():
-        parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
-        parser.add_argument('input', help='the .many file to be run')
-        parser.add_argument('-j', '--json', help='the languages .json file to use', metavar='<file>')
-        parser.add_argument('-o', '--output', help='the file the output is redirected to', metavar='<file>')
-        args = parser.parse_args()
-        runmany(args.input, args.json, args.output)
+        main()
     else:
         example = 'helloworld'
         runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('examples').joinpath(f'{example}.many'))
