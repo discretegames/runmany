@@ -23,6 +23,7 @@
 		"**/__pycache__/": true,
 		"**/*.egg-info/": true,
 		".eggs/": true,
-		".tox/": false
+		".tox/": true,
+		"htmlcov/": true
 	}
 }

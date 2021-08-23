@@ -11,10 +11,9 @@ import pathlib
 import argparse
 import subprocess
 from collections import defaultdict
-from contextlib import nullcontext, redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, List, Dict, DefaultDict, Tuple, Union, Optional, TextIO, Iterator, cast
-
 
 display_errors = True  # The only mutating global.
 
@@ -54,6 +53,12 @@ class Placeholders:
 
 def debugging() -> bool:
     return os.environ.get(DEBUG_ENV_VAR) == 'True'
+
+
+@contextmanager
+def nullcontext(file: TextIO) -> Iterator[TextIO]:
+    """Takes the place of contextlib.nullcontext which is not present in Python 3.6."""
+    yield file
 
 
 def print_err(message: str) -> None:
@@ -344,6 +349,7 @@ class Run:
         try:
             result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout,
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
+            # todo 3.6 has no text=, use encoding instead?
             stdout = result.stdout
             exit_code: Union[int, str] = result.returncode
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
@@ -488,7 +494,7 @@ Defaults to None.
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
     """
-    with nullcontext(sys.stdout) if output_file is None else open(output_file, 'w') as file:
+    with cast(TextIO, nullcontext(sys.stdout)) if output_file is None else open(output_file, 'w') as file:
         runmany_to_f(file, many_file, languages_json, from_string=from_string)
 
 
@@ -505,5 +511,5 @@ if __name__ == '__main__':
     if not debugging():
         main()
     else:
-        example = 'helloworld'
+        example = 'argv'
         runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('examples').joinpath(f'{example}.many'))

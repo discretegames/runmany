@@ -1,0 +1,81 @@
+@@@| All |@@@
+foobar
+
+~~~| Python |~~~
+
+import sys
+print(sys.argv[1])
+
+~~~| JavaScript |~~~
+
+console.log(process.argv[2])
+
+~~~| TypeScript |~~~
+
+console.log(Deno.args[0])
+
+
+~~~| Java |~~~
+
+public class HelloWorld {
+	public static void main(String[] args) {
+        System.out.println(args[0]);
+    }
+}
+
+
+~~~| Kotlin |~~~
+
+fun main(args: Array<String>) { 
+    println(args[0])
+}
+
+~~~| Rust |~~~
+
+use std::env;
+
+fn main() {
+	let args: Vec<String> = env::args().collect();
+    println!("{}", &args[1]);
+}
+
+~~~| Go |~~~
+
+package main
+
+import "fmt"
+import "os"
+
+func main() {
+	fmt.Println(os.Args[1])
+}
+
+~~~| C |~~~
+
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+   printf("%s\n", argv[1]);
+   return 0;
+}
+
+~~~| C++ |~~~
+
+using namespace std;
+#include <iostream>
+
+int main(int argc, char *argv[]) {
+    cout << argv[1] << endl;
+    return 0;
+}
+
+~~~| C# |~~~
+
+namespace Hello {
+	class HelloWorld {         
+		static void Main(string[] args)
+		{
+			System.Console.WriteLine(args[0]);
+		}
+	}
+}

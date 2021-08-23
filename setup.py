@@ -3,7 +3,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-version = "0.1.0"
+version = "0.1.1"
 
 with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
     long_description = file.read()
@@ -17,8 +17,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/discretegames/runmany',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    packages=['run_many'],
     package_data={'run_many': ['default_languages.json']},
     license="MIT",
     keywords=['run', 'execute', 'other languages', 'multiple languages', 'manyfile',

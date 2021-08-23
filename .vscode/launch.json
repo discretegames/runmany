@@ -18,7 +18,7 @@
 			"name": "Debug Tox Tests",
 			"type": "python",
 			"request": "launch",
-			"program": "${workspaceFolder}/debugtox.py",
+			"program": "${workspaceFolder}/runtoxdebug.py",
 			"console": "integratedTerminal"
 		},
 	]
