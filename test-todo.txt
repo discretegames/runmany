@@ -1,0 +1,74 @@
+Testing todo:
+
+- near 100% coverage of run_many.py
+
+- ways to run
+	- command line
+		- input file only
+		- with json
+		- with output
+	- runmany
+		- from file
+		- from string
+		- to stdout
+		- to file
+		- with default json
+		- with custom json
+	- runmany_to_s
+		- from file
+		- from string
+		- with default json
+		- with custom json
+	- runmany_to_f
+		- from file
+		- from string
+		- with default json
+		- with custom json
+	- with pathlib path
+	- with str path
+	- with custom path-like that defines __fspath__?
+	- with bytes path?
+
+- core functionality
+	- all name expands
+	- multiple languages in header
+	- argv list
+	- stdin list
+	- argv overwriting
+	- stdin overwriting
+	- comment !!!|
+	- exit %%%|
+	- malformed .many " ~~~|..." fails
+
+
+- all errors (pair with show_errors?)
+	- no NAME_KEY
+	- can't match all_name
+	- no COMMAND_KEY
+	- language in header not found
+	- no matching lead section
+
+
+- all json settings (with defaulting)
+	- all_name
+	- check_equal
+	- timeout
+	- languages overrides
+	- language custom settings
+	- stderr 3 options
+	- show_prologue
+	- show_command
+	- show_code
+	- show_argv
+	- show_stdin
+	- show_output
+	- show_errors (need to redirect stderr?)
+	- show_epilogue
+	- default_languages override? (not really in spec)
+
+
+- all examples
+	- argv.many
+	- hellolanguage.many
+	- helloworld.many
+	- sample.many (rename?)

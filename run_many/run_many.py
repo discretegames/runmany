@@ -174,17 +174,17 @@ class SectionType(enum.Enum):
 
 
 class Section:
-    @ staticmethod
+    @staticmethod
     def line_is_exit(line: str) -> bool:
         return line.rstrip() == EXIT_SEP
 
-    @ staticmethod
+    @staticmethod
     def line_is_comment(line: str) -> bool:
         line = line.rstrip()
         return removeprefix(line, COMMENT_PREFIX) == EXIT_SEP or \
             line.startswith(COMMENT_START) and line.endswith(COMMENT_END)
 
-    @ staticmethod
+    @staticmethod
     def line_is_header(line: str) -> bool:
         line = removeprefix(line.rstrip(), COMMENT_PREFIX)
         starts = CODE_START, ARGV_START, STDIN_START
@@ -192,7 +192,7 @@ class Section:
         seps = CODE_SEP, ARGV_SEP, STDIN_SEP
         return line in seps or any(line.startswith(s) and line.endswith(e) for s, e in zip(starts, ends))
 
-    @ staticmethod
+    @staticmethod
     def get_type_start_end(header: str) -> Tuple[SectionType, str, str]:
         if header == ARGV_SEP or header.startswith(ARGV_START):
             return SectionType.ARGV, ARGV_START, ARGV_END
@@ -201,7 +201,7 @@ class Section:
         else:
             return SectionType.CODE, CODE_START, CODE_END
 
-    @ staticmethod
+    @staticmethod
     def strip_content(content: str, section_type: SectionType) -> str:
         if section_type is SectionType.ARGV:
             return content.strip('\r\n')  # Always strip argv.
@@ -299,7 +299,7 @@ class Run:
         self.stdin_section = stdin_section
         self.language_data = language_data
 
-    @ staticmethod
+    @staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
         content = ''
         if section:
