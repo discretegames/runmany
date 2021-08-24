@@ -1,15 +1,8 @@
-Ways to run tests on Windows dev machine:
-- F5 in vsc with "Debug Tox Tests" configuration
-- py runtox.py
-- py runcoverage.py
-- py -m pytest
-- py -m pytest -m "not slow"
-
 Testing todo:
 
 - near 100% coverage of run_many.py
 
-- ways to run @pytest.mark.parametrize(argnames, argvalues)
+- ways to run
 	- command line
 		- input file only
 		- with json
@@ -75,10 +68,6 @@ Testing todo:
 	- show_epilogue
 	- default_languages override? (not really in spec)
 
-
-THINGS BELOW HERE DONE
-
-- only 3 imports work
 
 - all examples
 	- argv.many

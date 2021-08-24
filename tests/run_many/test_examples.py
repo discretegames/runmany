@@ -1,5 +1,4 @@
-"""Verifies .many files in /examples folder work."""
-
+import pytest
 from run_many import runmany_to_s
 
 
@@ -11,6 +10,7 @@ def verify_example(filestem: str) -> None:
     assert actual == expected
 
 
+@pytest.mark.slow
 def test_examples() -> None:
     examples = 'argv hellolanguage helloworld polyglot sample'
     for filestem in examples.split():
