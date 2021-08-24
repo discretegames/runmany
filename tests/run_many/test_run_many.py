@@ -1,14 +1,19 @@
 """Test module for run_many package."""
-
+import pathlib
 from run_many import runmany_to_s
+
+
+import os
+with open(r'C:\Users\r\Desktop\RunMany\FILE.txt', 'w') as f:
+    f.write(__file__ + '\n')
+    f.write(os.getcwd())
+
 
 # Ways to run on Windows dev machine:
 # F5 in vsc with "Debug Tox Tests" configuration
 # py runtox.py
 # pu runcoverage.py
 # py -m pytest
-
-import pathlib
 
 
 def get_file(name: str) -> pathlib.Path:

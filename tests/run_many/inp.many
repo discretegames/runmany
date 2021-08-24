@@ -30,15 +30,6 @@ fun main(args: Array<String>) {
     println(args[0])
 }
 
-~~~| Rust |~~~
-
-use std::env;
-
-fn main() {
-	let args: Vec<String> = env::args().collect();
-    println!("{}", &args[1]);
-}
-
 ~~~| Go |~~~
 
 package main
@@ -48,6 +39,15 @@ import "os"
 
 func main() {
 	fmt.Println(os.Args[1])
+}
+
+~~~| Rust |~~~
+
+use std::env;
+
+fn main() {
+	let args: Vec<String> = env::args().collect();
+    println!("{}", &args[1]);
 }
 
 ~~~| C |~~~

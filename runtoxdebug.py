@@ -3,9 +3,14 @@
 # F5 in VSCode with "Debug Tox Tests" configuration
 
 import tox
+
+# options = []
+# options = ['-q']
+options = ['-q', '-e', 'py39']
+
 print('Debugging Tox Tests...')
 try:
-    tox.cmdline(['-q'])
+    tox.cmdline(options)
 except SystemExit:
     pass
 print('TOX DEBUG DONE')

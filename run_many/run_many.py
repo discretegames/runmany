@@ -349,7 +349,7 @@ class Run:
         try:
             result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout,
                                     shell=True, text=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
-            # todo 3.6 has no text=, use encoding instead?
+                                    # todo 3.6 has no text=, use encoding instead?
             stdout = result.stdout
             exit_code: Union[int, str] = result.returncode
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
