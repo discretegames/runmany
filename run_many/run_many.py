@@ -477,10 +477,10 @@ Defaults to False.
     Returns:
         str: The results of the run that would normally appear on stdout.
     """
-    file = io.StringIO()
-    runmany_to_f(file, many_file, languages_json, from_string=from_string)
-    file.seek(0)
-    return file.read()
+    with io.StringIO() as file:
+        runmany_to_f(file, many_file, languages_json, from_string=from_string)
+        file.seek(0)
+        return file.read()
 
 
 def runmany(many_file: Union[PathLike, str], languages_json: JsonLike = None, output_file: Optional[PathLike] = None, *,
@@ -500,18 +500,24 @@ Defaults to False.
         runmany_to_f(file, many_file, languages_json, from_string=from_string)
 
 
-def main() -> None:
+def cmdline(argv: List[str]) -> None:
+    """The command line parser for run_many. Normally called via "runmany <argv>" from terminal. \
+Can alternatively be called from code.
+
+    Args:
+        - `argv` (List[str]): The space separated args that would normally be given on the command line.
+    """
     parser = argparse.ArgumentParser(prog='runmany', description='Run a .many file.')
     parser.add_argument('input', help='the .many file to run')
     parser.add_argument('-j', '--json', help='the languages .json settings file to use', metavar='<file>')
     parser.add_argument('-o', '--output', help='the file output is redirected to', metavar='<file>')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     runmany(args.input, args.json, args.output)
 
 
 if __name__ == '__main__':
     if not debugging():
-        main()
+        cmdline(sys.argv[1:])
     else:
         example = 'argv'
         runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('examples').joinpath(f'{example}.many'))

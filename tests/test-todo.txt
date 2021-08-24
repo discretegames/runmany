@@ -1,41 +1,13 @@
 Ways to run tests on Windows dev machine:
-- F5 in vsc with "Debug Tox Tests" configuration
-- py runtox.py
-- py runcoverage.py
-- py -m pytest
-- py -m pytest -m "not slow"
+F5 in vsc with "Debug Tox Tests" configuration
+py runtox.py
+py runcoverage.py
+py -m pytest [-q for quiet] [-v or -vv for verbose level]
+py -m pytest -m "not slow"
 
 Testing todo:
 
 - near 100% coverage of run_many.py
-
-- ways to run @pytest.mark.parametrize(argnames, argvalues)
-	- command line
-		- input file only
-		- with json
-		- with output
-	- runmany
-		- from file
-		- from string
-		- to stdout
-		- to file
-		- with default json
-		- with custom json, raw or file
-	- runmany_to_s
-		- from file
-		- from string
-		- with default json
-		- with custom json, raw or file
-	- runmany_to_f
-		- from file
-		- from string
-		- with default json
-		- with custom json, raw or file
-	- with pathlib path
-	- with str path
-	- with custom path-like that defines __fspath__?
-	- with bytes path?
-
 
 - core functionality
 	- all name expands
@@ -85,3 +57,30 @@ THINGS BELOW HERE DONE
 	- hellolanguage.many
 	- helloworld.many
 	- sample.many (rename?)
+
+- ways to run @pytest.mark.parametrize(argnames, argvalues)
+	- command line
+		- input file only
+		- with json
+		- with output
+	- runmany
+		- from file
+		- from string
+		- to stdout
+		- to file
+		- with default json
+		- with custom json, raw or file
+	- runmany_to_s
+		- from file
+		- from string
+		- with default json
+		- with custom json, raw or file
+	- runmany_to_f
+		- from file
+		- from string
+		- with default json
+		- with custom json, raw or file
+	- with pathlib path
+	- with str path
+	- with custom path-like that defines __fspath__?
+	- with bytes path?
