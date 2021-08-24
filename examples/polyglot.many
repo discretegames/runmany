@@ -1,0 +1,6 @@
+Code snippet that runs identically in Python and JavaScript.
+
+~~~| Python | JavaScript |~~~
+
+1//1; console = {'log': print}
+console['log']('This program runs in both Python and JS!')

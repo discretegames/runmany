@@ -8,12 +8,15 @@
 	"python.linting.pylintEnabled": false,
 	"python.pythonPath": "venv\\Scripts\\python.exe",
 	"cSpell.words": [
+		"htmlcov",
 		"nologo",
 		"rawbranch",
 		"rawdir",
 		"rawfile",
+		"runcoverage",
 		"runmany",
-		"runmanys"
+		"runmanys",
+		"runtox"
 	],
 	"files.exclude": {
 		".coverage": true,

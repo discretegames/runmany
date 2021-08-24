@@ -1,7 +1,7 @@
 Python and C++ programs that output the product of the ints on stdin and argv.
 
-!!!| argvs ("All" matches all languages, so just Python and C++ in this case) |!!!
-@@@| All |@@@
+!!!| List of argvs separated by @@@|@@@ to give each language|!!!
+@@@| Python | C++ |@@@
 2
 @@@|@@@
 3
@@ -9,12 +9,11 @@ Python and C++ programs that output the product of the ints on stdin and argv.
 4
 
 
-!!!| stdins |!!!
-$$$| All |$$$
+!!!| List of stdins separated by $$$|$$$ to give each language|!!!
+$$$| Python | C++ |$$$
 10
 $$$|$$$
 100
-
 
 
 ~~~| Python |~~~
@@ -32,8 +31,9 @@ using namespace std;
 #include <iostream>
 
 int main(int argc, char *argv[]) {
+	int a = stoi(argv[1]);
     int s;
     cin >> s;
-    cout << s * stoi(argv[1]) << endl;
+    cout << s * a << endl;
     return 0;
 }

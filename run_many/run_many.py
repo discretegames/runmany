@@ -63,7 +63,7 @@ def nullcontext(file: TextIO) -> Iterator[TextIO]:
 
 def print_err(message: str) -> None:
     if display_errors:
-        print(f"***| RunMany Error: {message} |***", file=sys.stderr)
+        print(f"***| Run Many Error: {message} |***", file=sys.stderr)
 
 
 def removeprefix(string: str, prefix: str) -> str:
@@ -363,8 +363,10 @@ class Run:
 
 
 def prologue(content: str) -> str:
-    content = content.strip() or 'RunMany Result'
-    return f'{OUTPUT_DIVIDER}\n{content}\n{OUTPUT_DIVIDER}\n\n'
+    content = content.strip()
+    if content:
+        content = '\n' + content
+    return f'{OUTPUT_DIVIDER}\nRun Many Result{content}\n{OUTPUT_DIVIDER}\n\n'
 
 
 def epilogue(total_runs: int, successful_runs: int, equal_stdouts: Optional[DefaultDict[str, List[int]]]) -> str:

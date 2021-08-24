@@ -1,3 +1,5 @@
+"Hello, <language>!" programs in 10 different programming languages.
+
 ~~~| Python |~~~
 
 print('Hello, Python!')
