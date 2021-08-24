@@ -347,9 +347,9 @@ class Run:
         command = PathParts(code_file_name).fill_command(cast(str, self.language_data.command), argv)
 
         try:
-            result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout,
-                                    shell=True, text=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
-                                    # todo 3.6 has no text=, use encoding instead?
+            # Using universal_newlines=True instead of text=True here for backwards compatability with Python 3.6.
+            result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout, shell=True,
+                                    universal_newlines=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
             stdout = result.stdout
             exit_code: Union[int, str] = result.returncode
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
