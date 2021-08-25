@@ -42,6 +42,7 @@ def parametrize():
     return pytest.mark.parametrize('many_file,languages_json,from_string,expected', build_cases())
 
 
+@pytest.mark.slow
 @parametrize()
 def test_runmany(many_file, languages_json, from_string, expected):
     from run_many import runmany

@@ -14,19 +14,12 @@ Testing todo:
 	- multiple languages in header
 	- argv list
 	- stdin list
+	- code list
 	- argv overwriting
 	- stdin overwriting
 	- comment !!!|
 	- exit %%%|
 	- malformed .many " ~~~|..." fails
-
-
-- all errors (pair with show_errors?)
-	- no NAME_KEY
-	- can't match all_name
-	- no COMMAND_KEY
-	- language in header not found
-	- no matching lead section
 	- timeout
 
 
@@ -84,3 +77,10 @@ THINGS BELOW HERE DONE
 	- with str path
 	- with custom path-like that defines __fspath__?
 	- with bytes path?
+
+- all errors
+	- no NAME_KEY
+	- can't match all_name
+	- no COMMAND_KEY
+	- language in header not found
+	- no matching lead section
