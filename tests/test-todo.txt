@@ -18,9 +18,9 @@ Testing todo:
 	- argv overwriting
 	- stdin overwriting
 	- comment !!!|
+	- ! comments
 	- exit %%%|
 	- malformed .many " ~~~|..." fails
-	- timeout
 
 
 - all json settings (with defaulting)
@@ -38,7 +38,6 @@ Testing todo:
 	- show_output
 	- show_errors (need to redirect stderr?)
 	- show_epilogue
-	- default_languages override? (not really in spec)
 
 
 THINGS BELOW HERE DONE
