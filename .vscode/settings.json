@@ -16,6 +16,7 @@
 		"runcoverage",
 		"runmany",
 		"runmanys",
+		"runpytest",
 		"runtox"
 	],
 	"files.exclude": {

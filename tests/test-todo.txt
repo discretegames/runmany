@@ -24,21 +24,10 @@ Testing todo:
 
 
 - all json settings (with defaulting)
-	- all_name
-	- check_equal
 	- timeout
 	- languages overrides
 	- language custom settings
 	- stderr 3 options
-	- show_prologue
-	- show_command
-	- show_code
-	- show_argv
-	- show_stdin
-	- show_output
-	- show_errors (need to redirect stderr?)
-	- show_epilogue
-
 
 THINGS BELOW HERE DONE
 
@@ -83,3 +72,15 @@ THINGS BELOW HERE DONE
 	- no COMMAND_KEY
 	- language in header not found
 	- no matching lead section
+
+- all json settings (with defaulting)
+	- all_name
+	- check_equal
+	- show_prologue
+	- show_command
+	- show_code
+	- show_argv
+	- show_stdin
+	- show_output
+	- show_errors (need to redirect stderr?)
+	- show_epilogue

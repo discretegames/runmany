@@ -131,6 +131,8 @@ class LanguagesData:
         self.data = self.json_to_class(self.get_json_string(languages_json))
         with open(pathlib.Path(__file__).with_name(DEFAULT_LANGUAGES_JSON_FILE)) as file:
             self.default_data = self.json_to_class(file.read())
+        global display_errors
+        display_errors = self.show_errors
 
         self.dict: Dict[str, LanguageData] = {}
         for language_obj in self.default_languages:
@@ -457,7 +459,8 @@ Defaults to False.
                     output, stdout, success = run.run(directory, run_number)
                     total_runs += 1
                     successful_runs += success
-                    print(output)
+                    if languages_data.show_runs:
+                        print(output)
                     if languages_data.check_equal:
                         equal_stdouts[stdout].append(run_number)
             if languages_data.show_epilogue:
