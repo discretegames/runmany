@@ -8,6 +8,7 @@ from run_many import runmany_to_s
 default_json = {
     "all_name": "All",
     "check_equal": False,
+    "languages": [],
     "timeout": 10.0,
     "stderr": False,
     "show_prologue": False,
@@ -43,11 +44,11 @@ def verify_output(languages_json: Dict[str, Any], output_file: str, many_file_co
     with open(path_to(output_file)) as file:
         expected = file.read()
         actual = runmany_to_s(many_file_contents, combine_jsons(languages_json), from_string=True)
+        print(actual)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
 def test_all_name() -> None:
-    languages_json = {"all_name": " every language ", "show_runs": True, "show_output": True}
     many_file = '''\
 $$$| Every Language |$$$
 abc
@@ -55,6 +56,7 @@ abc
 print(input())
 ~~~| Python 2 |~~~
 print raw_input()'''
+    languages_json = {"all_name": " every language ", "show_runs": True, "show_output": True}
     verify_output(languages_json, 'all_name.txt', many_file)
 
 
@@ -64,15 +66,26 @@ def test_check_equal() -> None:
 
 
 def test_languages() -> None:
-    assert 0
+    many_file = '''\
+~~~| Python |~~~
+print(3)
+~~~| Python 2 |~~~
+print 2
+'''
+    languages_json = {"show_runs": True, "languages": [{"name": "Python", "show_code": True}]}
+    verify_output(languages_json, 'languages1.txt', many_file)
+
+    languages_json = {"show_runs": True, "show_output": True,
+                      "languages": [{"name": "Python", "command": "echo $echoed"}]}
+    verify_output(languages_json, 'languages2.txt', many_file)
 
 
-def test_timeout() -> None:
-    assert 0
+# def test_timeout() -> None:
+#     assert 0
 
 
-def test_stderr() -> None:
-    assert 0
+# def test_stderr() -> None:
+#     assert 0
 
 
 def test_show_prologue() -> None:
