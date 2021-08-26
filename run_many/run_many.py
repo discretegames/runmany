@@ -440,7 +440,7 @@ def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: J
         - `file` (TextIO): The opened file object to write the run results to.
         - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
         - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_settings.json](TODO).
+Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
     """
@@ -474,7 +474,7 @@ def runmany_to_s(many_file: Union[PathLike, str], settings_json: JsonLike = None
     Args:
         - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
         - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_settings.json](TODO).
+Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
 
@@ -494,7 +494,7 @@ def runmany(many_file: Union[PathLike, str], settings_json: JsonLike = None, out
     Args:
         - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
         - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to[default_settings.json](TODO).
+Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
         - `output_file` (optional None | PathLike): The path to the file to send output to, or None for stdout. \
 Defaults to None.
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
