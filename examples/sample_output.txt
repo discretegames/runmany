@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------
-Run Many Result
+RunMany Result
 Python and C++ programs that output the product of the ints on stdin and argv.
 ------------------------------------------------------------------------------------------
 
