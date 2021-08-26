@@ -307,7 +307,7 @@ class Run:
         if section:
             name += f' at line {section.line_number + 1}'
             content = '\n' + section.content.strip('\r\n')
-        return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}'
+        return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}\n'
 
     def output(self, command: str, stdout: str, exit_code: Union[int, str], run_number: int) -> str:
         parts = []
@@ -317,26 +317,20 @@ class Run:
             header += f' [exit code {exit_code}]'
         if self.language_data.show_command:
             header += f' > {command}'
-        parts.append(header)
+        parts.append(header + '\n')
 
-        newline = False
         if self.language_data.show_code:
             parts.append(self.output_section('code', self.code_section))
-            newline = True
         if self.argv_section and self.language_data.show_argv:
             parts.append(self.output_section('argv', self.argv_section))
-            newline = True
         if self.stdin_section and self.language_data.show_stdin:
             parts.append(self.output_section('stdin', self.stdin_section))
-            newline = True
         if self.language_data.show_output:
             parts.append(self.output_section('output'))
-            parts.append(stdout + '\n')
-            newline = False
-        if newline:
-            parts[-1] += '\n\n'  # todo fix this mess
+            parts.append(stdout)
+        parts.append('\n')
 
-        return '\n'.join(parts)
+        return ''.join(parts)
 
     def get_stderr(self) -> int:
         if self.language_data.stderr in STDERR_NZEC:
