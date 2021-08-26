@@ -10,24 +10,14 @@ Testing todo:
 - near 100% coverage of run_many.py
 
 - core functionality
-	- all name expands
-	- multiple languages in header
 	- argv list
 	- stdin list
-	- code list
 	- argv overwriting
 	- stdin overwriting
-	- comment !!!|
+	- comment ^^^|
 	- ! comments
-	- exit %%%|
+	- exit ^^^|^^^
 	- malformed .many " ~~~|..." fails
-
-
-- all json settings (with defaulting)
-	- timeout
-	- languages overrides
-	- language custom settings
-	- stderr 3 options
 
 THINGS BELOW HERE DONE
 
@@ -75,6 +65,10 @@ THINGS BELOW HERE DONE
 
 - all json settings (with defaulting)
 	- all_name
+	- timeout
+	- languages overrides
+	- language custom settings
+	- stderr 3 options
 	- check_equal
 	- show_prologue
 	- show_command
@@ -84,3 +78,8 @@ THINGS BELOW HERE DONE
 	- show_output
 	- show_errors (need to redirect stderr?)
 	- show_epilogue
+
+- syntax
+	- all name expands
+	- multiple languages in header
+	- code list

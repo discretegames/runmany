@@ -1,6 +1,6 @@
 Python and C++ programs that output the product of the ints on stdin and argv.
 
-!!!| List of argvs separated by @@@|@@@ to give each language|!!!
+%%%| List of argvs separated by @@@|@@@ to give each language |%%%
 @@@| Python | C++ |@@@
 2
 @@@|@@@
@@ -9,7 +9,7 @@ Python and C++ programs that output the product of the ints on stdin and argv.
 4
 
 
-!!!| List of stdins separated by $$$|$$$ to give each language|!!!
+%%%| List of stdins separated by $$$|$$$ to give each language |%%%
 $$$| Python | C++ |$$$
 10
 $$$|$$$

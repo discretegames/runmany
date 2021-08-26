@@ -26,6 +26,4 @@ This readme is mostly a todo list for now.
 ## TODO
 
 - Readme with examples, .many syntax spec, etc.
-- Automated testing with tox and pytest.
-
 - A vscode plugin for syntax highlighting and running .many files?

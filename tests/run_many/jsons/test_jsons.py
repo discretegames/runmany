@@ -10,7 +10,7 @@ default_json = {
     "check_equal": False,
     "languages": [],
     "timeout": 10.0,
-    "stderr": False,
+    "stderr": None,
     "show_prologue": False,
     "show_runs": False,
     "show_command": False,
@@ -88,7 +88,7 @@ time.sleep(0.1)
 '''
     languages_json = {"show_runs": True, "show_output": True, "timeout": 0.09}
     verify_output(languages_json, 'timeout1.txt', many_file)
-    languages_json = {"show_runs": True, "show_output": True, "timeout": 0.15}
+    languages_json = {"show_runs": True, "show_output": True, "timeout": 0.5}
     verify_output(languages_json, 'timeout2.txt', many_file)
 
 

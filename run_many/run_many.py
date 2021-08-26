@@ -24,7 +24,7 @@ DEBUG_ENV_VAR = 'DEBUG_RUNMANY'
 CODE_START, ARGV_START, STDIN_START = '~~~|', '@@@|', '$$$|'
 CODE_END, ARGV_END, STDIN_END = '|~~~', '|@@@', '|$$$'
 CODE_SEP, ARGV_SEP, STDIN_SEP = '~~~|~~~', '@@@|@@@', '$$$|$$$'
-COMMENT_START, COMMENT_END, EXIT_SEP = '!!!|', '|!!!', '%%%|%%%'
+COMMENT_START, COMMENT_END, EXIT_SEP = '%%%|', '|%%%', '%%%|%%%'
 LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
@@ -52,7 +52,7 @@ class Placeholders:
 
 
 def debugging() -> bool:
-    return os.environ.get(DEBUG_ENV_VAR) == 'True'
+    return os.environ.get(DEBUG_ENV_VAR) == 'True'  # pragma: no cover
 
 
 @contextmanager
@@ -519,7 +519,7 @@ Can alternatively be called from code.
     runmany(args.input, args.json, args.output)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         cmdline(sys.argv[1:])
     else:
