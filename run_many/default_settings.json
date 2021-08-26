@@ -7,6 +7,7 @@
 	"ext": "",
 	"show_prologue": true,
 	"show_runs": true,
+	"show_time": false,
 	"show_command": false,
 	"show_code": false,
 	"show_argv": true,

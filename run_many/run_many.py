@@ -3,9 +3,9 @@
 import os
 import io
 import sys
-import ast
 import json
 import enum
+import time
 import types
 import pathlib
 import argparse
@@ -309,12 +309,14 @@ class Run:
             content = '\n' + section.content.strip('\r\n')
         return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}\n'
 
-    def output(self, command: str, stdout: str, exit_code: Union[int, str], run_number: int) -> str:
+    def output(self, time_taken: float, command: str, stdout: str, exit_code: Union[int, str], run_number: int) -> str:
         parts = []
 
         header = f'{run_number}. {self.language_data.name}'
         if exit_code != 0:
             header += f' [exit code {exit_code}]'
+        if self.language_data.show_time:
+            header += f' [{time_taken:.2f}s]'
         if self.language_data.show_command:
             header += f' > {command}'
         parts.append(header + '\n')
@@ -349,19 +351,23 @@ class Run:
         stdin = self.stdin_section.content if self.stdin_section else None
         command = PathParts(code_file_name).fill_command(cast(str, self.language_data.command), argv)
 
+        start_time = time.perf_counter()
         try:
             # Using universal_newlines=True instead of text=True here for backwards compatability with Python 3.6.
             result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout, shell=True,
                                     universal_newlines=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
+            time_taken = time.perf_counter() - start_time
+        except subprocess.TimeoutExpired:
+            time_taken = time.perf_counter() - start_time
+            stdout = f'TIMED OUT OF {self.language_data.timeout:g}s LIMIT'
+            exit_code: Union[int, str] = 'T'
+        else:
             stdout = result.stdout
-            exit_code: Union[int, str] = result.returncode
+            exit_code = result.returncode
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
                 stdout += result.stderr
-        except subprocess.TimeoutExpired:
-            stdout = f'TIMED OUT OF {self.language_data.timeout:g}s LIMIT'
-            exit_code = 'T'
 
-        output = self.output(command, stdout, exit_code, run_number)
+        output = self.output(time_taken, command, stdout, exit_code, run_number)
         return output, stdout, exit_code == 0
 
 

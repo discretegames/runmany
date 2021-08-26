@@ -7,7 +7,3 @@
 	- testing multiple argv or stdin combos
 	- polyglot
 	- testing variants of a program
-
-
-
-show_time should be a thing

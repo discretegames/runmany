@@ -4,7 +4,7 @@ from run_many import runmany_to_s
 
 
 # Some testing code duplicated from test_jsons.py but ehh.
-default_json = {
+default_settings_json = {
     "all_name": "All",
     "check_equal": False,
     "languages": [],
@@ -29,7 +29,7 @@ def path_to(filename: str) -> pathlib.Path:
 def verify_output(output_file: str, many_file_contents: str) -> None:
     with open(path_to(output_file)) as file:
         expected = file.read()
-        actual = runmany_to_s(many_file_contents, default_json, from_string=True)
+        actual = runmany_to_s(many_file_contents, default_settings_json, from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
