@@ -519,7 +519,7 @@ Can alternatively be called from code.
     """
     parser = argparse.ArgumentParser(prog='runmany', description='Runs a .many file.')
     parser.add_argument('input', help='the .many file to run', metavar='<input-file>')
-    parser.add_argument('-j', '--json', help='the .json settings file to use', metavar='<json-file>')
+    parser.add_argument('-j', '--json', help='the .json settings file to use', metavar='<settings-file>')
     parser.add_argument('-o', '--output', help='the file output is redirected to', metavar='<output-file>')
     args = parser.parse_args(argv)
     runmany(args.input, args.json, args.output)

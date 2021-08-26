@@ -12,6 +12,6 @@ def verify_example(filestem: str) -> None:
 
 @pytest.mark.slow
 def test_examples() -> None:
-    examples = 'argv hellolanguage helloworld polyglot sample'
+    examples = 'argv argvstdin helloworld polyglot'
     for filestem in examples.split():
         verify_example(filestem)

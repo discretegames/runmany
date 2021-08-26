@@ -1,0 +1,6 @@
+{
+	"show_time": true,
+	"show_code": true,
+	"show_output": false,
+	"timeout": 120
+}

@@ -157,7 +157,7 @@ def test_similar() -> None:
 $$$| Python |$$$
 $$$|$$
  ~~~| Python |~~~
-@@@@@@
+@@@|@@@!
 ~~~| Python |~~~	  
 print(input())
 print(input())

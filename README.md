@@ -34,7 +34,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -j <json-file>, --json <json-file>
+  -j <settings-file>, --json <settings-file>
                         the .json settings file to use
   -o <output-file>, --output <output-file>
                         the file output is redirected to
