@@ -1,4 +1,4 @@
-"""Tool to run the .many file type wherein many programs written in many languages may exist in one file."""
+"""Tool to run .many files, in which many programs written in many languages may exist in one file."""
 
 from .run_many import runmany
 from .run_many import runmany_to_s

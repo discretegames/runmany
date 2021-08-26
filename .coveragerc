@@ -1,4 +1,2 @@
 [run]
-omit =
-	*/site-packages/*
-	*/.vscode/extensions/*
+source=run_many

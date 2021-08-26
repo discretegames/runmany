@@ -27,3 +27,7 @@ This readme is mostly a todo list for now.
 
 - Readme with examples, .many syntax spec, etc.
 - A vscode plugin for syntax highlighting and running .many files?
+
+
+https://smarie.github.io/python-genbadge/
+https://shields.io/category/coverage
