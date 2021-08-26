@@ -3,7 +3,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-version = "0.1.5"
+version = "0.1.6"
 
 with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
     long_description = file.read()
@@ -27,7 +27,7 @@ setup(
                   "TestPyPI": "https://test.pypi.org/project/run-many"},
     python_requires='>=3.6',
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Education",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
@@ -37,10 +37,14 @@ setup(
         "Topic :: Utilities",
         "Typing :: Typed",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9"
     ],
     entry_points={
         'console_scripts': [
-            'runmany = run_many.run_many:main'
+            'runmany = run_many.run_many:cmdline'
         ]
     },
 )

@@ -9,6 +9,7 @@
 	"python.pythonPath": "venv\\Scripts\\python.exe",
 	"cSpell.words": [
 		"htmlcov",
+		"infile",
 		"nologo",
 		"rawbranch",
 		"rawdir",
