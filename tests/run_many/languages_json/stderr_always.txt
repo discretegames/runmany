@@ -1,0 +1,4 @@
+1. Python [exit code 1]
+-------------------------- output --------------------------
+to stderr
+to stdout

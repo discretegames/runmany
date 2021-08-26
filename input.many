@@ -1,0 +1,5 @@
+~~~| Python |~~~
+import sys
+sys.stderr.write('to stderr\n')
+print('to stdout')
+sys.exit(1)

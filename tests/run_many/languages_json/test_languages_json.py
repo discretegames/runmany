@@ -29,7 +29,8 @@ the argv
 $$$| Python |$$$
 the stdin
 ~~~| Python |~~~
-print("the output")'''
+print("the output")
+'''
 
 
 def path_to(filename: str) -> pathlib.Path:
@@ -44,7 +45,6 @@ def verify_output(languages_json: Dict[str, Any], output_file: str, many_file_co
     with open(path_to(output_file)) as file:
         expected = file.read()
         actual = runmany_to_s(many_file_contents, combine_jsons(languages_json), from_string=True)
-        print(actual)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
@@ -55,7 +55,8 @@ abc
 ~~~| Python |~~~
 print(input())
 ~~~| Python 2 |~~~
-print raw_input()'''
+print raw_input()
+'''
     languages_json = {"all_name": " every language ", "show_runs": True, "show_output": True}
     verify_output(languages_json, 'all_name.txt', many_file)
 
@@ -74,18 +75,35 @@ print 2
 '''
     languages_json = {"show_runs": True, "languages": [{"name": "Python", "show_code": True}]}
     verify_output(languages_json, 'languages1.txt', many_file)
-
     languages_json = {"show_runs": True, "show_output": True,
                       "languages": [{"name": "Python", "command": "echo $echoed"}]}
     verify_output(languages_json, 'languages2.txt', many_file)
 
 
-# def test_timeout() -> None:
-#     assert 0
+def test_timeout() -> None:
+    many_file = '''\
+~~~| Python |~~~
+import time
+time.sleep(0.1)
+'''
+    languages_json = {"show_runs": True, "show_output": True, "timeout": 0.09}
+    verify_output(languages_json, 'timeout1.txt', many_file)
+    languages_json = {"show_runs": True, "show_output": True, "timeout": 0.15}
+    verify_output(languages_json, 'timeout2.txt', many_file)
 
 
-# def test_stderr() -> None:
-#     assert 0
+def test_stderr() -> None:
+    many_file = '''\
+~~~| Python |~~~
+import sys
+sys.stderr.write("to stderr\\n")
+print("to stdout")
+sys.exit(1)
+'''
+    for name, alt in ('always', True), ('nzec', None), ('never', False):
+        for value in (name, alt):
+            languages_json = {"show_runs": True, "show_output": True, "stderr": value}
+            verify_output(languages_json, f'stderr_{name}.txt', many_file)
 
 
 def test_show_prologue() -> None:

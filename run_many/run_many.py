@@ -358,7 +358,7 @@ class Run:
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
                 stdout += result.stderr
         except subprocess.TimeoutExpired:
-            stdout = f'TIMED OUT OF {self.language_data.timeout}s LIMIT'
+            stdout = f'TIMED OUT OF {self.language_data.timeout:g}s LIMIT'
             exit_code = 'T'
 
         output = self.output(command, stdout, exit_code, run_number)
