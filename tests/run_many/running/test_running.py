@@ -39,23 +39,23 @@ def build_cases():
 
 
 def parametrize():
-    return pytest.mark.parametrize('many_file,languages_json,from_string,expected', build_cases())
+    return pytest.mark.parametrize('many_file,settings_json,from_string,expected', build_cases())
 
 
 @pytest.mark.slow
 @parametrize()
-def test_runmany(many_file, languages_json, from_string, expected):
+def test_runmany(many_file, settings_json, from_string, expected):
     from run_many import runmany
 
     # Test outputting to stdout.
     with io.StringIO() as file, redirect_stdout(file):
-        runmany(many_file, languages_json, from_string=from_string)
+        runmany(many_file, settings_json, from_string=from_string)
         file.seek(0)
         assert file.read() == expected
 
     # Test outputting to file:
     def verify_output_file(output_path):
-        runmany(many_file, languages_json, output_path, from_string=from_string)
+        runmany(many_file, settings_json, output_path, from_string=from_string)
         with open(output_path) as f:
             assert f.read() == expected
         os.remove(output_path)
@@ -66,16 +66,16 @@ def test_runmany(many_file, languages_json, from_string, expected):
 
 
 @parametrize()
-def test_runmany_to_s(many_file, languages_json, from_string, expected):
+def test_runmany_to_s(many_file, settings_json, from_string, expected):
     from run_many import runmany_to_s
-    assert runmany_to_s(many_file, languages_json, from_string=from_string) == expected
+    assert runmany_to_s(many_file, settings_json, from_string=from_string) == expected
 
 
 @parametrize()
-def test_runmany_to_f(many_file, languages_json, from_string, expected):
+def test_runmany_to_f(many_file, settings_json, from_string, expected):
     from run_many import runmany_to_f
     with io.StringIO() as file:
-        runmany_to_f(file, many_file, languages_json, from_string=from_string)
+        runmany_to_f(file, many_file, settings_json, from_string=from_string)
         file.seek(0)
         assert file.read() == expected
 

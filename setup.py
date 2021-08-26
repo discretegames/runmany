@@ -18,7 +18,7 @@ setup(
     long_description_content_type="text/markdown",
     url='https://github.com/discretegames/runmany',
     packages=['run_many'],
-    package_data={'run_many': ['default_languages.json']},
+    package_data={'run_many': ['default_settings.json']},
     license="MIT",
     keywords=['run', 'execute', 'other languages', 'multiple languages', 'manyfile',
               '.many', 'one file', 'programs', 'chrestomathy', 'polyglot'],

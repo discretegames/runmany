@@ -4,9 +4,9 @@ from run_many import runmany
 from contextlib import redirect_stderr
 
 
-def stderr_of_run(many_file_contents: str, languages_json_dict: Dict[str, Any]) -> str:
+def stderr_of_run(many_file_contents: str, settings_json_dict: Dict[str, Any]) -> str:
     with io.StringIO() as file, redirect_stderr(file):
-        runmany(many_file_contents, languages_json_dict, from_string=True)
+        runmany(many_file_contents, settings_json_dict, from_string=True)
         file.seek(0)
         return file.read()
 

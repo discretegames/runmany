@@ -5,7 +5,7 @@ from contextlib import redirect_stderr
 from run_many import runmany_to_s
 
 
-default_json = {
+default_settings_json = {
     "all_name": "All",
     "check_equal": False,
     "languages": [],
@@ -37,14 +37,14 @@ def path_to(filename: str) -> pathlib.Path:
     return pathlib.Path(__file__).with_name(filename)
 
 
-def combine_jsons(languages_json: Dict[str, Any]) -> Dict[str, Any]:
-    return {key: languages_json.get(key, default_json[key]) for key in default_json}
+def combine_jsons(settings_json: Dict[str, Any]) -> Dict[str, Any]:
+    return {key: settings_json.get(key, default_settings_json[key]) for key in default_settings_json}
 
 
-def verify_output(languages_json: Dict[str, Any], output_file: str, many_file_contents: str = default_input) -> None:
+def verify_output(settings_json: Dict[str, Any], output_file: str, many_file_contents: str = default_input) -> None:
     with open(path_to(output_file)) as file:
         expected = file.read()
-        actual = runmany_to_s(many_file_contents, combine_jsons(languages_json), from_string=True)
+        actual = runmany_to_s(many_file_contents, combine_jsons(settings_json), from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
@@ -57,13 +57,13 @@ print(input())
 ~~~| Python 2 |~~~
 print raw_input()
 '''
-    languages_json = {"all_name": " every language ", "show_runs": True, "show_output": True}
-    verify_output(languages_json, 'all_name.txt', many_file)
+    settings_json = {"all_name": " every language ", "show_runs": True, "show_output": True}
+    verify_output(settings_json, 'all_name.txt', many_file)
 
 
 def test_check_equal() -> None:
-    languages_json = {"check_equal": True, "show_epilogue": True}
-    verify_output(languages_json, 'check_equal.txt')
+    settings_json = {"check_equal": True, "show_epilogue": True}
+    verify_output(settings_json, 'check_equal.txt')
 
 
 def test_languages() -> None:
@@ -73,11 +73,11 @@ print(3)
 ~~~| Python 2 |~~~
 print 2
 '''
-    languages_json = {"show_runs": True, "languages": [{"name": "Python", "show_code": True}]}
-    verify_output(languages_json, 'languages1.txt', many_file)
-    languages_json = {"show_runs": True, "show_output": True,
-                      "languages": [{"name": "Python", "command": "echo $echoed"}]}
-    verify_output(languages_json, 'languages2.txt', many_file)
+    settings_json = {"show_runs": True, "languages": [{"name": "Python", "show_code": True}]}
+    verify_output(settings_json, 'languages1.txt', many_file)
+    settings_json = {"show_runs": True, "show_output": True,
+                     "languages": [{"name": "Python", "command": "echo $echoed"}]}
+    verify_output(settings_json, 'languages2.txt', many_file)
 
 
 def test_timeout() -> None:
@@ -86,10 +86,10 @@ def test_timeout() -> None:
 import time
 time.sleep(0.1)
 '''
-    languages_json = {"show_runs": True, "show_output": True, "timeout": 0.09}
-    verify_output(languages_json, 'timeout1.txt', many_file)
-    languages_json = {"show_runs": True, "show_output": True, "timeout": 0.5}
-    verify_output(languages_json, 'timeout2.txt', many_file)
+    settings_json = {"show_runs": True, "show_output": True, "timeout": 0.09}
+    verify_output(settings_json, 'timeout1.txt', many_file)
+    settings_json = {"show_runs": True, "show_output": True, "timeout": 0.5}
+    verify_output(settings_json, 'timeout2.txt', many_file)
 
 
 def test_stderr() -> None:
@@ -102,8 +102,8 @@ sys.exit(1)
 '''
     for name, alt in ('always', True), ('nzec', None), ('never', False):
         for value in (name, alt):
-            languages_json = {"show_runs": True, "show_output": True, "stderr": value}
-            verify_output(languages_json, f'stderr_{name}.txt', many_file)
+            settings_json = {"show_runs": True, "show_output": True, "stderr": value}
+            verify_output(settings_json, f'stderr_{name}.txt', many_file)
 
 
 def test_show_prologue() -> None:
@@ -115,8 +115,8 @@ def test_show_runs() -> None:
 
 
 def test_show_command() -> None:
-    languages_json = combine_jsons({"show_runs": True, "show_command": True})
-    actual = runmany_to_s(default_input, languages_json, from_string=True)
+    settings_json = combine_jsons({"show_runs": True, "show_command": True})
+    actual = runmany_to_s(default_input, settings_json, from_string=True)
     assert actual.startswith("1. Python > python")
 
 

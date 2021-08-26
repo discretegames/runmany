@@ -30,7 +30,7 @@ LANGUAGE_DIVIDER, COMMENT_PREFIX = '|', '!'
 OUTPUT_FILL, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL * int(1.5 * OUTPUT_FILL_WIDTH)
 
-DEFAULT_LANGUAGES_JSON_FILE = 'default_languages.json'
+DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
 ALL_NAME_KEY, NAME_KEY, COMMAND_KEY, EXT_KEY = 'all_name', 'name', 'command', 'ext'
 STDERR_NZEC, STDERR_NEVER = ('nzec', None), ('never', False)
 
@@ -75,7 +75,7 @@ def removesuffix(string: str, suffix: str) -> str:
 
 
 class LanguageData:
-    def __init__(self, language_obj: Any, parent: 'LanguagesData') -> None:
+    def __init__(self, language_obj: Any, parent: 'Settings') -> None:
         self.obj = language_obj
         self.default_obj = None
         self.parent = parent
@@ -91,8 +91,7 @@ class LanguageData:
         return getattr(self.parent, name)
 
 
-# Todo rename to settings? This is not just about languages.
-class LanguagesData:
+class Settings:
     @staticmethod
     def normalize(language: str) -> str:
         return language.strip().lower()
@@ -102,12 +101,12 @@ class LanguagesData:
         return json.loads(json_string, object_hook=lambda d: types.SimpleNamespace(**d))
 
     @staticmethod
-    def get_json_string(languages_json: JsonLike) -> str:
-        if languages_json is None:
+    def get_json_string(settings_json: JsonLike) -> str:
+        if settings_json is None:
             return str({})
-        elif isinstance(languages_json, dict):  # Assume already valid json dict.
-            return json.dumps(languages_json)
-        with open(languages_json) as file:  # Assume path like.
+        elif isinstance(settings_json, dict):  # Assume already valid json dict.
+            return json.dumps(settings_json)
+        with open(settings_json) as file:  # Assume path like.
             return file.read() or str({})
 
     def language_obj_valid(self, language_obj: Any, is_default: bool) -> bool:
@@ -117,7 +116,7 @@ class LanguagesData:
             print_err(f'No "{NAME_KEY}" key found for json list item{end}')
             return False
 
-        if LanguagesData.normalize(language_obj.name) == LanguagesData.normalize(self.all_name):
+        if Settings.normalize(language_obj.name) == Settings.normalize(self.all_name):
             print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
             return False
 
@@ -128,9 +127,9 @@ class LanguagesData:
 
         return True
 
-    def __init__(self, languages_json: JsonLike) -> None:
-        self.data = self.json_to_class(self.get_json_string(languages_json))
-        with open(pathlib.Path(__file__).with_name(DEFAULT_LANGUAGES_JSON_FILE)) as file:
+    def __init__(self, settings_json: JsonLike) -> None:
+        self.data = self.json_to_class(self.get_json_string(settings_json))
+        with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE)) as file:
             self.default_data = self.json_to_class(file.read())
         global display_errors
         display_errors = self.show_errors
@@ -213,7 +212,7 @@ class Section:
         else:
             return content  # Never strip code.
 
-    def __init__(self, header: str, content: str, languages_data: LanguagesData, line_number: int) -> None:
+    def __init__(self, header: str, content: str, settings: Settings, line_number: int) -> None:
         self.header = header.rstrip()
         self.type, start, end = self.get_type_start_end(self.header)
         self.commented = self.header.startswith(COMMENT_PREFIX)
@@ -228,16 +227,16 @@ class Section:
             raw_header = removesuffix(removeprefix(raw_header, start), end)
             for language in raw_header.split(LANGUAGE_DIVIDER):
                 try:
-                    self.languages.extend(languages_data.unpack(language))
+                    self.languages.extend(settings.unpack(language))
                 except KeyError:
                     if not self.commented:
                         print_err(f'Language "{language.strip()}" in section header at line {self.line_number}'
                                   ' not found in json. Skipping language.')
 
 
-def section_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Section]]:
+def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Section]]:
     def current_section() -> Section:
-        return Section(cast(str, header), ''.join(section_lines), languages_data, header_line_number)
+        return Section(cast(str, header), ''.join(section_lines), settings, header_line_number)
 
     header: Optional[str] = None
     header_line_number = 0
@@ -393,12 +392,12 @@ def epilogue(total_runs: int, successful_runs: int, equal_stdouts: Optional[Defa
     return f'{OUTPUT_DIVIDER}\n{line1}{line2}\n{OUTPUT_DIVIDER}'
 
 
-def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[str, Run]]:
+def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
 
-    for section in section_iterator(file, languages_data):
+    for section in section_iterator(file, settings):
         if isinstance(section, str):
             yield section  # Yield prologue. Only happens once.
             continue
@@ -430,52 +429,52 @@ def run_iterator(file: TextIO, languages_data: LanguagesData) -> Iterator[Union[
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
-                        yield Run(section, argv_section, stdin_section, languages_data[language])
+                        yield Run(section, argv_section, stdin_section, settings[language])
 
 
-def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], languages_json: JsonLike = None, *,
+def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: JsonLike = None, *,
                  from_string: bool = False) -> None:
-    """Runs `many_file` with the settings from `languages_json`, writing the results to the open file object `file`.
+    """Runs `many_file` with the settings from `settings_json`, writing the results to the open file object `file`.
 
     Args:
         - `file` (TextIO): The opened file object to write the run results to.
         - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
-        - `languages_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_languages.json](https://git.io/JEmzM).
+        - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
+Undefined settings fallback to [default_settings.json](TODO).
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
     """
     with redirect_stdout(file):
-        languages_data = LanguagesData(languages_json)
+        settings = Settings(settings_json)
         total_runs, successful_runs = 0, 0
         equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
 
         context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
         with context_manager as manyfile, TemporaryDirectory() as directory:
-            for run in run_iterator(manyfile, languages_data):
+            for run in run_iterator(manyfile, settings):
                 if isinstance(run, str):
-                    if languages_data.show_prologue:
+                    if settings.show_prologue:
                         print(prologue(run))
                 else:
                     run_number = total_runs + 1
                     output, stdout, success = run.run(directory, run_number)
                     total_runs += 1
                     successful_runs += success
-                    if languages_data.show_runs:
+                    if settings.show_runs:
                         print(output)
-                    if languages_data.check_equal:
+                    if settings.check_equal:
                         equal_stdouts[stdout].append(run_number)
-            if languages_data.show_epilogue:
-                print(epilogue(total_runs, successful_runs, equal_stdouts if languages_data.check_equal else None))
+            if settings.show_epilogue:
+                print(epilogue(total_runs, successful_runs, equal_stdouts if settings.check_equal else None))
 
 
-def runmany_to_s(many_file: Union[PathLike, str], languages_json: JsonLike = None, *, from_string: bool = False) -> str:
-    """Runs `many_file` with the settings from `languages_json`, returning the results as a string.
+def runmany_to_s(many_file: Union[PathLike, str], settings_json: JsonLike = None, *, from_string: bool = False) -> str:
+    """Runs `many_file` with the settings from `settings_json`, returning the results as a string.
 
     Args:
         - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
-        - `languages_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_languages.json](https://git.io/JEmzM).
+        - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
+Undefined settings fallback to [default_settings.json](TODO).
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
 
@@ -483,26 +482,26 @@ Defaults to False.
         str: The results of the run that would normally appear on stdout.
     """
     with io.StringIO() as file:
-        runmany_to_f(file, many_file, languages_json, from_string=from_string)
+        runmany_to_f(file, many_file, settings_json, from_string=from_string)
         file.seek(0)
         return file.read()
 
 
-def runmany(many_file: Union[PathLike, str], languages_json: JsonLike = None, output_file: Optional[PathLike] = None, *,
+def runmany(many_file: Union[PathLike, str], settings_json: JsonLike = None, output_file: Optional[PathLike] = None, *,
             from_string: bool = False) -> None:
-    """Runs `many_file` with the settings from `languages_json`, outputting the results to `output_file` or stdout.
+    """Runs `many_file` with the settings from `settings_json`, outputting the results to `output_file` or stdout.
 
     Args:
         - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
-        - `languages_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to[default_languages.json](https: // git.io/JEmzM).
+        - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
+Undefined settings fallback to[default_settings.json](TODO).
         - `output_file` (optional None | PathLike): The path to the file to send output to, or None for stdout. \
 Defaults to None.
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
     """
     with cast(TextIO, nullcontext(sys.stdout)) if output_file is None else open(output_file, 'w') as file:
-        runmany_to_f(file, many_file, languages_json, from_string=from_string)
+        runmany_to_f(file, many_file, settings_json, from_string=from_string)
 
 
 def cmdline(argv: List[str]) -> None:
