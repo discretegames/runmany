@@ -19,7 +19,7 @@ In general RunMany can be used for:
 
 # Installation (supports Python 3.6+)
 
-```console
+```text
 pip install run-many
 ```
 
@@ -29,7 +29,7 @@ pip install run-many
 
 ## Command Line
 
-```console
+```text
 > runmany [-h] [-j <json-file>] [-o <output-file>] <input-file>
 
 Runs a .many file.
