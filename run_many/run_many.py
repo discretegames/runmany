@@ -525,9 +525,13 @@ Can alternatively be called from code.
     runmany(args.input, args.json, args.output)
 
 
+def main() -> None:
+    cmdline(sys.argv[1:])  # pragma: no cover
+
+
 if __name__ == '__main__':  # pragma: no cover
     if not debugging():
-        cmdline(sys.argv[1:])
+        main()
     else:
         example = 'argv'
         runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('examples').joinpath(f'{example}.many'))

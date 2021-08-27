@@ -75,6 +75,8 @@ Additionally, the many file contents may be given as a string rather than a path
 
 `run_many.cmdline` is also present as an alternative to using the command line directly.
 
+TODO - mention default languages
+
 # .many Syntax
 
 TODO - describe with examples

@@ -1,4 +1,0 @@
-- .many syntax
-- output
-- how argv and stdin overwrites
-- list out of the box supported languages (add more later)
