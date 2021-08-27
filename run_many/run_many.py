@@ -301,6 +301,7 @@ class Run:
         self.stdin_section = stdin_section
         self.language_data = language_data
 
+    # TODO Add line numbers for output?
     @staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
         content = ''
@@ -330,7 +331,7 @@ class Run:
         if self.language_data.show_output:
             parts.append(self.output_section('output'))
             parts.append(stdout)
-        parts.append('\n')
+        parts.append('\n')  # TODO Have compact option that does not add this newline?
 
         return ''.join(parts)
 
@@ -433,6 +434,7 @@ def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
 
         elif section.type is SectionType.CODE:
             for language in lead_section.languages:
+                # Todo? A way to reset argv and stdin back to None would go here.
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
                         yield Run(section, argv_section, stdin_section, settings[language])

@@ -9,6 +9,42 @@
 
 Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in *the same* file using any programming languages you like, and then run them all at once.
 
+For example, given the [simple file](https://github.com/discretegames/runmany/blob/main/examples/simple.many)
+
+```text
+~~~| Python |~~~
+print("Hi")
+~~~| JavaScript |~~~
+console.log("Hi")
+~~~| Rust |~~~
+fn main() { println!("Hi"); }
+```
+
+RunMany will number and run each program in it and give [the output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt)
+
+```text
+------------------------------------------------------------------------------------------
+RunMany Result
+------------------------------------------------------------------------------------------
+
+1. Python
+-------------------------- output --------------------------
+Hi
+
+2. JavaScript
+-------------------------- output --------------------------
+Hi
+
+3. Rust
+-------------------------- output --------------------------
+Hi
+
+------------------------------------------------------------------------------------------
+3/3 programs successfully run!
+3/3 had the exact same stdout!
+------------------------------------------------------------------------------------------
+```
+
 In general RunMany can be used for:
 
 - Crestomathy - Writing programs that do the same thing in many languages, like
@@ -20,8 +56,6 @@ In general RunMany can be used for:
  ([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
 - Creating Polyglots - Esoteric programs that can be executed in multiple languages.
  ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
-
-todo show basic input and output
 
 # Installation (supports Python 3.6+)
 
@@ -84,9 +118,9 @@ The function `run_many.cmdline` is also present as an alternative to using the c
 
 # .many Syntax
 
-The .many file format is what runmany expects when given a file to run. (Though, of course, ".many" is not required as an extension.) Since .many files may contain syntax from arbitrary programming languages, a small, unique set of syntax was required to demarcate the various parts.
+The .many file format is what runmany expects when given a file to run. Though, of course, ".many" is not required as an extension. Since .many files may contain syntax from arbitrary programming languages, a small, unique set of syntax was required to demarcate the various parts.
 
-## Comments and EOF Trigger
+## Comments and EOF Marker
 
 Though not crucial, comments and a way to prematurely exit are provided for convenience as part of .many file syntax.
 
@@ -96,17 +130,17 @@ Any line in a .many file starting with `%%%|` and ending `|%%%` (possibly with t
 %%%| this is a comment |%%%
 ```
 
-The line `%%%|%%%` alone (possibly with trailing whitespace) is considered an end-of-file trigger, and everything after it in the entire file is ignored. `!` may be put before it, e.g. `!%%%|%%%`, to disable the trigger.
+The line `%%%|%%%` alone (possibly with trailing whitespace) is considered an end-of-file marker, and everything after it in the entire file is ignored. `!` may be put before it, e.g. `!%%%|%%%`, to disable the marker.
 
 ## Sections & Delimiters
 
-Aside from comments and the EOF trigger, a .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
+Aside from comments and the EOF marker, a .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
 
 A section delimiter must reside on its own line that has no leading whitespace, but may have trailing whitespace.
 
 Putting `!` at the front of any section delimiter disables it and its entire section until the next delimiter.
 
-The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output (todo see below). Otherwise, lines that are not section delimiters are treated as part of the section content.
+The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output (todo see below). Otherwise, lines that are not section delimiters (nor comments or EOF markers) are treated as part of the section content.
 
 **There are 6 types of section delimiters:**
 
@@ -141,9 +175,80 @@ The part before the very first delimiter in a .many file is treated as a comment
 
 The language names in the Code Header, Argv Header, and Stdin Header are always stripped of whitespace and made lowercase before checking if they match a language defined in the settings JSON. The special keyword `All` can be used as a language name and it will auto-expand to all the languages defined in the settings JSON. This is useful for giving the same argv or stdin to all programs. (todo mention how it can be changed below)
 
+Blank lines around section delimiters are only for readability and not required.
+
 ## Syntax Example
 
-todo
+```text
+prologue comment area
+
+$$$| Python |$$$
+Alice
+$$$|$$$
+Bob
+$$$|$$$
+Charlie
+
+!~~~| Python |~~~
+print('this section is disabled with !')
+
+~~~| Python |~~~
+%%%| this line is a .many file comment |%%%
+print(f'Hello, {input()}.')
+
+@@@| All |@@@
+--flag
+
+~~~| JavaScript |~~~
+console.log(`The arg was '${process.argv[2]}'`)
+
+%%%|%%%
+~~~| Python |~~~
+print('this section is after the EOf marker')
+```
+
+
+
+```text
+------------------------------------------------------------------------------------------
+RunMany Result
+prologue comment area
+------------------------------------------------------------------------------------------
+
+
+1. Python
+--------------------- stdin at line 4 ----------------------
+Alice
+-------------------------- output --------------------------
+Hello, Alice.
+
+
+2. Python
+--------------------- stdin at line 6 ----------------------
+Bob
+-------------------------- output --------------------------
+Hello, Bob.
+
+
+3. Python
+--------------------- stdin at line 8 ----------------------
+Charlie
+-------------------------- output --------------------------
+Hello, Charlie.
+
+
+4. JavaScript
+--------------------- argv at line 18 ----------------------
+--flag
+-------------------------- output --------------------------
+The arg was '--flag'
+
+
+------------------------------------------------------------------------------------------
+4/4 programs successfully run!
+1/4 had the exact same stdout. Equal runs grouped: [1] [2] [3] [4]
+------------------------------------------------------------------------------------------
+```
 
 # Settings JSON
 
@@ -153,18 +258,6 @@ command formatting
 
 # About
 
-TODO?
-inspiration
-more todo - syntax highlighting?
+I was driven to make RunMany by my desire to learn more programming languages combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
 
-TODO - mention default languages
-
-Basic .many example containing Python and JavaScript programs: todo ?
-
-```text
-~~~| Python |~~~
-print('Hello, Python!')
-
-~~~| JavaScript |~~~
-console.log('Hello, JS!')
-```
+The obvious limitation of RunMany and the .many file format is that syntax highlighting and tooling like IntelliSense doesn't work. Making a VSCode extension that can syntax highlight .many files is definitely on my radar.

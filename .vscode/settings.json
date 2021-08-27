@@ -8,6 +8,7 @@
 	"python.linting.pylintEnabled": false,
 	"python.pythonPath": "venv\\Scripts\\python.exe",
 	"cSpell.words": [
+		"f'Hello",
 		"htmlcov",
 		"infile",
 		"isprime",

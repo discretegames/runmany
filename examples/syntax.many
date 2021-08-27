@@ -1,0 +1,25 @@
+prologue comment area
+
+$$$| Python |$$$
+Alice
+$$$|$$$
+Bob
+$$$|$$$
+Charlie
+
+!~~~| Python |~~~
+print('this section is disabled with !')
+
+~~~| Python |~~~
+%%%| this line is a .many file comment |%%%
+print(f'Hello, {input()}.')
+
+@@@| All |@@@
+--flag
+
+~~~| JavaScript |~~~
+console.log(`The arg was '${process.argv[2]}'`)
+
+%%%|%%%
+~~~| Python |~~~
+print('this section is after the EOf marker')
