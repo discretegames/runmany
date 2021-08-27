@@ -1,6 +1,5 @@
 
-[![PyPI version](https://badge.fury.io/py/run-many.svg)](https://badge.fury.io/py/run-many) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/run-many) ![Coverage](https://github.com/discretegames/runmany/blob/main/examples/coverage.svg)
-
+[![PyPI version](https://badge.fury.io/py/run-many.svg)](https://badge.fury.io/py/run-many) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/run-many) ![Test coverage](https://github.com/discretegames/runmany/blob/main/coverage.svg)
 
 # [RunMany](https://pypi.org/project/run-many/)
 
