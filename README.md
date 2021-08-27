@@ -7,7 +7,7 @@ Suppose you want to practice multiple programming languages at once. Normally yo
 
 In general RunMany can be used for:
 
-- Crestomathy - Writing programs that do the same thing in many languages, like on
+- Crestomathy - Writing programs that do the same thing in many languages, like
  [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
  ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
 - Performance Testing - Timing different implementations of a program, even across languages.
