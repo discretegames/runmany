@@ -6,6 +6,7 @@ from subprocess import run
 
 print('Running Coverage...')
 run('venv/Scripts/python -m coverage run -m pytest')
+run('venv/Scripts/python -m coverage-badge -o coverage.svg')
 run('venv/Scripts/python -m coverage report')
 run('venv/Scripts/python -m coverage html')
 run('cmd /c start htmlcov/index.html')
