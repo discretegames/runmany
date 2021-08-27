@@ -30,7 +30,7 @@ pip install run-many
 ## Command Line
 
 ```text
-> runmany [-h] [-j <json-file>] [-o <output-file>] <input-file>
+> runmany [-h] [-j <settings-file>] [-o <output-file>] <input-file>
 
 Runs a .many file.
 
