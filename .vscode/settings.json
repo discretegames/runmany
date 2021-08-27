@@ -11,6 +11,7 @@
 		"htmlcov",
 		"infile",
 		"isprime",
+		"myfile",
 		"nologo",
 		"rawbranch",
 		"rawdir",
@@ -19,7 +20,8 @@
 		"runmany",
 		"runmanys",
 		"runpytest",
-		"runtox"
+		"runtox",
+		"tdin"
 	],
 	"files.exclude": {
 		".coverage": true,

@@ -21,6 +21,8 @@ In general RunMany can be used for:
 - Creating Polyglots - Esoteric programs that can be executed in multiple languages.
  ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
+todo show basic input and output
+
 # Installation (supports Python 3.6+)
 
 ```text
@@ -34,24 +36,24 @@ pip install run-many
 ## Command Line
 
 ```text
-> runmany [-h] [-j <settings-file>] [-o <output-file>] <input-file>
-
-Runs a .many file.
-
-positional arguments:
-  <input-file>          the .many file to run
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -j <settings-file>, --json <settings-file>
-                        the .json settings file to use
-  -o <output-file>, --output <output-file>
-                        the file output is redirected to
+runmany myfile.many
 ```
+
+More generally:
+
+```text
+runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <input-file>
+```
+
+- `<input-file>` is the required .many file to run.
+- `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
+- `<output-file>` is the optional file to send the output to.
 
 By default output goes to stdout and [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback when a custom settings json is not provided or is missing any settings.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try. Note that they were run on a Windows machine with the necessary interpreters and compilers installed.
+
+The [default JSON](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json#L18) has preset commands for a handful of languages, namely Python, Python 2, JavaScript, TypeScript, Java, Kotlin, Rust, Go, C, C++, and C#. But any of these can be overridden and new languages can be added by populating the "languages" key in a custom JSON. (todo link to more details below)
 
 ## From Python
 
@@ -74,30 +76,87 @@ with open('output.txt', 'w') as f:
 
 As with the command line, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback for all settings.
 
-In each of the 3 runmany functions, the setting json argument may be given as a path to the .json file or a corresponding Python dictionary.  
-Additionally, the many file contents may be given as a string rather than a path with `from_string=True`.
+In each of the 3 runmany functions, the setting JSON argument may be given as a path to the .json file or a corresponding Python dictionary.  
+Additionally, the many file contents may be given as a string rather than a file path with `from_string=True`.
 
-`run_many.cmdline` is also present as an alternative to using the command line directly.
-
-TODO - mention default languages
+The function `run_many.cmdline` is also present as an alternative to using the command line directly.
 
 # .many Syntax
 
-TODO - describe with examples
+The .many file format is what runmany expects when given a file to run. (Though, of course, ".many" is not required as an extension.)
 
-- \~\~\~| code
-  - \~\~\~|~~~ lists
-- \$\$\$| stdin
-  - \$\$\$|\$\$\$ lists
-- @@@| argv
-  - @@@|@@@ lists
+As .many files may contain syntax from arbitrary programming languages, special syntax unlikely to appear in real code needed to be adopted
+
+## Comments and Exit Trigger
+
+Todo
 - %%%| comments
 - %%%|%%% exit
 
-# Settings
+## Sections & Delimiters
+
+A .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
+
+A section delimiter must reside on its own line with no leading whitespace, but may have trailing whitespace.
+
+Putting `!` at the front of any section delimiter disables it and its entire section until the next delimiter.
+
+The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output (todo see below). Otherwise, lines that are not section delimiters are treated as part of the content of the section of the last delimiter.
+
+**There are 6 types of section delimiters:**
+
+1. Code Header: `~~~| language1 | language2 | language3 | ... |~~~`  
+   A `|` separated list of languages, (though usually just one suffices) starting `~~~|` and ending `|~~~`.  
+   The section content is treated as code that will be run in each language in the list in turn.  
+   The language names (stripped of whitespace and made lowercase) must match language names in the settings JSON which defines how they are run.
+
+2. Code Header Repeat: `~~~|~~~`  
+   Expects to appear after a Code Header section and is merely shorthand for repeating the exact same Code Header delimiter.
+
+3. Argv Header: `@@@| language1 | language2 | language3 | ... |@@@`  
+   A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for **a**rgv).  
+   The section content is stripped of newlines and will be used as the command line arguments for the listed languages in any subsequent code sections.  
+   Overwrites any previous Argv Header and Argv List sections for the listed languages.
+
+4. Argv List: `@@@|@@@`  
+   Expects to appear after an Argv Header section or another Argv List section.  
+   The section content is stripped of newlines and added to the list of argv inputs to give to the languages listed in the header.  
+   In this way, multiple argv inputs may be tested without code duplication.
+
+5. Stdin Header: `$$$| language1 | language2 | language3 | ... |$$$`  
+   A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for **s**tdin).  
+   The section content is stripped of newlines (except one left trailing) and will be used as the stdin for the listed languages in any subsequent code sections.  
+   Overwrites any previous Stdin Header and Stdin List sections for the listed languages.
+
+6. Stdin List: `$$$|$$$`  
+   Expects to appear after a Stdin Header section or another Stdin List section.  
+   The section content is stripped of newlines (except one left trailing) and added to the list of stdin inputs to give to the languages listed in the header.  
+   In this way, multiple stdin inputs may be tested without code duplication.
+
+## Syntax Example
+
+todo
+
+# Settings JSON
 
 TODO - describe possible values and behavior of every setting, how to read the output
+
+command formatting
 
 # About
 
 TODO?
+inspiration
+more todo - syntax highlighting?
+
+TODO - mention default languages
+
+Basic .many example containing Python and JavaScript programs: todo ?
+
+```text
+~~~| Python |~~~
+print('Hello, Python!')
+
+~~~| JavaScript |~~~
+console.log('Hello, JS!')
+```
