@@ -39,17 +39,17 @@ pip install run-many
 runmany myfile.many
 ```
 
-More generally:
+More generally
 
 ```text
 runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <input-file>
 ```
 
-- `<input-file>` is the required .many file to run.
-- `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
-- `<output-file>` is the optional file to send the output to.
+- `<input-file>` is the required .many file to run
+- `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted
+- `<output-file>` is the optional file to send the output to
 
-By default output goes to stdout and [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback when a custom settings json is not provided or is missing any settings.
+By default, output goes to stdout and [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback when a custom settings json is not provided or is missing any settings.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try. Note that they were run on a Windows machine with the necessary interpreters and compilers installed.
 
@@ -76,26 +76,31 @@ with open('output.txt', 'w') as f:
 
 As with the command line, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback for all settings.
 
-In each of the 3 runmany functions, the setting JSON argument may be given as a path to the .json file or a corresponding Python dictionary.  
+In each of the 3 runmany functions, the settings JSON argument may be given as a path to the .json file or a corresponding Python dictionary.
+
 Additionally, the many file contents may be given as a string rather than a file path with `from_string=True`.
 
 The function `run_many.cmdline` is also present as an alternative to using the command line directly.
 
 # .many Syntax
 
-The .many file format is what runmany expects when given a file to run. (Though, of course, ".many" is not required as an extension.)
+The .many file format is what runmany expects when given a file to run. (Though, of course, ".many" is not required as an extension.) Since .many files may contain syntax from arbitrary programming languages, a small, unique set of syntax was required to demarcate the various parts.
 
-As .many files may contain syntax from arbitrary programming languages, special syntax unlikely to appear in real code needed to be adopted
+## Comments and EOF Trigger
 
-## Comments and Exit Trigger
+Though not crucial, comments and a way to prematurely exit are provided for convenience as part of the .many file syntax.
 
-Todo
-- %%%| comments
-- %%%|%%% exit
+Any line in a .many file starting with `%%%|` and ending `|%%%` (possibly with trailing whitespace) is considered a comment and completely ignored.
+
+```test
+%%%| this is a comment |%%%
+```
+
+The line `%%%|%%%` alone (possibly with trailing whitespace) is considered an end-of-file trigger, and everything after it is ignored. `!` may be put before it, e.g. `!%%%|%%%`, to disable the trigger.
 
 ## Sections & Delimiters
 
-A .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
+Apart from comments and the EOF trigger, a .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
 
 A section delimiter must reside on its own line with no leading whitespace, but may have trailing whitespace.
 
@@ -106,32 +111,32 @@ The part before the very first delimiter in a .many file is treated as a comment
 **There are 6 types of section delimiters:**
 
 1. Code Header: `~~~| language1 | language2 | language3 | ... |~~~`  
-   A `|` separated list of languages, (though usually just one suffices) starting `~~~|` and ending `|~~~`.  
-   The section content is treated as code that will be run in each language in the list in turn.  
-   The language names (stripped of whitespace and made lowercase) must match language names in the settings JSON which defines how they are run.
+   - A `|` separated list of languages, (though usually just one suffices) starting `~~~|` and ending `|~~~`.  
+   - The section content is treated as code that will be run in each language in the list in turn.  
+   - The language names (stripped of whitespace and made lowercase) must match language names in the settings JSON which defines how they are run.
 
 2. Code Header Repeat: `~~~|~~~`  
-   Expects to appear after a Code Header section and is merely shorthand for repeating the exact same Code Header delimiter.
+   - Expects to appear after a Code Header section and is merely shorthand for repeating the exact same Code Header delimiter.
 
 3. Argv Header: `@@@| language1 | language2 | language3 | ... |@@@`  
-   A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for **a**rgv).  
-   The section content is stripped of newlines and will be used as the command line arguments for the listed languages in any subsequent code sections.  
-   Overwrites any previous Argv Header and Argv List sections for the listed languages.
+   - A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for **a**rgv).  
+   - The section content is stripped of newlines and will be used as the command line arguments for the listed languages in any subsequent code sections.  
+   - Overwrites any previous Argv Header and Argv List sections for the listed languages.
 
 4. Argv List: `@@@|@@@`  
-   Expects to appear after an Argv Header section or another Argv List section.  
-   The section content is stripped of newlines and added to the list of argv inputs to give to the languages listed in the header.  
-   In this way, multiple argv inputs may be tested without code duplication.
+   - Expects to appear after an Argv Header section or another Argv List section.  
+   - The section content is stripped of newlines and added to the list of successive argv inputs to give to the languages listed in the header.  
+   - In this way, multiple argv inputs may be tested without code duplication.
 
 5. Stdin Header: `$$$| language1 | language2 | language3 | ... |$$$`  
-   A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for **s**tdin).  
-   The section content is stripped of newlines (except one left trailing) and will be used as the stdin for the listed languages in any subsequent code sections.  
-   Overwrites any previous Stdin Header and Stdin List sections for the listed languages.
+   - A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for **s**tdin).  
+   - The section content is stripped of newlines (except one left trailing) and will be used as the stdin for the listed languages in any subsequent code sections.  
+   - Overwrites any previous Stdin Header and Stdin List sections for the listed languages.
 
 6. Stdin List: `$$$|$$$`  
-   Expects to appear after a Stdin Header section or another Stdin List section.  
-   The section content is stripped of newlines (except one left trailing) and added to the list of stdin inputs to give to the languages listed in the header.  
-   In this way, multiple stdin inputs may be tested without code duplication.
+   - Expects to appear after a Stdin Header section or another Stdin List section.  
+   - The section content is stripped of newlines (except one left trailing) and added to the list of successive stdin inputs to give to the languages listed in the header.  
+   - In this way, multiple stdin inputs may be tested without code duplication.
 
 ## Syntax Example
 
