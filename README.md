@@ -88,7 +88,7 @@ The .many file format is what runmany expects when given a file to run. (Though,
 
 ## Comments and EOF Trigger
 
-Though not crucial, comments and a way to prematurely exit are provided for convenience as part of the .many file syntax.
+Though not crucial, comments and a way to prematurely exit are provided for convenience as part of .many file syntax.
 
 Any line in a .many file starting with `%%%|` and ending `|%%%` (possibly with trailing whitespace) is considered a comment and is completely ignored.
 
@@ -102,41 +102,42 @@ The line `%%%|%%%` alone (possibly with trailing whitespace) is considered an en
 
 Aside from comments and the EOF trigger, a .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
 
-A section delimiter must reside on its own line with no leading whitespace, but may have trailing whitespace.
+A section delimiter must reside on its own line that has no leading whitespace, but may have trailing whitespace.
 
 Putting `!` at the front of any section delimiter disables it and its entire section until the next delimiter.
 
-The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output (todo see below). Otherwise, lines that are not section delimiters are treated as part of the content of the section of the last delimiter.
+The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output (todo see below). Otherwise, lines that are not section delimiters are treated as part of the section content.
 
 **There are 6 types of section delimiters:**
 
-1. Code Header: `~~~| language1 | language2 | language3 | ... |~~~`  
+1. Code Header: `~~~| language1 | language2 | language3 | ... |~~~`
    - A `|` separated list of languages, (though usually just one suffices) starting `~~~|` and ending `|~~~`.  
-   - The section content is treated as code that will be run in each language in the list in turn.  
+   - The section content is treated as code that will be run in each language in the list in turn.
    - The language names must match language names in the settings JSON which defines how they are run.
 
-2. Code Header Repeat: `~~~|~~~`  
-   - Expects to appear after a Code Header section and is merely shorthand for repeating the exact same Code Header delimiter.
+2. Code List: `~~~|~~~`
+   - Expects to appear after a Code Header section or another Code List section.
+   - Is merely shorthand for exactly repeating the previous Code Header delimiter.
 
-3. Argv Header: `@@@| language1 | language2 | language3 | ... |@@@`  
-   - A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for ***a***rgv).  
-   - The section content is stripped of newlines and will be used as the command line arguments for the listed languages in any subsequent code sections.  
+3. Argv Header: `@@@| language1 | language2 | language3 | ... |@@@`
+   - A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for ***a***rgv).
+   - The section content is stripped of newlines and will be used as the command line arguments for the listed languages in any following code sections.
    - Overwrites any previous Argv Header and Argv List sections for the listed languages.
 
-4. Argv List: `@@@|@@@`  
-   - Expects to appear after an Argv Header section or another Argv List section.  
-   - The section content is stripped of newlines and added to the list of successive argv inputs to give to the languages listed in the header.  
-   - In this way, multiple argv inputs may be tested without code duplication.
+4. Argv List: `@@@|@@@`
+   - Expects to appear after an Argv Header section or another Argv List section.
+   - The section content is stripped of newlines and added to the list of successive argv inputs to give to the languages listed in the header.
+   - In this way, multiple argv inputs may be tested at once without code duplication.
 
-5. Stdin Header: `$$$| language1 | language2 | language3 | ... |$$$`  
-   - A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for ***s***tdin).  
-   - The section content is stripped of newlines (except one left trailing) and will be used as the stdin for the listed languages in any subsequent code sections.  
+5. Stdin Header: `$$$| language1 | language2 | language3 | ... |$$$`
+   - A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for ***s***tdin).
+   - The section content is stripped of newlines (except one left trailing) and will be used as the stdin for the listed languages in any following code sections.
    - Overwrites any previous Stdin Header and Stdin List sections for the listed languages.
 
-6. Stdin List: `$$$|$$$`  
-   - Expects to appear after a Stdin Header section or another Stdin List section.  
-   - The section content is stripped of newlines (except one left trailing) and added to the list of successive stdin inputs to give to the languages listed in the header.  
-   - In this way, multiple stdin inputs may be tested without code duplication.
+6. Stdin List: `$$$|$$$`
+   - Expects to appear after a Stdin Header section or another Stdin List section.
+   - The section content is stripped of newlines (except one left trailing) and added to the list of successive stdin inputs to give to the languages listed in the header.
+   - In this way, multiple stdin inputs may be tested at once without code duplication.
 
 The language names in the Code Header, Argv Header, and Stdin Header are always stripped of whitespace and made lowercase before checking if they match a language defined in the settings JSON. The special keyword `All` can be used as a language name and it will auto-expand to all the languages defined in the settings JSON. This is useful for giving the same argv or stdin to all programs. (todo mention how it can be changed below)
 
