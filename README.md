@@ -179,6 +179,8 @@ Blank lines around section delimiters are only for readability and not required.
 
 ## Syntax Example
 
+This [syntax.many](https://github.com/discretegames/runmany/blob/main/examples/syntax.many) file consists of one enabled Python program that reads from stdin and one JavaScript program that reads from argv.
+
 ```text
 prologue comment area
 
@@ -207,7 +209,7 @@ console.log(`The arg was '${process.argv[2]}'`)
 print('this section is after the EOf marker')
 ```
 
-
+[The output](https://github.com/discretegames/runmany/blob/main/examples/output_syntax.many) first has all the results of running the Python program on the `$$$|$$$` separated stdins, then result of JavaScript program given its single argv.
 
 ```text
 ------------------------------------------------------------------------------------------
