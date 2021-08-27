@@ -1,6 +1,6 @@
 <!-- markdownlint-disable-next-line MD041 -->
 [![PyPI Version](https://badge.fury.io/py/run-many.svg)](https://badge.fury.io/py/run-many)
- [![Test Coverage](https://github.com/discretegames/runmany/blob/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
+ [![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
  [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/run-many)](https://www.python.org/downloads/)
 
 # [RunMany](https://pypi.org/project/run-many/)

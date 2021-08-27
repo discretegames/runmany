@@ -3,7 +3,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-version = "0.1.9"
+version = "0.1.10"
 
 with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
     long_description = file.read()
@@ -40,7 +40,8 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9"
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10"
     ],
     entry_points={
         'console_scripts': [
