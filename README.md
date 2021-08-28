@@ -1,10 +1,10 @@
-<!-- markdownlint-disable-file MD022 MD031 MD032 MD038 -->
 <!-- markdownlint-disable-next-line MD041 -->
 [![PyPI Version](https://badge.fury.io/py/run-many.svg)](https://badge.fury.io/py/run-many)
  [![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
  [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/run-many)](https://www.python.org/downloads/)
 
 # [RunMany](https://pypi.org/project/run-many/)
+
 **[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [About](https://github.com/discretegames/runmany#about)**
 
 **A tool to run many programs written in many languages from one file.**
@@ -23,6 +23,7 @@ fn main() { println!("Hi"); }
 ```
 
 RunMany will number and run each program
+
 ```text
 ------------------------------------------------------------------------------------------
 RunMany Result
@@ -47,6 +48,7 @@ Hi
 ```
 
 In general RunMany can be used for:
+
 - Crestomathy - Writing programs that do the same thing in many languages, like
  [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
  ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
@@ -58,6 +60,7 @@ In general RunMany can be used for:
  ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
 # Installation (supports Python 3.6+)
+
 ```text
 pip install run-many
 ```
@@ -67,11 +70,13 @@ pip install run-many
 # Usage
 
 ## Command Line
+
 ```text
 runmany myfile.many
 ```
 
 More generally
+
 ```text
 runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <input-file>
 ```
@@ -87,6 +92,7 @@ See [the examples folder](https://github.com/discretegames/runmany/tree/main/exa
 The default JSON has [presets](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json#L18) for a handful of languages, namely Python, Python 2, JavaScript, TypeScript, Java, Kotlin, Rust, Go, C, C++, and C#. But any of these can be overwritten and new languages can be added by populating the `"languages"` key in a custom JSON. [More details below.](https://github.com/discretegames/runmany#settings-json)
 
 ## From Python
+
 ```py
 from run_many import runmany, runmany_to_s, runmany_to_f
 
@@ -113,9 +119,11 @@ Additionally, the many file contents may be given as a string rather than a file
 The function `run_many.cmdline` is also present as an alternative to using the command line directly.
 
 # .many Syntax
+
 The .many file format is what runmany expects when given a file to run. Though, of course, ".many" is not required as an extension. Since .many files may contain syntax from arbitrary programming languages, a small, unique set of syntax was required to demarcate the various parts.
 
 ## Comments and EOF Marker
+
 Though not crucial, comments and a way to prematurely exit are provided for convenience as part of .many file syntax.
 
 Any line in a .many file starting with `%%%|` and ending `|%%%` (possibly with trailing whitespace) is considered a comment and is completely ignored.
@@ -127,6 +135,7 @@ Any line in a .many file starting with `%%%|` and ending `|%%%` (possibly with t
 The line `%%%|%%%` alone (possibly with trailing whitespace) is considered an end-of-file marker, and everything after it in the entire file is ignored. `!` may be put before it, e.g. `!%%%|%%%`, to disable the marker.
 
 ## Sections & Delimiters
+
 Aside from comments and the EOF marker, a .many file can be split into a number of sections, each of which occupies its own contiguous block of lines and is headed by a section delimiter.
 
 A section delimiter must reside on its own line that has no leading whitespace, but may have trailing whitespace.
@@ -171,7 +180,9 @@ The language names in the Code Header, Argv Header, and Stdin Header are always 
 Blank lines around section delimiters are only for readability and not required.
 
 ## Syntax Example
-[This file](https://github.com/discretegames/runmany/blob/main/examples/syntax.many) consists of one enabled Python program that reads from stdin and one JavaScript program that reads from argv.
+
+This file consists of one enabled Python program that reads from stdin and one JavaScript program that reads from argv.
+
 ```text
 prologue comment area
 
@@ -200,7 +211,8 @@ console.log(`The arg was '${process.argv[2]}'`)
 print('this section is after the EOf marker')
 ```
 
-[The output](https://github.com/discretegames/runmany/blob/main/examples/output_syntax.many) first has all the results of running the Python program on the `$$$|$$$` separated stdins, then the result of JavaScript program given its single argv.
+The output first has all the results of running the Python program on the `$$$|$$$` separated stdins, then the result of JavaScript program given its single argv.
+
 ```text
 ------------------------------------------------------------------------------------------
 RunMany Result
@@ -243,6 +255,7 @@ The arg was '--flag'
 ```
 
 # Settings JSON
+
 The settings JSON defines what languages RunMany can run and how to run them. It also defines how the output will be formatted.
 
 As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) holds the default values for all settings which are automatically used if not present in the provided settings JSON, or if none is provided.
@@ -260,6 +273,7 @@ will make Rust programs have a 5 second time limit rather than the default of 10
 It is advised to not set `"default_languages"` in your settings JSON file and only change `"languages"`.
 
 ## List of Settings
+
 All settings described, and whether or not they are inherited by language objects in `"languages"`.
 
 | JSON Key          | Type   | Default  | Inherited | Description                                                                                                                                                                                    |
@@ -281,6 +295,7 @@ All settings described, and whether or not they are inherited by language object
 | `"show_epilogue"` | bool   | `true`   | no        | Whether the trailing output lines that count successful runs are shown.                                                                                                                        |
 
 ## Command Format
+
 The `"command"` key of a language object defines the terminal command that is run to execute the language.
 
 Placeholders like `$file` and `$dir` are used in a command to refer to the temporary file RunMany creates for the code of each program it runs, or the directory that file is stored in.
@@ -301,9 +316,11 @@ Placeholders like `$file` and `$dir` are used in a command to refer to the tempo
 
 Note that some placeholders are "quoted" and some are not. Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
 
+<!-- markdownlint-disable-next-line MD038 -->
 If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
 
 # About
+
 I was driven to make RunMany by my desire to learn more programming languages combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
 
 The obvious limitation of RunMany and the .many file format is that syntax highlighting and tooling like IntelliSense doesn't work. Making a VSCode extension that can syntax highlight .many files is definitely on my radar.
