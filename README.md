@@ -5,11 +5,13 @@
 
 # [RunMany](https://pypi.org/project/run-many/)
 
+**[Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [About](https://github.com/discretegames/runmany#about)**
+
 **A tool to run many programs written in many languages from one file.**
 
 Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in *the same* file using any programming languages you like, and then run them all at once.
 
-For example, given the [simple file](https://github.com/discretegames/runmany/blob/main/examples/simple.many)
+For example, given the simple file ([simple.many](https://github.com/discretegames/runmany/blob/main/examples/simple.many))
 
 ```text
 ~~~| Python |~~~
@@ -20,7 +22,7 @@ console.log("Hi")
 fn main() { println!("Hi"); }
 ```
 
-RunMany will number and run each program in it and give [the output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt)
+RunMany will number and run each program ([simple_output.txt](https://github.com/discretegames/runmany/blob/main/examples/simple_ouput.txt))
 
 ```text
 ------------------------------------------------------------------------------------------
@@ -87,7 +89,7 @@ By default, output goes to stdout and [default_settings.json](https://github.com
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try. Note that they were run on a Windows machine with the necessary interpreters and compilers installed.
 
-The [default JSON](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json#L18) has preset commands for a handful of languages, namely Python, Python 2, JavaScript, TypeScript, Java, Kotlin, Rust, Go, C, C++, and C#. But any of these can be overridden and new languages can be added by populating the "languages" key in a custom JSON. (todo link to more details below)
+The default JSON has [presets](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json#L18) for a handful of languages, namely Python, Python 2, JavaScript, TypeScript, Java, Kotlin, Rust, Go, C, C++, and C#. But any of these can be overwritten and new languages can be added by populating the `"languages"` key in a custom JSON. More details [below](https://github.com/discretegames/runmany#settings-json).
 
 ## From Python
 
@@ -140,7 +142,7 @@ A section delimiter must reside on its own line that has no leading whitespace, 
 
 Putting `!` at the front of any section delimiter disables it and its entire section until the next delimiter.
 
-The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output (todo see below). Otherwise, lines that are not section delimiters (nor comments or EOF markers) are treated as part of the section content.
+The part before the very first delimiter in a .many file is treated as a comment area and gets copied to the prologue part of the output. Otherwise, lines that are not section delimiters (nor comments or EOF markers) are treated as part of the section content.
 
 **There are 6 types of section delimiters:**
 
@@ -173,7 +175,7 @@ The part before the very first delimiter in a .many file is treated as a comment
    - The section content is stripped of newlines (except one left trailing) and added to the list of successive stdin inputs to give to the languages listed in the header.
    - In this way, multiple stdin inputs may be tested at once without code duplication.
 
-The language names in the Code Header, Argv Header, and Stdin Header are always stripped of whitespace and made lowercase before checking if they match a language defined in the settings JSON. The special keyword `All` can be used as a language name and it will auto-expand to all the languages defined in the settings JSON. This is useful for giving the same argv or stdin to all programs. (todo mention how it can be changed below)
+The language names in the Code Header, Argv Header, and Stdin Header are always stripped of whitespace and made lowercase before checking if they match a language defined in the settings JSON. The special keyword `All` can be used as a language name and it will auto-expand to all the languages defined in the settings JSON. This is useful for giving the same argv or stdin to all programs.
 
 Blank lines around section delimiters are only for readability and not required.
 
@@ -209,7 +211,7 @@ console.log(`The arg was '${process.argv[2]}'`)
 print('this section is after the EOf marker')
 ```
 
-[The output](https://github.com/discretegames/runmany/blob/main/examples/output_syntax.many) first has all the results of running the Python program on the `$$$|$$$` separated stdins, then result of JavaScript program given its single argv.
+[The output](https://github.com/discretegames/runmany/blob/main/examples/output_syntax.many) first has all the results of running the Python program on the `$$$|$$$` separated stdins, then the result of JavaScript program given its single argv.
 
 ```text
 ------------------------------------------------------------------------------------------
@@ -254,9 +256,33 @@ The arg was '--flag'
 
 # Settings JSON
 
-TODO - describe possible values and behavior of every setting, how to read the output
+The settings JSON defines what languages RunMany can run and how to run them. It also defines how the output will be formatted.
 
-command formatting
+As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) holds the default values for all settings which are automatically used if not present in the provided settings JSON, or if none is provided.
+
+The setting to add a custom language is the `"languages"` key, which maps to a list of JSON objects, each of which must have a `"name"` to identify the language and a `"command"` to run it (todo link). However, objects in `"languages"` with a matching `"name"` in `"default_languages"` will automatically inherit its other values such as `"command"` and `"ext"`. Additionally, some settings that exist in the base JSON object are inherited by the language objects and can be overwritten.
+
+So, for example, a settings JSON of
+
+```json
+{ "languages": [{"name": "Rust", "timeout": 5.0 }] }
+```
+
+will make Rust programs have a 5 second time limit rather than the default of 10, and `"command"` does not need to be present because Rust is in the default `"default_languages"`.
+
+It is advised to not set `"default_languages"` in your settings JSON file and only change `"languages"`.
+
+## Settings Behavior
+
+A list of all settings and whether or not they will be inherited by language objects.
+
+1. `"all_name"` (string, inherited) - The shorthand name for all known languages in a section header.
+
+2. todo
+
+## Command Placeholders
+
+todo
 
 # About
 
