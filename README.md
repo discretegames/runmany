@@ -260,7 +260,7 @@ The settings JSON defines what languages RunMany can run and how to run them. It
 
 As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) holds the default values for all settings which are automatically used if not present in the provided settings JSON, or if none is provided.
 
-The setting to add a custom language is the `"languages"` key, which maps to a list of JSON objects, each of which must have a `"name"` to identify the language and a `"command"` to run it (see [command format](https://github.com/discretegames/runmany#command-format)). However, objects in `"languages"` with a matching `"name"` in `"default_languages"` will automatically inherit its other values, such as `"command"` and `"ext"`. Additionally, most settings that exist in the base JSON object are inherited by the language objects and can be overwritten.
+The setting to add a custom language is the `"languages"` key, which maps to a list of JSON 'language' objects, each of which must have a `"name"` string to identify it and a `"command"` string to run it (see [command format](https://github.com/discretegames/runmany#command-format)). However, objects in `"languages"` with a matching `"name"` in `"default_languages"` will automatically inherit its other values, such as `"command"` and `"ext"`. Also, most settings that exist in the base JSON object are inherited by the language objects and can be overwritten.
 
 So, for example, a settings JSON of
 
@@ -274,29 +274,49 @@ It is advised to not set `"default_languages"` in your settings JSON file and on
 
 ## List of Settings
 
-All settings described, and whether or not they will be inherited by language objects in `"languages"`.
+All settings described, and whether or not they are inherited by language objects in `"languages"`.
 
-| JSON Key          | Type   | Default  | Inherited | Description  |
-| ----------------- | ------ | -------- | --------- | ------------ |
-| `"all_name"`      | string | `"All"`  | no        | The shorthand name that expands to all languages in a section header.
-| `"check_equal"`   | bool   | `true`   | no        | Whether the second line of the epilogue that checks stdout equality is shown.
-| `"timeout"`       | float  | `10.0`   | yes       | The time limit of each program in seconds.
-| `"stderr"`        | string | `"nzec"` | yes       | `"always"` to always combine program stderr streams with stdout. `"never"` to always hide program stderr streams. `"nzec"` to only show stderr streams when programs have non-zero exit codes.
-| `"ext"`           | string | `""`     | yes       | The file extension of a language. Best to always define in the language object.
-| `"show_prologue"` | bool   | `true`   | no        | Whether the leading output lines that start "RunMany Result" are shown.
-| `"show_runs"`     | bool   | `true`   | no        | Whether the list of runs (the bulk of the output) is shown.
-| `"show_time"`     | bool   | `false`  | yes       | Whether the execution time of each program is shown.
-| `"show_command"`  | bool   | `false`  | yes       | Whether the command used to run each program is shown.
-| `"show_code"`     | bool   | `false`  | yes       | Whether the source code of the program is shown.
-| `"show_argv"`     | bool   | `true`   | yes       | Whether the argv for the program is shown (when present).
-| `"show_stdin"`    | bool   | `true`   | yes       | Whether the stdin for the program is shown (when present).
-| `"show_output"`   | bool   | `true`   | yes       | Whether the output for the program is shown.
-| `"show_errors"`   | bool   | `true`   | no        | Whether RunMany errors like `***\| RunMany Error: ... \|***` are sent to stderr or silenced.
-| `"show_epilogue"` | bool   | `true`   | no        | Whether the trailing output lines that count successful runs are shown.
+| JSON Key          | Type   | Default  | Inherited | Description                                                                                                                                                                                    |
+| ----------------- | ------ | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"all_name"`      | string | `"All"`  | no        | The shorthand name that expands to all languages in a section header.                                                                                                                          |
+| `"check_equal"`   | bool   | `true`   | no        | Whether the second line of the epilogue that checks stdout equality is shown.                                                                                                                  |
+| `"timeout"`       | float  | `10.0`   | yes       | The time limit of each program in seconds.                                                                                                                                                     |
+| `"stderr"`        | string | `"nzec"` | yes       | `"always"` to always combine program stderr streams with stdout. `"never"` to always hide program stderr streams. `"nzec"` to only show stderr streams when programs have non-zero exit codes. |
+| `"ext"`           | string | `""`     | yes       | The file extension of a language. Best to always define in the language object.                                                                                                                |
+| `"show_prologue"` | bool   | `true`   | no        | Whether the leading output lines that start "RunMany Result" are shown.                                                                                                                        |
+| `"show_runs"`     | bool   | `true`   | no        | Whether the list of runs (the bulk of the output) is shown.                                                                                                                                    |
+| `"show_time"`     | bool   | `false`  | yes       | Whether the execution time of each program is shown.                                                                                                                                           |
+| `"show_command"`  | bool   | `false`  | yes       | Whether the command used to run each program is shown.                                                                                                                                         |
+| `"show_code"`     | bool   | `false`  | yes       | Whether the source code of the program is shown.                                                                                                                                               |
+| `"show_argv"`     | bool   | `true`   | yes       | Whether the argv for the program is shown (when present).                                                                                                                                      |
+| `"show_stdin"`    | bool   | `true`   | yes       | Whether the stdin for the program is shown (when present).                                                                                                                                     |
+| `"show_output"`   | bool   | `true`   | yes       | Whether the output for the program is shown.                                                                                                                                                   |
+| `"show_errors"`   | bool   | `true`   | no        | Whether RunMany errors like `***\| RunMany Error: ... \|***` are sent to stderr or silenced.                                                                                                   |
+| `"show_epilogue"` | bool   | `true`   | no        | Whether the trailing output lines that count successful runs are shown.                                                                                                                        |
 
 ## Command Format
 
-todo
+The `"command"` key of a language object defines the terminal command that is run to execute the language.
+
+Placeholders like `$file` and `$dir` are used in a command to refer to the temporary file RunMany creates for the code of each program it runs, or the directory that file is stored in.
+
+| Placeholder  | Portion of `.../dir/file.ext` |
+| ------------ | ----------------------------- |
+| `$rawdir`    | `.../dir`
+| `$dir`       | `".../dir"`
+| `$rawfile`   | `.../dir/file.ext`
+| `$file`      | `".../dir/file.ext"`
+| `$rawbranch` | `.../dir/file`
+| `$branch`    | `".../dir/file"`
+| `$name`      | `file.ext`
+| `$stem`      | `file`
+| `$ext`       | `.ext`
+| `$sep`       | `/` (OS specific)
+| `$argv`      | n/a - the argv is inserted here
+
+Note that some placeholders are "quoted" and some are not. Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
+
+If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
 
 # About
 
