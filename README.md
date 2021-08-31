@@ -49,7 +49,7 @@ Hi
 
 In general RunMany can be used for:
 
-- Crestomathy - Writing programs that do the same thing in many languages, like
+- Crestomathy - Writing programs that do the same thing in many languages, like on
  [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
  ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
 - Performance Testing - Timing different implementations of a program, even across languages.
@@ -65,7 +65,7 @@ In general RunMany can be used for:
 pip install run-many
 ```
 
-[PyPI Package Page](https://pypi.org/project/run-many/) | [TestPyPI bleeding edge version](https://test.pypi.org/project/run-many/)
+[PyPI Package Page](https://pypi.org/project/run-many/) | [Bleeding edge version on TestPyPI](https://test.pypi.org/project/run-many/)
 
 # Usage
 
@@ -85,7 +85,7 @@ runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <inp
 - `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted
 - `<output-file>` is the optional file to send the output to
 
-By default, output goes to stdout and [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback when a custom settings json is not provided or is missing any settings.
+By default, output goes to stdout and [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback when a custom settings JSON is not provided or is missing any settings.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try. Note that they were run on a Windows machine with the necessary interpreters and compilers installed.
 
@@ -120,7 +120,7 @@ The function `run_many.cmdline` is also present as an alternative to using the c
 
 # .many Syntax
 
-The .many file format is what runmany expects when given a file to run. Though, of course, ".many" is not required as an extension. Since .many files may contain syntax from arbitrary programming languages, a small, unique set of syntax was required to demarcate the various parts.
+The .many file format is what RunMany expects when given a file to run. Though, of course, ".many" is not required as an extension. Since .many files may contain syntax from arbitrary programming languages, a small, unique set of syntax was required to demarcate the various parts.
 
 ## Comments and EOF Marker
 
@@ -156,23 +156,23 @@ The part before the very first delimiter in a .many file is treated as a comment
    - Is merely shorthand for exactly repeating the previous Code Header delimiter.
 
 3. Argv Header: `@@@| language1 | language2 | language3 | ... |@@@`
-   - A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for ***a***rgv).
+   - A `|` separated list of languages, starting `@@@|` and ending `|@@@` (`@` for *a*rgv).
    - The section content is stripped of newlines and will be used as the command line arguments for the listed languages in any following code sections.
    - Overwrites any previous Argv Header and Argv List sections for the listed languages.
 
 4. Argv List: `@@@|@@@`
    - Expects to appear after an Argv Header section or another Argv List section.
-   - The section content is stripped of newlines and added to the list of successive argv inputs to give to the languages listed in the header.
+   - The section content is stripped of newlines and added to the list of successive argv inputs to give to the languages listed in the previous Argv Header.
    - In this way, multiple argv inputs may be tested at once without code duplication.
 
 5. Stdin Header: `$$$| language1 | language2 | language3 | ... |$$$`
-   - A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for ***s***tdin).
+   - A `|` separated list of languages, starting `$$$|` and ending `|$$$` (`$` for *s*tdin).
    - The section content is stripped of newlines (except one left trailing) and will be used as the stdin for the listed languages in any following code sections.
    - Overwrites any previous Stdin Header and Stdin List sections for the listed languages.
 
 6. Stdin List: `$$$|$$$`
    - Expects to appear after a Stdin Header section or another Stdin List section.
-   - The section content is stripped of newlines (except one left trailing) and added to the list of successive stdin inputs to give to the languages listed in the header.
+   - The section content is stripped of newlines (except one left trailing) and added to the list of successive stdin inputs to give to the languages listed in the previous Stdin Header.
    - In this way, multiple stdin inputs may be tested at once without code duplication.
 
 The language names in the Code Header, Argv Header, and Stdin Header are always stripped of whitespace and made lowercase before checking if they match a language defined in the settings JSON. The special keyword `All` (which [can be changed](https://github.com/discretegames/runmany#list-of-settings)) can be used as a language name and it will auto-expand to all the languages defined in the settings JSON. This is useful for giving the same argv or stdin to all programs.
