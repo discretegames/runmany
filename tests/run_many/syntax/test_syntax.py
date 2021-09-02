@@ -140,6 +140,8 @@ $$$| All |$$$
 %%%||%%%
 %%%| spacing matters |%%%
 ~~~| Python |~~~
+!%%%| exclamation is ok |%%% 
+!%%%|%%%
 print(input())
 %%%||%%%
 print(input())

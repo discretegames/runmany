@@ -183,9 +183,8 @@ class Section:
     @staticmethod
     def line_is_comment(line: str) -> bool:
         line = line.rstrip()
-        # todo allow !%%%| comments |%%%
-        return removeprefix(line, COMMENT_PREFIX) == EXIT_SEP or \
-            line.startswith(COMMENT_START) and line.endswith(COMMENT_END)
+        return line == COMMENT_PREFIX + EXIT_SEP or line.endswith(COMMENT_END) and \
+            (line.startswith(COMMENT_START) or line.startswith(COMMENT_PREFIX + COMMENT_START))
 
     @staticmethod
     def line_is_header(line: str) -> bool:
