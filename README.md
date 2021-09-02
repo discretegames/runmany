@@ -325,4 +325,4 @@ I was driven to make RunMany by my desire to learn more programming languages co
 
 The obvious limitation of RunMany and the .many file format is that syntax highlighting and tooling like IntelliSense doesn't work. Making a VSCode extension that can syntax highlight .many files is definitely on my radar.
 
-# todo add to readme: spacing,!%%%| comment, prologue changes
+# todo add to readme: spacing,!%%%| comment, prologue changes, commented -> disabled

@@ -111,7 +111,7 @@ print('stdin reset')
     verify_output('stdin.txt', many_file)
 
 
-def test_commented_sections() -> None:
+def test_disabled_sections() -> None:
     many_file = '''\
 $$$| Python |$$$
 A
@@ -128,7 +128,7 @@ console.log('unseen')
 ~~~|~~~
 print(4, input())
 '''
-    verify_output('commented_sections.txt', many_file)
+    verify_output('disabled_sections.txt', many_file)
 
 
 def test_comments() -> None:
