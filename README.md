@@ -324,3 +324,5 @@ If `$` is not present anywhere in the command string, ` $file $argv` is appended
 I was driven to make RunMany by my desire to learn more programming languages combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
 
 The obvious limitation of RunMany and the .many file format is that syntax highlighting and tooling like IntelliSense doesn't work. Making a VSCode extension that can syntax highlight .many files is definitely on my radar.
+
+# todo add to readme: spacing,!%%%| comment, prologue changes

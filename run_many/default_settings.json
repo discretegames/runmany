@@ -4,6 +4,7 @@
 	"languages": [],
 	"timeout": 10.0,
 	"stderr": "nzec",
+	"spacing": 1,
 	"ext": "",
 	"show_prologue": true,
 	"show_runs": true,

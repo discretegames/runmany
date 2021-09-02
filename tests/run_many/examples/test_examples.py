@@ -1,6 +1,8 @@
 import pytest
 from run_many import runmany_to_s
 
+# TODO fix example output line, and in readme
+
 
 def verify_example(filestem: str) -> None:
     file = f'examples/{filestem}.many'

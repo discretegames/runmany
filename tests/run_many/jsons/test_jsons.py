@@ -4,6 +4,7 @@ from typing import Dict, Any
 from contextlib import redirect_stderr
 from run_many import runmany_to_s
 
+# TODO redo tests so inputs are files and outputs are in code??
 
 default_settings_json = {
     "all_name": "All",

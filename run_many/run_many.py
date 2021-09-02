@@ -304,34 +304,34 @@ class Run:
         self.language_data = language_data
 
     @staticmethod
-    def make_output_segment(title: str, section: Section, content: Optional[str] = None) -> str:
+    def make_output_part(title: str, section: Section, content: Optional[str] = None) -> str:
         if content is None:
             content = section.content.strip('\r\n')
         return f'{f" {title} line {section.line_number + 1} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}\n{content}'
 
-    def output(self, time_taken: float, command: str, stdout: str, exit_code: Union[int, str], run_number: int) -> str:
+    def make_output(self, run_number: int, spacing: int, time_taken: float, exit_code: Union[int, str], command: str,
+                    stdout: str) -> str:
         parts = []
 
-        header = f'{run_number}. {self.language_data.name}'
+        headline = f'{run_number}. {self.language_data.name}'
         if self.language_data.show_time:
-            header += f' ({time_taken:.2f}s)'
+            headline += f' ({time_taken:.2f}s)'
         if exit_code != 0:
-            header += f' [exit code {exit_code}]'
+            headline += f' [exit code {exit_code}]'
         if self.language_data.show_command:
-            header += f' > {command}'
-        parts.append(header + '\n')
+            headline += f' > {command}'
+        parts.append(headline)
 
         if self.language_data.show_code:
-            parts.append(self.make_output_segment('code at', self.code_section))
+            parts.append(self.make_output_part('code at', self.code_section))
         if self.argv_section and self.argv_section.has_content and self.language_data.show_argv:
-            parts.append(self.make_output_segment('argv at', self.argv_section))
+            parts.append(self.make_output_part('argv at', self.argv_section))
         if self.stdin_section and self.stdin_section.has_content and self.language_data.show_stdin:
-            parts.append(self.make_output_segment('stdin at', self.stdin_section))
+            parts.append(self.make_output_part('stdin at', self.stdin_section))
         if self.language_data.show_output:
-            parts.append(self.make_output_segment('output from', self.code_section, stdout))
-        parts.append('\n')  # TODO Have compact option that does not add this newline? or spacing = 0+ option
+            parts.append(self.make_output_part('output from', self.code_section, stdout))
 
-        return ''.join(parts)
+        return '\n'.join(parts) + '\n' * spacing
 
     def get_stderr(self) -> int:
         if self.language_data.stderr in STDERR_NZEC:
@@ -341,7 +341,7 @@ class Run:
         else:
             return subprocess.STDOUT
 
-    def run(self, directory: str, run_number: int) -> Tuple[str, str, bool]:
+    def run(self, directory: str, run_number: int, spacing: int) -> Tuple[str, str, bool]:
         with NamedTemporaryFile(mode='w', suffix=self.language_data.ext, dir=directory, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
@@ -366,9 +366,8 @@ class Run:
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
                 stdout += result.stderr
 
-        output = self.output(time_taken, command, stdout, exit_code, run_number)
+        output = self.make_output(run_number, spacing, time_taken, exit_code, command, stdout)
         return output, stdout, exit_code == 0
-
 
 def prologue(content: str) -> str:
     content = content.strip()
@@ -464,7 +463,7 @@ Defaults to False.
                         print(prologue(run))
                 else:
                     run_number = total_runs + 1
-                    output, stdout, success = run.run(directory, run_number)
+                    output, stdout, success = run.run(directory, run_number, settings.spacing)
                     total_runs += 1
                     successful_runs += success
                     if settings.show_runs:

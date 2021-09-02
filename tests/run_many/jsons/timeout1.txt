@@ -1,3 +1,3 @@
 1. Python [exit code T]
--------------------------- output --------------------------
+-------------------- output from line 2 --------------------
 TIMED OUT OF 0.09s LIMIT
