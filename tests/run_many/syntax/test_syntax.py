@@ -75,6 +75,10 @@ overwrite
 ~~~| Python | Python 2 |~~~
 import sys
 print(sys.argv[1])
+
+@@@| All |@@@
+~~~| Python |~~~
+print('argv reset')
 '''
     verify_output('argv.txt', many_file)
 
@@ -96,6 +100,12 @@ $$$| Python 2 |$$$
 0
 ~~~| Python | Python 2 |~~~
 print(input())
+
+$$$| Python |$$$
+
+
+~~~| Python |~~~
+print('stdin reset')
 '''
     verify_output('stdin.txt', many_file)
 

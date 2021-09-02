@@ -118,7 +118,7 @@ def test_show_runs() -> None:
 def test_show_time() -> None:
     settings_json = combine_jsons({"show_runs": True, "show_time": True})
     actual = runmany_to_s(default_input, settings_json, from_string=True)
-    assert actual.startswith("1. Python [0.")
+    assert actual.startswith("1. Python (0.")
 
 
 def test_show_command() -> None:

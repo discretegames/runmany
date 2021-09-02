@@ -183,6 +183,7 @@ class Section:
     @staticmethod
     def line_is_comment(line: str) -> bool:
         line = line.rstrip()
+        # todo allow !%%%| comments |%%%
         return removeprefix(line, COMMENT_PREFIX) == EXIT_SEP or \
             line.startswith(COMMENT_START) and line.endswith(COMMENT_END)
 
@@ -219,6 +220,7 @@ class Section:
 
         raw_header = removeprefix(self.header, COMMENT_PREFIX)
         self.is_sep = raw_header in (CODE_SEP, ARGV_SEP, STDIN_SEP)
+        self.has_content = bool(content.strip('\r\n'))
         self.content = self.strip_content(content, self.type)
         self.line_number = line_number
 
@@ -248,7 +250,7 @@ def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Se
             continue
         if Section.line_is_header(line):
             if not header:
-                yield ''.join(section_lines)  # Yield prologue. Only happens once.
+                yield ''.join(section_lines)  # Yield prologue. Only happens once. # TODO remove prologue stuff
             else:
                 yield current_section()
             header = line
@@ -262,6 +264,7 @@ def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Se
 
 
 class PathParts:
+    # todo put this back to how it was
     def __init__(self, path: str) -> None:
         def quote(s: str) -> str:
             return f'"{s}"'
@@ -301,7 +304,7 @@ class Run:
         self.stdin_section = stdin_section
         self.language_data = language_data
 
-    # TODO Add line numbers for output?
+    # TODO Add line numbers for output? --- output from line 25 ---
     @staticmethod
     def output_section(name: str, section: Optional[Section] = None) -> str:
         content = ''
@@ -314,24 +317,24 @@ class Run:
         parts = []
 
         header = f'{run_number}. {self.language_data.name}'
+        if self.language_data.show_time:
+            header += f' ({time_taken:.2f}s)'
         if exit_code != 0:
             header += f' [exit code {exit_code}]'
-        if self.language_data.show_time:
-            header += f' [{time_taken:.2f}s]'
         if self.language_data.show_command:
             header += f' > {command}'
         parts.append(header + '\n')
 
         if self.language_data.show_code:
             parts.append(self.output_section('code', self.code_section))
-        if self.argv_section and self.language_data.show_argv:
+        if self.argv_section and self.argv_section.has_content and self.language_data.show_argv:
             parts.append(self.output_section('argv', self.argv_section))
-        if self.stdin_section and self.language_data.show_stdin:
+        if self.stdin_section and self.stdin_section.has_content and self.language_data.show_stdin:
             parts.append(self.output_section('stdin', self.stdin_section))
         if self.language_data.show_output:
             parts.append(self.output_section('output'))
             parts.append(stdout)
-        parts.append('\n')  # TODO Have compact option that does not add this newline?
+        parts.append('\n')  # TODO Have compact option that does not add this newline? or spacing = 0+ option
 
         return ''.join(parts)
 
@@ -348,8 +351,8 @@ class Run:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
-        argv = self.argv_section.content if self.argv_section else ''
-        stdin = self.stdin_section.content if self.stdin_section else None
+        argv = self.argv_section.content if self.argv_section and self.argv_section.has_content else ''
+        stdin = self.stdin_section.content if self.stdin_section and self.stdin_section.has_content else None
         command = PathParts(code_file_name).fill_command(cast(str, self.language_data.command), argv)
 
         start_time = time.perf_counter()
@@ -434,10 +437,11 @@ def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
 
         elif section.type is SectionType.CODE:
             for language in lead_section.languages:
-                # Todo? A way to reset argv and stdin back to None would go here.
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
                         yield Run(section, argv_section, stdin_section, settings[language])
+
+# todo split up into files - runmanys and main, run, section, settings, constants
 
 
 def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: JsonLike = None, *,
