@@ -73,7 +73,7 @@ class Section:
         self.disabled = self.header.startswith(Syntax.DISABLE_PREFIX)
 
         raw_header = removeprefix(self.header, Syntax.DISABLE_PREFIX)
-        self.is_sep = raw_header in (Syntax.CODE_SEP, Syntax.ARGV_SEP, Syntax.STDIN_SEP)
+        self.is_sep = raw_header in Syntax.SEPS
         self.has_content = bool(content.strip('\r\n'))
         self.content = self.strip_content(content, self.type)
         self.line_number = line_number

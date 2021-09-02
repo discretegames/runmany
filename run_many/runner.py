@@ -33,7 +33,6 @@ class Placeholders:
 
 
 class PathParts:
-    # todo put this back to how it was
     def __init__(self, path: str) -> None:
         def quote(s: str) -> str:
             return f'"{s}"'
@@ -188,19 +187,13 @@ def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
         else:
             lead_section = section
 
-        if section.type is SectionType.ARGV:  # todo dry up
+        if section.type is SectionType.ARGV or section.type is SectionType.STDIN:
+            input_dict = argvs if section.type is SectionType.ARGV else stdins
             for language in lead_section.languages:
                 if not section.is_sep:
-                    argvs[language].clear()
-                argvs[language].append(section)
-
-        elif section.type is SectionType.STDIN:
-            for language in lead_section.languages:
-                if not section.is_sep:
-                    stdins[language].clear()
-                stdins[language].append(section)
-
-        elif section.type is SectionType.CODE:
+                    input_dict[language].clear()
+                input_dict[language].append(section)
+        else:
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
