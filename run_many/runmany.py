@@ -10,7 +10,7 @@ from typing import List, DefaultDict, Union, Optional, TextIO, cast
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
 from run_many.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
-from run_many.runner import run_iterator, prologue, epilogue  # noqa: E402
+from run_many.runner import run_iterator, epilogue  # noqa: E402
 from run_many.settings import Settings  # noqa: E402
 
 
@@ -34,18 +34,14 @@ Defaults to False.
         context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
         with context_manager as manyfile, TemporaryDirectory() as directory:
             for run in run_iterator(manyfile, settings):
-                if isinstance(run, str):
-                    if settings.show_prologue:
-                        print(prologue(run))
-                else:
-                    run_number = total_runs + 1
-                    output, stdout, success = run.run(directory, run_number, settings.spacing)
-                    total_runs += 1
-                    successful_runs += success
-                    if settings.show_runs:
-                        print(output)
-                    if settings.check_equal:
-                        equal_stdouts[stdout].append(run_number)
+                run_number = total_runs + 1
+                output, stdout, success = run.run(directory, run_number, settings.spacing)
+                total_runs += 1
+                successful_runs += success
+                if settings.show_runs:
+                    print(output)
+                if settings.check_equal:
+                    equal_stdouts[stdout].append(run_number)
             if settings.show_epilogue:
                 print(epilogue(total_runs, successful_runs, equal_stdouts if settings.check_equal else None))
 

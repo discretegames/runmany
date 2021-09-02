@@ -139,13 +139,6 @@ class Run:
         return output, stdout, exit_code == 0
 
 
-def prologue(content: str) -> str:
-    content = content.strip()
-    if content:
-        content = '\n' + content
-    return f'{OUTPUT_DIVIDER}\nRunMany Result{content}\n{OUTPUT_DIVIDER}\n\n'
-
-
 def epilogue(total_runs: int, successful_runs: int, equal_stdouts: Optional[DefaultDict[str, List[int]]]) -> str:
     line1 = f'{successful_runs}/{total_runs} program{"" if total_runs == 1 else "s"} successfully run'
     if successful_runs < total_runs:
@@ -166,16 +159,12 @@ def epilogue(total_runs: int, successful_runs: int, equal_stdouts: Optional[Defa
     return f'{OUTPUT_DIVIDER}\n{line1}{line2}\n{OUTPUT_DIVIDER}'
 
 
-def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
+def run_iterator(file: TextIO, settings: Settings) -> Iterator[Run]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
 
     for section in section_iterator(file, settings):
-        if isinstance(section, str):
-            yield section  # Yield prologue. Only happens once.
-            continue
-
         if section.disabled:
             continue
 

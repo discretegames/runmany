@@ -11,7 +11,7 @@ default_settings_json = {
     "languages": [],
     "timeout": 10.0,
     "stderr": None,
-    "show_prologue": False,
+    "show_prologue": False,  # TODO change prologue test
     "show_runs": True,
     "show_command": False,
     "show_code": False,

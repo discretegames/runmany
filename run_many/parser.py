@@ -90,7 +90,7 @@ class Section:
                                   ' not found in json. Skipping language.')
 
 
-def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Section]]:
+def section_iterator(file: TextIO, settings: Settings) -> Iterator[Section]:
     def current_section() -> Section:
         return Section(cast(str, header), ''.join(section_lines), settings, header_line_number)
 
@@ -103,9 +103,7 @@ def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Se
         if Section.line_is_comment(line):
             continue
         if Section.line_is_header(line):
-            if not header:
-                yield ''.join(section_lines)  # Yield prologue. Only happens once. # TODO remove prologue stuff
-            else:
+            if header:
                 yield current_section()
             header = line
             header_line_number = line_number
