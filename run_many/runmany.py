@@ -7,9 +7,11 @@ from contextlib import redirect_stdout
 from tempfile import TemporaryDirectory
 from typing import List, DefaultDict, Union, Optional, TextIO, cast
 
-from .settings import Settings
-from .runner import run_iterator, prologue, epilogue
-from .util import PathLike, JsonLike, nullcontext, debugging
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
+
+from run_many.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
+from run_many.runner import run_iterator, prologue, epilogue  # noqa: E402
+from run_many.settings import Settings  # noqa: E402
 
 
 def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: JsonLike = None, *,
@@ -108,4 +110,5 @@ if __name__ == '__main__':  # pragma: no cover
         main()
     else:
         example = 'argv'
-        runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('examples').joinpath(f'{example}.many'))
+        print(__file__)
+        runmany(pathlib.Path(__file__).parent.parent.joinpath('examples').joinpath(f'{example}.many'))
