@@ -1,5 +1,3 @@
-# TODO docstrings for all main files
-
 import io
 import sys
 import pathlib

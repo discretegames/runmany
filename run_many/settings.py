@@ -1,7 +1,8 @@
-import types
-from typing import Any, Dict, List
 import json
+import types
 import pathlib
+from typing import Any, Dict, List
+
 from .util import JsonLike, print_err, display_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'

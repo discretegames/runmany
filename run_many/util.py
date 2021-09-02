@@ -1,8 +1,8 @@
 
 import os
 import sys
-from typing import Union, Any, TextIO, Iterator
 from contextlib import contextmanager
+from typing import Any, Union, TextIO, Iterator
 
 display_errors = True  # The only mutating global.
 

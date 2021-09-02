@@ -1,8 +1,8 @@
 import enum
-from typing import Optional, List, Tuple, Iterator, Union, TextIO, cast
-from .util import removeprefix, removesuffix, print_err
+from typing import List, Optional, Tuple, Iterator, Union, TextIO, cast
+
 from .settings import Settings
-# todo organize imports in all main files
+from .util import removeprefix, removesuffix, print_err
 
 
 class Syntax:
