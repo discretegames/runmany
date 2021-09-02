@@ -1,6 +1,5 @@
 {
 	"all_name": "All",
-	"check_equal": true,
 	"languages": [],
 	"timeout": 10.0,
 	"stderr": "nzec",
@@ -14,7 +13,8 @@
 	"show_stdin": true,
 	"show_output": true,
 	"show_errors": true,
-	"show_epilogue": true,
+	"show_stats": true,
+	"show_equal": true,
 	"default_languages": [
 		{
 			"name": "Python",

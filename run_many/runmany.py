@@ -10,7 +10,7 @@ from typing import List, DefaultDict, Union, Optional, TextIO, cast
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
 from run_many.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
-from run_many.runner import run_iterator, epilogue  # noqa: E402
+from run_many.runner import run_iterator, make_footer  # noqa: E402
 from run_many.settings import Settings  # noqa: E402
 
 
@@ -40,10 +40,9 @@ Defaults to False.
                 successful_runs += success
                 if settings.show_runs:
                     print(output)
-                if settings.check_equal:
+                if settings.show_equal:
                     equal_stdouts[stdout].append(run_number)
-            if settings.show_epilogue:
-                print(epilogue(total_runs, successful_runs, equal_stdouts if settings.check_equal else None))
+            print(make_footer(settings, total_runs, successful_runs, equal_stdouts))
 
 
 def runmany_to_s(many_file: Union[PathLike, str], settings_json: JsonLike = None, *, from_string: bool = False) -> str:

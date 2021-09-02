@@ -8,7 +8,7 @@ from run_many import runmany_to_s
 
 default_settings_json = {
     "all_name": "All",
-    "check_equal": False,
+    "check_equal": False,  # todo rename to show_equal in tests
     "languages": [],
     "timeout": 10.0,
     "stderr": None,
@@ -21,7 +21,7 @@ default_settings_json = {
     "show_stdin": False,
     "show_output": False,
     "show_errors": False,
-    "show_epilogue": False
+    "show_epilogue": False  # todo rename epilogue to footer in tests
 }
 
 default_input = '''\

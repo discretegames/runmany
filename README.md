@@ -276,23 +276,22 @@ It is advised to not set `"default_languages"` in your settings JSON file and on
 
 All settings described, and whether or not they are inherited by language objects in `"languages"`.
 
-| JSON Key          | Type   | Default  | Inherited | Description                                                                                                                                                                                    |
-| ----------------- | ------ | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `"all_name"`      | string | `"All"`  | no        | The shorthand name that expands to all languages in a section header.                                                                                                                          |
-| `"check_equal"`   | bool   | `true`   | no        | Whether the second line of the epilogue that checks stdout equality is shown.                                                                                                                  |
-| `"timeout"`       | float  | `10.0`   | yes       | The time limit of each program in seconds.                                                                                                                                                     |
-| `"stderr"`        | string | `"nzec"` | yes       | `"always"` to always combine program stderr streams with stdout. `"never"` to always hide program stderr streams. `"nzec"` to only show stderr streams when programs have non-zero exit codes. |
-| `"ext"`           | string | `""`     | yes       | The file extension of a language. Best to always define in the language object.                                                                                                                |
-| `"show_prologue"` | bool   | `true`   | no        | Whether the leading output lines that start "RunMany Result" are shown.                                                                                                                        |
-| `"show_runs"`     | bool   | `true`   | no        | Whether the list of runs (the bulk of the output) is shown.                                                                                                                                    |
-| `"show_time"`     | bool   | `false`  | yes       | Whether the execution time of each program is shown.                                                                                                                                           |
-| `"show_command"`  | bool   | `false`  | yes       | Whether the command used to run each program is shown.                                                                                                                                         |
-| `"show_code"`     | bool   | `false`  | yes       | Whether the source code of the program is shown.                                                                                                                                               |
-| `"show_argv"`     | bool   | `true`   | yes       | Whether the argv for the program is shown (when present).                                                                                                                                      |
-| `"show_stdin"`    | bool   | `true`   | yes       | Whether the stdin for the program is shown (when present).                                                                                                                                     |
-| `"show_output"`   | bool   | `true`   | yes       | Whether the output for the program is shown.                                                                                                                                                   |
-| `"show_errors"`   | bool   | `true`   | no        | Whether RunMany errors like `***\| RunMany Error: ... \|***` are sent to stderr or silenced.                                                                                                   |
-| `"show_epilogue"` | bool   | `true`   | no        | Whether the trailing output lines that count successful runs are shown.                                                                                                                        |
+| JSON Key         | Type   | Default  | Inherited | Description                                                                                                                                                                                    |
+| ---------------- | ------ | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"all_name"`     | string | `"All"`  | no        | The shorthand name that expands to all languages in a section header.                                                                                                                          |
+| `"timeout"`      | float  | `10.0`   | yes       | The time limit of each program in seconds.                                                                                                                                                     |
+| `"stderr"`       | string | `"nzec"` | yes       | `"always"` to always combine program stderr streams with stdout. `"never"` to always hide program stderr streams. `"nzec"` to only show stderr streams when programs have non-zero exit codes. |
+| `"ext"`          | string | `""`     | yes       | The file extension of a language. Best to always define in the language object.                                                                                                                |
+| `"show_time"`    | bool   | `false`  | yes       | Whether the execution time of each program is shown.                                                                                                                                           |
+| `"show_command"` | bool   | `false`  | yes       | Whether the command used to run each program is shown.                                                                                                                                         |
+| `"show_code"`    | bool   | `false`  | yes       | Whether the source code of the program is shown.                                                                                                                                               |
+| `"show_argv"`    | bool   | `true`   | yes       | Whether the argv for the program is shown (when present).                                                                                                                                      |
+| `"show_stdin"`   | bool   | `true`   | yes       | Whether the stdin for the program is shown (when present).                                                                                                                                     |
+| `"show_output"`  | bool   | `true`   | yes       | Whether the output for the program is shown.                                                                                                                                                   |
+| `"show_errors"`  | bool   | `true`   | no        | Whether RunMany errors like `***\| RunMany Error: ... \|***` are sent to stderr or silenced.                                                                                                   |
+| `"show_runs"`    | bool   | `true`   | no        | Whether the list of runs (the bulk of the output) is shown.                                                                                                                                    |
+| `"show_stats"`   | bool   | `true`   | no        | Whether the success and failure counts are shown after everything has run.                                                                                                                     |
+| `"show_equal"`   | bool   | `true`   | no        | Whether the matching stdouts are compared and grouped after everything has run.                                                                                                                |
 
 ## Command Format
 
@@ -325,4 +324,4 @@ I was driven to make RunMany by my desire to learn more programming languages co
 
 The obvious limitation of RunMany and the .many file format is that syntax highlighting and tooling like IntelliSense doesn't work. Making a VSCode extension that can syntax highlight .many files is definitely on my radar.
 
-# todo add to readme: spacing,!%%%| comment, prologue changes, commented -> disabled
+- todo add to readme: spacing,!%%%| comment, prologue changes, commented -> disabled
