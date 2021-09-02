@@ -303,14 +303,11 @@ class Run:
         self.stdin_section = stdin_section
         self.language_data = language_data
 
-    # TODO Add line numbers for output? --- output from line 25 ---
     @staticmethod
-    def output_section(name: str, section: Optional[Section] = None) -> str:
-        content = ''
-        if section:
-            name += f' at line {section.line_number + 1}'
-            content = '\n' + section.content.strip('\r\n')
-        return f'{f" {name} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}{content}\n'
+    def make_output_segment(title: str, section: Section, content: Optional[str] = None) -> str:
+        if content is None:
+            content = section.content.strip('\r\n')
+        return f'{f" {title} line {section.line_number + 1} ":{OUTPUT_FILL}^{OUTPUT_FILL_WIDTH}}\n{content}'
 
     def output(self, time_taken: float, command: str, stdout: str, exit_code: Union[int, str], run_number: int) -> str:
         parts = []
@@ -325,14 +322,13 @@ class Run:
         parts.append(header + '\n')
 
         if self.language_data.show_code:
-            parts.append(self.output_section('code', self.code_section))
+            parts.append(self.make_output_segment('code at', self.code_section))
         if self.argv_section and self.argv_section.has_content and self.language_data.show_argv:
-            parts.append(self.output_section('argv', self.argv_section))
+            parts.append(self.make_output_segment('argv at', self.argv_section))
         if self.stdin_section and self.stdin_section.has_content and self.language_data.show_stdin:
-            parts.append(self.output_section('stdin', self.stdin_section))
+            parts.append(self.make_output_segment('stdin at', self.stdin_section))
         if self.language_data.show_output:
-            parts.append(self.output_section('output'))
-            parts.append(stdout)
+            parts.append(self.make_output_segment('output from', self.code_section, stdout))
         parts.append('\n')  # TODO Have compact option that does not add this newline? or spacing = 0+ option
 
         return ''.join(parts)
