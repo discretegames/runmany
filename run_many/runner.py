@@ -166,12 +166,15 @@ def make_footer(settings: Settings, total_runs: int, successful_runs: int,
     return '\n'.join(parts)
 
 
-def run_iterator(file: TextIO, settings: Settings) -> Iterator[Run]:
+def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
 
-    for section in section_iterator(file, settings):
+    iterator = section_iterator(file, settings)
+    yield next(iterator)  # Specially yield JSON string at top.
+
+    for section in iterator:
         if section.disabled:
             continue
 

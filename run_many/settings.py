@@ -25,7 +25,6 @@ def get_json_string(settings_json: JsonLike) -> str:
     with open(settings_json) as file:  # Assume path like.
         return file.read() or str({})
 
-
 class LanguageData:
     def __init__(self, language_obj: Any, parent: 'Settings') -> None:
         self.obj = language_obj
@@ -44,24 +43,6 @@ class LanguageData:
 
 
 class Settings:
-    def language_obj_valid(self, language_obj: Any, is_default: bool) -> bool:
-        end = ". Ignoring language."
-
-        if not hasattr(language_obj, NAME_KEY):
-            print_err(f'No "{NAME_KEY}" key found for json list item{end}')
-            return False
-
-        if normalize(language_obj.name) == normalize(self.all_name):
-            print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
-            return False
-
-        default_obj = self[language_obj.name] if not is_default and language_obj.name in self else None
-        if not hasattr(language_obj, COMMAND_KEY) and not hasattr(default_obj, COMMAND_KEY):
-            print_err(f'No "{COMMAND_KEY}" key found for {language_obj.name}{end}')
-            return False
-
-        return True
-
     def __init__(self, settings_json: JsonLike) -> None:
         self.data = json_to_class(get_json_string(settings_json))
         with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE)) as file:
@@ -79,6 +60,24 @@ class Settings:
                     self[language_obj.name].update_obj(language_obj)
                 else:
                     self[language_obj.name] = LanguageData(language_obj, self)
+
+    def language_obj_valid(self, language_obj: Any, is_default: bool) -> bool:
+        end = ". Ignoring language."
+
+        if not hasattr(language_obj, NAME_KEY):
+            print_err(f'No "{NAME_KEY}" key found for json list item{end}')
+            return False
+
+        if normalize(language_obj.name) == normalize(self.all_name):
+            print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
+            return False
+
+        default_obj = self[language_obj.name] if not is_default and language_obj.name in self else None
+        if not hasattr(language_obj, COMMAND_KEY) and not hasattr(default_obj, COMMAND_KEY):
+            print_err(f'No "{COMMAND_KEY}" key found for {language_obj.name}{end}')
+            return False
+
+        return True
 
     def __getattr__(self, name: str) -> Any:
         if hasattr(self.data, name):

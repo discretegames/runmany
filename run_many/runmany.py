@@ -10,7 +10,7 @@ from typing import List, DefaultDict, Union, Optional, TextIO, cast
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
 from run_many.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
-from run_many.runner import run_iterator, make_footer  # noqa: E402
+from run_many.runner import run_iterator, make_footer, Run  # noqa: E402
 from run_many.settings import Settings  # noqa: E402
 
 
@@ -27,15 +27,19 @@ Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
 Defaults to False.
     """
     with redirect_stdout(file):
-        settings = Settings(settings_json)
         total_runs, successful_runs = 0, 0
         equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
 
         context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
         with context_manager as manyfile, TemporaryDirectory() as directory:
-            for run in run_iterator(manyfile, settings):
+            settings = Settings(settings_json)
+            iterator = run_iterator(manyfile, settings)
+            n = next(iterator)
+            print(repr(n), type(n))
+
+            for run in iterator:
                 run_number = total_runs + 1
-                output, stdout, success = run.run(directory, run_number, settings.spacing)
+                output, stdout, success = cast(Run, run).run(directory, run_number, settings.spacing)
                 total_runs += 1
                 successful_runs += success
                 if settings.show_runs:

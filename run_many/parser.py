@@ -33,40 +33,6 @@ class SectionType(enum.Enum):
 
 
 class Section:
-    @staticmethod
-    def line_is_exit(line: str) -> bool:
-        return line.rstrip() == Syntax.EXIT_MARKER
-
-    @staticmethod
-    def line_is_comment(line: str) -> bool:
-        line = line.rstrip()
-        return line == Syntax.DISABLE_PREFIX + Syntax.EXIT_MARKER or line.endswith(Syntax.COMMENT_END) and \
-            (line.startswith(Syntax.COMMENT_START) or line.startswith(Syntax.DISABLE_PREFIX + Syntax.COMMENT_START))
-
-    @staticmethod
-    def line_is_header(line: str) -> bool:
-        line = removeprefix(line.rstrip(), Syntax.DISABLE_PREFIX)
-        return line in Syntax.SEPS or \
-            any(line.startswith(s) and line.endswith(e) for s, e in zip(Syntax.STARTS, Syntax.ENDS))
-
-    @staticmethod
-    def get_type_start_end(header: str) -> Tuple[SectionType, str, str]:
-        if header == Syntax.ARGV_SEP or header.startswith(Syntax.ARGV_START):
-            return SectionType.ARGV, Syntax.ARGV_START, Syntax.ARGV_END
-        elif header == Syntax.STDIN_SEP or header.startswith(Syntax.STDIN_START):
-            return SectionType.STDIN, Syntax.STDIN_START, Syntax.STDIN_END
-        else:
-            return SectionType.CODE, Syntax.CODE_START, Syntax.CODE_END
-
-    @staticmethod
-    def strip_content(content: str, section_type: SectionType) -> str:
-        if section_type is SectionType.ARGV:
-            return content.strip('\r\n')  # Always strip argv.
-        elif section_type is SectionType.STDIN:
-            return content.strip('\r\n') + '\n'  # Always strip stdin except trailing newline.
-        else:
-            return content  # Never strip code.
-
     def __init__(self, header: str, content: str, settings: Settings, line_number: int) -> None:
         self.header = header.rstrip()
         self.type, start, end = self.get_type_start_end(self.header)
@@ -89,8 +55,42 @@ class Section:
                         print_err(f'Language "{language.strip()}" in section header at line {self.line_number}'
                                   ' not found in json. Skipping language.')
 
+    @staticmethod
+    def get_type_start_end(header: str) -> Tuple[SectionType, str, str]:
+        if header == Syntax.ARGV_SEP or header.startswith(Syntax.ARGV_START):
+            return SectionType.ARGV, Syntax.ARGV_START, Syntax.ARGV_END
+        elif header == Syntax.STDIN_SEP or header.startswith(Syntax.STDIN_START):
+            return SectionType.STDIN, Syntax.STDIN_START, Syntax.STDIN_END
+        else:
+            return SectionType.CODE, Syntax.CODE_START, Syntax.CODE_END
 
-def section_iterator(file: TextIO, settings: Settings) -> Iterator[Section]:
+    @staticmethod
+    def strip_content(content: str, section_type: SectionType) -> str:
+        if section_type is SectionType.ARGV:
+            return content.strip('\r\n')  # Always strip argv.
+        elif section_type is SectionType.STDIN:
+            return content.strip('\r\n') + '\n'  # Always strip stdin except trailing newline.
+        else:
+            return content  # Never strip code.
+
+
+def line_is_exit(line: str) -> bool:
+    return line.rstrip() == Syntax.EXIT_MARKER
+
+
+def line_is_comment(line: str) -> bool:
+    line = line.rstrip()
+    return line == Syntax.DISABLE_PREFIX + Syntax.EXIT_MARKER or line.endswith(Syntax.COMMENT_END) and \
+        (line.startswith(Syntax.COMMENT_START) or line.startswith(Syntax.DISABLE_PREFIX + Syntax.COMMENT_START))
+
+
+def line_is_header(line: str) -> bool:
+    line = removeprefix(line.rstrip(), Syntax.DISABLE_PREFIX)
+    return line in Syntax.SEPS or \
+        any(line.startswith(s) and line.endswith(e) for s, e in zip(Syntax.STARTS, Syntax.ENDS))
+
+
+def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Section]]:
     def current_section() -> Section:
         return Section(cast(str, header), ''.join(section_lines), settings, header_line_number)
 
@@ -98,12 +98,14 @@ def section_iterator(file: TextIO, settings: Settings) -> Iterator[Section]:
     header_line_number = 0
     section_lines: List[str] = []
     for line_number, line in enumerate(file, 1):
-        if Section.line_is_exit(line):
+        if line_is_exit(line):
             break
-        if Section.line_is_comment(line):
+        if line_is_comment(line):
             continue
-        if Section.line_is_header(line):
-            if header:
+        if line_is_header(line):
+            if not header:
+                yield ''.join(section_lines)  # Yield JSON string at top. Only happens once.
+            else:
                 yield current_section()
             header = line
             header_line_number = line_number
