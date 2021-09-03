@@ -1,5 +1,5 @@
 import enum
-from typing import List, Optional, Tuple, Iterator, Union, TextIO, cast
+from typing import List, Optional, Tuple, Generator, Union, TextIO, cast
 
 from run_many.settings import Settings
 from run_many.util import removeprefix, removesuffix, print_err
@@ -90,7 +90,7 @@ def line_is_header(line: str) -> bool:
         any(line.startswith(s) and line.endswith(e) for s, e in zip(Syntax.STARTS, Syntax.ENDS))
 
 
-def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Section]]:
+def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
     def current_section() -> Section:
         return Section(cast(str, header), ''.join(section_lines), settings, header_line_number)
 
@@ -103,10 +103,11 @@ def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Se
         if line_is_comment(line):
             continue
         if line_is_header(line):
-            if not header:
-                yield ''.join(section_lines)  # Yield JSON string at top. Only happens once.
-            else:
+            if header:
                 yield current_section()
+            else:
+                settings = yield ''.join(section_lines)  # Yield JSON string at top. Only happens once.
+                yield None  # Extra yield needed to catch the send from run_iterator. Not ready to yield sections yet.
             header = line
             header_line_number = line_number
             section_lines = []
@@ -115,3 +116,6 @@ def section_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Se
 
     if header:
         yield current_section()
+    else:
+        yield ''.join(section_lines)  # Yield JSON string at top because it's expected but won't actually be used.
+        yield None  # Extra yield needed to catch the send from run_iterator.

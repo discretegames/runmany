@@ -2,7 +2,6 @@ import json
 import types
 import pathlib
 from typing import Any, Dict, List
-
 from run_many.util import JsonLike, print_err, set_show_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
@@ -16,14 +15,6 @@ def normalize(language: str) -> str:
 def json_to_class(json_string: str) -> Any:
     return json.loads(json_string, object_hook=lambda d: types.SimpleNamespace(**d))
 
-
-def get_json_string(settings_json: JsonLike) -> str:
-    if settings_json is None:
-        return str({})
-    elif isinstance(settings_json, dict):  # Assume already valid json dict.
-        return json.dumps(settings_json)
-    with open(settings_json) as file:  # Assume path like.
-        return file.read() or str({})
 
 class LanguageData:
     def __init__(self, language_obj: Any, parent: 'Settings') -> None:
@@ -43,8 +34,8 @@ class LanguageData:
 
 
 class Settings:
-    def __init__(self, settings_json: JsonLike) -> None:
-        self.data = json_to_class(get_json_string(settings_json))
+    def __init__(self, settings_json_string: str) -> None:
+        self.data = json_to_class(settings_json_string.strip() or str({}))
         with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE)) as file:
             self.default_data = json_to_class(file.read())
         set_show_errors(self.show_errors)
@@ -100,3 +91,21 @@ class Settings:
         if language in self:
             return [language]
         raise KeyError
+
+
+def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settings:
+    settings_json_string = ''
+    if provided_json is not None:
+        if isinstance(provided_json, dict):
+            # todo try catch this too
+            settings_json_string = json.dumps(provided_json)
+        else:
+            try:
+                with open(provided_json) as file:
+                    settings_json_string = file.read()
+            except IOError:
+                print_err(f'TODO')
+    else:
+        # todo try this too, but would need to convert
+        settings_json_string = hardcoded_json_string
+    return Settings(settings_json_string)

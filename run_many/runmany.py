@@ -5,13 +5,13 @@ import argparse
 from collections import defaultdict
 from contextlib import redirect_stdout
 from tempfile import TemporaryDirectory
-from typing import List, DefaultDict, Union, Optional, TextIO, cast
+from typing import List, DefaultDict, Union, Optional, TextIO, Iterator, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
 from run_many.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
 from run_many.runner import run_iterator, make_footer, Run  # noqa: E402
-from run_many.settings import Settings  # noqa: E402
+from run_many.settings import load_settings  # noqa: E402
 
 
 def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: JsonLike = None, *,
@@ -32,14 +32,13 @@ Defaults to False.
 
         context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
         with context_manager as manyfile, TemporaryDirectory() as directory:
-            settings = Settings(settings_json)
-            iterator = run_iterator(manyfile, settings)
-            n = next(iterator)
-            print(repr(n), type(n))
+            iterator = run_iterator(manyfile)
+            settings = load_settings(settings_json, cast(str, next(iterator)))
+            iterator.send(settings)
 
-            for run in iterator:
+            for run in cast(Iterator[Run], iterator):
                 run_number = total_runs + 1
-                output, stdout, success = cast(Run, run).run(directory, run_number, settings.spacing)
+                output, stdout, success = run.run(directory, run_number, settings.spacing)
                 total_runs += 1
                 successful_runs += success
                 if settings.show_runs:
@@ -108,6 +107,4 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        example = 'argv'
-        print(__file__)
-        runmany(pathlib.Path(__file__).parent.parent.joinpath('examples').joinpath(f'{example}.many'))
+        runmany(pathlib.Path(__file__).parent.parent.joinpath(f'test.many'))

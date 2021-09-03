@@ -4,7 +4,7 @@ import pathlib
 import subprocess
 from collections import defaultdict
 from tempfile import NamedTemporaryFile
-from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, TextIO, cast
+from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 
 from run_many.util import print_err
 from run_many.settings import Settings, LanguageData
@@ -166,15 +166,17 @@ def make_footer(settings: Settings, total_runs: int, successful_runs: int,
     return '\n'.join(parts)
 
 
-def run_iterator(file: TextIO, settings: Settings) -> Iterator[Union[str, Run]]:
+def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, None]:
     lead_section: Optional[Section] = None
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
 
-    iterator = section_iterator(file, settings)
-    yield next(iterator)  # Specially yield JSON string at top.
+    iterator = section_iterator(file)
+    settings = yield cast(str, next(iterator))  # Specially yield JSON string at top.
+    yield None  # Extra yield needed to catch the send from runmany_to_f. Not ready to yield runs yet.
+    iterator.send(settings)
 
-    for section in iterator:
+    for section in cast(Iterator[Section], iterator):
         if section.disabled:
             continue
 
