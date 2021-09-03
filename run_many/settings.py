@@ -1,7 +1,7 @@
 import json
 import types
 import pathlib
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 from run_many.util import JsonLike, print_err, set_show_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
@@ -35,7 +35,7 @@ class LanguageData:
 
 class Settings:
     def __init__(self, settings_json_string: str) -> None:
-        self.data = json_to_class(settings_json_string.strip() or str({}))
+        self.data = json_to_class(settings_json_string)
         with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE)) as file:
             self.default_data = json_to_class(file.read())
         set_show_errors(self.show_errors)
@@ -95,17 +95,26 @@ class Settings:
 
 def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settings:
     settings_json_string = ''
-    if provided_json is not None:
+    if provided_json is None:
+        settings_json_string = hardcoded_json_string
+    else:
         if isinstance(provided_json, dict):
-            # todo try catch this too
-            settings_json_string = json.dumps(provided_json)
+            try:
+                settings_json_string = json.dumps(provided_json)
+            except (ValueError, TypeError) as e:
+                print_err(f'JSON issue - {e}. Using default settings JSON.')
         else:
             try:
                 with open(provided_json) as file:
                     settings_json_string = file.read()
-            except IOError:
-                print_err(f'TODO')
-    else:
-        # todo try this too, but would need to convert
-        settings_json_string = hardcoded_json_string
-    return Settings(settings_json_string)
+            except IOError as e:
+                print_err(f'JSON issue - {e}. Using default settings JSON.')
+
+    try:  # Validate settings_json_string.
+        if not isinstance(json.loads(settings_json_string.strip() or str({})), dict):
+            print_err(f'JSON issue - The JSON must be an object/dict. Using default settings JSON.')
+    except json.decoder.JSONDecodeError as e:
+        print_err(f'JSON issue - {e}. Using default settings JSON.')
+        settings_json_string = str({})
+
+    return Settings(settings_json_string.strip() or str({}))
