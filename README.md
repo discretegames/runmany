@@ -278,7 +278,7 @@ It is advised to not set `"default_languages"` in your settings JSON file and on
 
 ## List of Settings
 
-All settings described, and whether or not they are inherited by language objects in `"languages"`.
+All settings described, and whether or not they are inherited by language objects in `"languages"`:
 
 | JSON Key         | Type   | Default  | Inherited | Description                                                                                                                                                                                    |
 | ---------------- | ------ | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
