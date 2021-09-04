@@ -1,7 +1,7 @@
 import json
 import types
 import pathlib
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Union, cast
 from run_many.util import JsonLike, print_err, set_show_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
@@ -93,6 +93,10 @@ class Settings:
         raise KeyError
 
 
+def json_err(error: Union[str, Exception]) -> None:
+    print_err(f'JSON issue - {error}. Using default settings JSON.')
+
+
 def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settings:
     settings_json_string = ''
     if provided_json is None:
@@ -101,20 +105,20 @@ def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settin
         if isinstance(provided_json, dict):
             try:
                 settings_json_string = json.dumps(provided_json)
-            except (ValueError, TypeError) as e:
-                print_err(f'JSON issue - {e}. Using default settings JSON.')
+            except (TypeError, ValueError) as e:
+                json_err(e)
         else:
             try:
                 with open(provided_json) as file:
                     settings_json_string = file.read()
             except IOError as e:
-                print_err(f'JSON issue - {e}. Using default settings JSON.')
+                json_err(e)
 
     try:  # Validate settings_json_string.
         if not isinstance(json.loads(settings_json_string.strip() or str({})), dict):
-            print_err(f'JSON issue - The JSON must be an object/dict. Using default settings JSON.')
+            json_err('The JSON must be an object/dict')
     except json.decoder.JSONDecodeError as e:
-        print_err(f'JSON issue - {e}. Using default settings JSON.')
+        json_err(e)
         settings_json_string = str({})
 
     return Settings(settings_json_string.strip() or str({}))

@@ -158,5 +158,3 @@ def test_show_output() -> None:
 
 def test_show_epilogue() -> None:
     verify_output({"show_epilogue": True}, "show_epilogue.txt")
-
-# TODO test nonexistent, badly formatted json errors, in errors
