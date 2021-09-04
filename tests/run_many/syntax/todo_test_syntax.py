@@ -177,3 +177,12 @@ print(input())
 print(input())    
 '''
     verify_output('similar.txt', many_file)
+
+
+# TODO not here, but test totally empty file
+'''
+************************************************************
+0/0 programs successfully run!
+0/0 had the exact same stdout!
+************************************************************
+'''
