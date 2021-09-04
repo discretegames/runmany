@@ -23,6 +23,7 @@
 		"runmanys",
 		"runpytest",
 		"runtox",
+		"Stmts",
 		"tdin"
 	],
 	"files.exclude": {

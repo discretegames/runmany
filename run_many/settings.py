@@ -4,7 +4,7 @@ import pathlib
 from typing import Any, Dict, List, Union, cast
 from run_many.util import JsonLike, print_err, set_show_errors
 
-DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
+DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'  # todo switch back, delete file
 ALL_NAME_KEY, NAME_KEY, COMMAND_KEY, EXT_KEY = 'all_name', 'name', 'command', 'ext'
 
 

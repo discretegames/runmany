@@ -2,7 +2,6 @@ import pathlib
 from typing import Dict, Any
 from run_many import runmany_to_s
 
-# TODO test spacing
 
 # Some testing code duplicated from test_jsons.py but ehh.
 default_settings_json = {
@@ -11,7 +10,7 @@ default_settings_json = {
     "languages": [],
     "timeout": 10.0,
     "stderr": None,
-    "show_prologue": False,  # TODO change prologue test
+    "show_prologue": False,  # TODO change prologue test, change whole def json here
     "show_runs": True,
     "show_command": False,
     "show_code": False,
@@ -179,7 +178,7 @@ print(input())
     verify_output('similar.txt', many_file)
 
 
-# TODO not here, but test totally empty file
+# TODO test totally empty file
 '''
 ************************************************************
 0/0 programs successfully run!

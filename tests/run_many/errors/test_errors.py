@@ -75,9 +75,10 @@ def test_no_lead_section() -> None:
 
 def test_json_type_error() -> None:
     bad_type_json = {"spacing": 2+3j}
-    expected = '!!!| RunMany Error: JSON issue - '\
-        'Object of type complex is not JSON serializable. Using default settings JSON. |!!!\n'
-    assert stderr_of_run('', bad_type_json) == expected
+    expected1 = "!!!| RunMany Error: JSON issue - "\
+        "Object of type 'complex' is not JSON serializable. Using default settings JSON. |!!!\n"
+    expected2 = expected1.replace("'", '')  # Python 3.6 doesn't put quotes around 'complex'.
+    assert stderr_of_run('', bad_type_json) in (expected1, expected2)
 
 
 def test_json_value_error() -> None:
