@@ -186,3 +186,4 @@ print(input())
 0/0 had the exact same stdout!
 ************************************************************
 '''
+# TODO test hardcoded json and override

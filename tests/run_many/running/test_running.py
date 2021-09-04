@@ -25,7 +25,7 @@ def build_cases():
     from_string_values = False, False, True
     _, output1 = file_data('output1.txt')
     _, output2 = file_data('output2.txt')
-    output1_jsons = None, {}
+    output1_jsons = None, {"show_equal": False}
     output2_jsons = json_path, str(json_path), json.loads(json_contents)
 
     cases = []

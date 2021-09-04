@@ -1,2 +1,3 @@
+{ "show_equal": false }
 ~~~| Python |~~~
 print('simple')
