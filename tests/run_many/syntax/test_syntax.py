@@ -4,21 +4,23 @@ from run_many import runmany_to_s
 
 
 # Some testing code duplicated from test_jsons.py but ehh.
-default_settings_json = {
+base_settings_json = {
     "all_name": "All",
-    "check_equal": False,
     "languages": [],
     "timeout": 10.0,
     "stderr": None,
-    "show_prologue": False,  # TODO change prologue test, change whole def json here
+    "ext": "",
+    "spacing": 1,
     "show_runs": True,
+    "show_time": False,
     "show_command": False,
     "show_code": False,
     "show_argv": True,
     "show_stdin": True,
     "show_output": True,
     "show_errors": False,
-    "show_epilogue": False
+    "show_stats": False,
+    "show_equal": False
 }
 
 
@@ -26,11 +28,15 @@ def path_to(filename: str) -> pathlib.Path:
     return pathlib.Path(__file__).with_name(filename)
 
 
-def verify_output(output_file: str, many_file_contents: str) -> None:
+def verify(output_file: str, many_file: str) -> None:
     with open(path_to(output_file)) as file:
         expected = file.read()
-        actual = runmany_to_s(many_file_contents, default_settings_json, from_string=True)
+        actual = runmany_to_s(many_file, base_settings_json, from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
+
+
+def test_empty() -> None:
+    verify('empty.txt', '')
 
 
 def test_section_header() -> None:
@@ -44,7 +50,7 @@ print(input())
 ~~~| Python 2 |~~~
 print raw_input()
 '''
-        verify_output('section_header.txt', many_file)
+        verify('section_header.txt', many_file)
 
 
 def test_code_list() -> None:
@@ -56,7 +62,7 @@ print('B')
 ~~~|~~~
 print('C')
 '''
-    verify_output('code_list.txt', many_file)
+    verify('code_list.txt', many_file)
 
 
 def test_argv() -> None:
@@ -80,7 +86,7 @@ print(sys.argv[1])
 ~~~| Python |~~~
 print('argv reset')
 '''
-    verify_output('argv.txt', many_file)
+    verify('argv.txt', many_file)
 
 
 def test_stdin() -> None:
@@ -107,7 +113,7 @@ $$$| Python |$$$
 ~~~| Python |~~~
 print('stdin reset')
 '''
-    verify_output('stdin.txt', many_file)
+    verify('stdin.txt', many_file)
 
 
 def test_disabled_sections() -> None:
@@ -127,7 +133,7 @@ console.log('unseen')
 ~~~|~~~
 print(4, input())
 '''
-    verify_output('disabled_sections.txt', many_file)
+    verify('disabled_sections.txt', many_file)
 
 
 def test_comments() -> None:
@@ -147,7 +153,7 @@ print(input())
 print(input())
 %%%| contents | don't |%%%
 '''
-    verify_output('comments.txt', many_file)
+    verify('comments.txt', many_file)
 
 
 def test_exit() -> None:
@@ -161,7 +167,7 @@ print(2)
 ~~~| Python |~~~
 print(3)
 '''
-    verify_output('exit.txt', many_file)
+    verify('exit.txt', many_file)
 
 
 def test_similar() -> None:
@@ -175,14 +181,19 @@ print(input())
 print(input())
 print(input())    
 '''
-    verify_output('similar.txt', many_file)
+    verify('similar.txt', many_file)
 
 
-# TODO test totally empty file
+def test_hardcoded_json() -> None:
+    many_file = '''\
+{ "show_stats": false, "show_equal": false }
+~~~| Python |~~~
+print('x')
 '''
-************************************************************
-0/0 programs successfully run!
-0/0 had the exact same stdout!
-************************************************************
-'''
-# TODO test hardcoded json and override
+    with open(path_to('hardcoded1.txt')) as file:
+        actual = runmany_to_s(many_file, from_string=True)
+        assert actual.strip('\r\n') == file.read().strip('\r\n')
+
+    with open(path_to('hardcoded2.txt')) as file:
+        actual = runmany_to_s(many_file, {}, from_string=True)
+        assert actual.strip('\r\n') == file.read().strip('\r\n')
