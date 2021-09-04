@@ -1,5 +1,10 @@
-Python and JavaScript programs for two methods of printing all primes up 5 million.
-
+{
+	"show_time": true,
+	"show_output": false,
+	"show_argv": false,
+	"show_code": true,
+	"timeout": 120
+}
 @@@| All |@@@
 5000000
 
@@ -82,4 +87,3 @@ for (let n = 0; n < primes.length; n++) {
 		console.log(n);
 	}
 }
-

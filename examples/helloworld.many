@@ -1,5 +1,3 @@
-"Hello, World!" programs in 10 different programming languages.
-
 ~~~| Python |~~~
 
 print('Hello, World!')

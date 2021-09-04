@@ -11,6 +11,17 @@ def test_imports() -> None:
     assert not hasattr(run_many, 'Placeholders')
     assert not hasattr(run_many, 'CODE_START')
 
+# TODO update names here, use main and so on
+
+
+# TODO not here, but test totally empty file
+'''
+************************************************************
+0/0 programs successfully run!
+0/0 had the exact same stdout!
+************************************************************
+'''
+
 
 def test_from_imports() -> None:
     from run_many import runmany, runmany_to_s, runmany_to_f, cmdline

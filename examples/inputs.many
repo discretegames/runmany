@@ -1,19 +1,21 @@
-Python and C++ programs that output the product of the ints on stdin and argv.
-
-%%%| List of argvs separated by @@@|@@@ to give each language |%%%
-@@@| Python | C++ |@@@
+%%%| Python and C++ programs that output the product of the ints on stdin and argv. |%%%
+%%%| 3 argvs tested (2, 4, 6) times 3 stdins tested (10, 100, 1000) times 2 languages gives 18 runs overall. |%%%
+{
+	"show_equal": false
+}
+@@@| All |@@@
 2
 @@@|@@@
-3
-@@@|@@@
 4
+@@@|@@@
+6
 
-
-%%%| List of stdins separated by $$$|$$$ to give each language |%%%
-$$$| Python | C++ |$$$
+$$$| All |$$$
 10
 $$$|$$$
 100
+$$$|$$$
+1000
 
 
 ~~~| Python |~~~

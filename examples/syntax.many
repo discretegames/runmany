@@ -1,25 +1,29 @@
-prologue comment area
+%%%| This %%% syntax is a comment in a .many file. |%%%
+%%%| The hardcoded settings JSON is at the top. |%%%
+{ "show_argv": false, "show_stdin": false, "show_equal": false }
 
+%%%| The $$$ syntax defines the stdins, in this case for Python. |%%%
 $$$| Python |$$$
 Alice
 $$$|$$$
 Bob
 $$$|$$$
-Charlie
+Carmen
 
-!~~~| Python |~~~
-print('this section is disabled with !')
-
+%%%| The ~~~ syntax defines a program that will be run. |%%%
 ~~~| Python |~~~
-%%%| this line is a .many file comment |%%%
 print(f'Hello, {input()}.')
 
+%%%| The @@@ syntax defines the argvs, in this case for all languages. |%%%
 @@@| All |@@@
 --flag
 
+!~~~| Python |~~~
+print('This section is disabled with ! so it never gets run.')
+
 ~~~| JavaScript |~~~
-console.log(`The arg was '${process.argv[2]}'`)
+console.log(`The arg was '${process.argv[2]}'.`)
 
 %%%|%%%
 ~~~| Python |~~~
-print('this section is after the EOf marker')
+print('This section is after the EOF marker so it never gets run.')
