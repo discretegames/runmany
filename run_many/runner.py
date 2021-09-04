@@ -79,7 +79,7 @@ class Run:
         else:
             return subprocess.STDOUT
 
-    def run(self, directory: str, run_number: int, spacing: int) -> Tuple[str, str, bool]:
+    def run(self, directory: str, run_number: int) -> Tuple[str, str, bool]:
         with NamedTemporaryFile(mode='w', suffix=self.language_data.ext, dir=directory, delete=False) as code_file:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
@@ -104,7 +104,7 @@ class Run:
             if exit_code != 0 and self.language_data.stderr in STDERR_NZEC:
                 stdout += result.stderr
 
-        output = self.make_output(run_number, spacing, time_taken, exit_code, command, stdout)
+        output = self.make_output(run_number, time_taken, exit_code, command, stdout)
         return output, stdout, exit_code == 0
 
     @staticmethod
@@ -113,7 +113,7 @@ class Run:
             content = section.content.strip('\r\n')
         return f'{f" {title} line {section.line_number + 1} ":{OUTPUT_FILL_CHAR}^{OUTPUT_FILL_WIDTH}}\n{content}'
 
-    def make_output(self, run_number: int, spacing: int, time_taken: float, exit_code: Union[int, str], command: str,
+    def make_output(self, run_number: int, time_taken: float, exit_code: Union[int, str], command: str,
                     stdout: str) -> str:
         parts = [OUTPUT_DIVIDER]
 
@@ -135,7 +135,7 @@ class Run:
         if self.language_data.show_output:
             parts.append(self.make_output_part('output from', self.code_section, stdout))
 
-        return '\n'.join(parts) + '\n' * spacing
+        return '\n'.join(parts) + '\n' * cast(int, self.language_data.spacing)
 
 
 def make_footer(settings: Settings, total_runs: int, successful_runs: int,

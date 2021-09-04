@@ -38,7 +38,7 @@ Defaults to False.
 
             for run in cast(Iterator[Run], iterator):
                 run_number = total_runs + 1
-                output, stdout, success = run.run(directory, run_number, settings.spacing)
+                output, stdout, success = run.run(directory, run_number)
                 total_runs += 1
                 successful_runs += success
                 if settings.show_runs:
