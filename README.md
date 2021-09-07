@@ -1,9 +1,9 @@
 <!-- markdownlint-disable-next-line MD041 -->
-[![PyPI Version](https://badge.fury.io/py/run-many.svg)](https://badge.fury.io/py/run-many)
+[![PyPI Version](https://badge.fury.io/py/runmany.svg)](https://badge.fury.io/py/runmany)
  [![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
- [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/run-many)](https://www.python.org/downloads/)
+ [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runmany)](https://www.python.org/downloads/)
 
-# [RunMany](https://pypi.org/project/run-many/)
+# [RunMany](https://pypi.org/project/runmany/)
 
 **[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [About](https://github.com/discretegames/runmany#about)**
 
@@ -63,10 +63,10 @@ In general RunMany can be used for:
 # Installation (supports Python 3.6+)
 
 ```text
-pip install run-many
+pip install runmany
 ```
 
-[PyPI Package Page](https://pypi.org/project/run-many/) | [Bleeding edge version on TestPyPI](https://test.pypi.org/project/run-many/)
+[PyPI Package Page](https://pypi.org/project/runmany/) | [Bleeding edge version on TestPyPI](https://test.pypi.org/project/runmany/)
 
 # Usage
 
@@ -86,7 +86,7 @@ runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <inp
 - `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
 - `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
 
-When a settings JSON file is not provided, the hardcoded settings JSON at the top of the .many file is used. If neither is provided, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback.
+When a settings JSON file is not provided, the hardcoded settings JSON at the top of the .many file is used. If neither is provided, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) is used as a fallback.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try. Note that they were run on a Windows machine with the necessary interpreters and compilers installed.
 
@@ -95,7 +95,7 @@ The default JSON has presets for a handful of languages, namely Python, Python 2
 ## Running From Python
 
 ```py
-from run_many import runmany, runmany_to_s, runmany_to_f
+from runmany import runmany, runmany_to_s, runmany_to_f
 
 # Run to stdout
 runmany('path/to/input.many', 'path/to/settings.json') # settings JSON is always optional
@@ -111,13 +111,13 @@ with open('output.txt', 'w') as file_obj:
     runmany_to_f(file_obj, 'path/to/input.many', 'path/to/settings.json')
 ```
 
-As with the command line, the settings JSON provided takes precedence over the JSON that may be at the top of the .many file, and [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) is used as a fallback for all settings.
+As with the command line, the settings JSON provided takes precedence over the JSON that may be at the top of the .many file, and [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) is used as a fallback for all settings.
 
 In each of the 3 runmany functions, the settings JSON argument may be given as a path to the .json file or a JSON-like Python dictionary.
 
 Additionally, the many file contents may be given as a string rather than a file path with `from_string=True`.
 
-The function `run_many.cmdline`, which takes a list of command line arguments, is also present as an alternative to using the command line directly.
+The function `runmany.cmdline`, which takes a list of command line arguments, is also present as an alternative to using the command line directly.
 
 # .many Syntax
 
@@ -137,9 +137,9 @@ The line `%%%|%%%` alone (possibly with trailing whitespace) is considered an en
 
 ## Hardcoded Settings JSON
 
-The area at the very top of a .many file, before the first [section delimiter](https://github.com/discretegames/runmany#sections--delimiters), may be used as a place to put a custom settings JSON that only applies to that file. When empty or purely whitespace it is treated as an empty object `{}` and all settings default back to [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json).
+The area at the very top of a .many file, before the first [section delimiter](https://github.com/discretegames/runmany#sections--delimiters), may be used as a place to put a custom settings JSON that only applies to that file. When empty or purely whitespace it is treated as an empty object `{}` and all settings default back to [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json).
 
-The hardcoded JSON is not used at all if another custom settings JSON is provided on the command line or to the Python function call (though these also fallback to [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json)).
+The hardcoded JSON is not used at all if another custom settings JSON is provided on the command line or to the Python function call (though these also fallback to [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json)).
 
 The area before the first section is still .many file syntax so it may contain `%%%| comments |%%%`.
 
@@ -261,7 +261,7 @@ The arg was '--flag'.
 
 The settings JSON defines what languages RunMany can run and how to run them. It also defines how the output will be formatted.
 
-As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/run_many/default_settings.json) holds the default values for all settings which are automatically used if not otherwise present in a provided or hardcoded JSON.
+As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) holds the default values for all settings which are automatically used if not otherwise present in a provided or hardcoded JSON.
 
 The setting to add a custom language is the `"languages"` key, which maps to a list of JSON 'language' objects, each of which must have a `"name"` string to identify it and a `"command"` string to run it (see [command format](https://github.com/discretegames/runmany#command-format)). However, objects in `"languages"` with a matching `"name"` in `"default_languages"` will automatically inherit its other values, such as `"command"` and `"ext"`. Also, most settings that exist in the base JSON object are inherited by the language objects and can be overwritten.
 

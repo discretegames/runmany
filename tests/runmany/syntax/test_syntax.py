@@ -1,6 +1,6 @@
 import pathlib
 from typing import Dict, Any
-from run_many import runmany_to_s
+from runmany import runmany_to_s
 
 
 # Some testing code duplicated from test_jsons.py but ehh.

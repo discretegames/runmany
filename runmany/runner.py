@@ -6,9 +6,9 @@ from collections import defaultdict
 from tempfile import NamedTemporaryFile
 from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 
-from run_many.util import print_err
-from run_many.settings import Settings, LanguageData
-from run_many.parser import section_iterator, Section, SectionType
+from runmany.util import print_err
+from runmany.settings import Settings, LanguageData
+from runmany.parser import section_iterator, Section, SectionType
 
 OUTPUT_FILL_CHAR, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL_WIDTH * '*'

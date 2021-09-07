@@ -9,9 +9,9 @@ from typing import List, DefaultDict, Union, Optional, TextIO, Iterator, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from run_many.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
-from run_many.runner import run_iterator, make_footer, Run  # noqa: E402
-from run_many.settings import load_settings  # noqa: E402
+from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
+from runmany.runner import run_iterator, make_footer, Run  # noqa: E402
+from runmany.settings import load_settings  # noqa: E402
 
 
 def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: JsonLike = None, *,
@@ -85,7 +85,7 @@ Defaults to False.
 
 
 def cmdline(argv: List[str]) -> None:
-    """The command line parser for run_many. Normally called via "runmany <argv>" from terminal. \
+    """The command line parser for runmany. Normally called via "runmany <argv>" from terminal. \
 Can alternatively be called from code.
 
     Args:

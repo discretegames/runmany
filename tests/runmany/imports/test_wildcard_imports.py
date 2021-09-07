@@ -1,5 +1,5 @@
 # Separate file is needed to test wildcard imports since the syntax is not allowed in functions.
-from run_many import *
+from runmany import *
 
 
 def test_wildcard_imports() -> None:

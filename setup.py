@@ -1,15 +1,15 @@
-"""Package setup file for the Python 3 run-many package: https://pypi.org/project/run-many"""
+"""Package setup file for the Python 3 runmany package: https://pypi.org/project/runmany"""
 
 from pathlib import Path
 from setuptools import setup, find_packages
 
-version = "0.2.1"
+version = "0.3.0"
 
 with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
     long_description = file.read()
 
 setup(
-    name='run_many',
+    name='runmany',
     version=version,
     author='discretegames',
     author_email='discretizedgames@gmail.com',
@@ -17,14 +17,14 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/discretegames/runmany',
-    packages=['run_many'],
-    package_data={'run_many': ['default_settings.json']},
+    packages=['runmany'],
+    package_data={'runmany': ['default_settings.json']},
     license="MIT",
     keywords=['run', 'execute', 'other languages', 'multiple languages', 'manyfile',
               '.many', 'one file', 'programs', 'chrestomathy', 'polyglot'],
     project_urls={"GitHub": "https://github.com/discretegames/runmany",
-                  "PyPI": "https://pypi.org/project/run-many",
-                  "TestPyPI": "https://test.pypi.org/project/run-many"},
+                  "PyPI": "https://pypi.org/project/runmany",
+                  "TestPyPI": "https://test.pypi.org/project/runmany"},
     python_requires='>=3.6',
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -45,7 +45,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'runmany = run_many.run_many:main'
+            'runmany = runmany.runmany:main'
         ]
     },
 )

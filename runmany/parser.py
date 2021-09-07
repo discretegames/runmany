@@ -1,8 +1,8 @@
 import enum
 from typing import List, Optional, Tuple, Generator, Union, TextIO, cast
 
-from run_many.settings import Settings
-from run_many.util import removeprefix, removesuffix, print_err
+from runmany.settings import Settings
+from runmany.util import removeprefix, removesuffix, print_err
 
 
 class Syntax:

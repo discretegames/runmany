@@ -1,8 +1,8 @@
 import io
 import pathlib
 from typing import Dict, Any, Union
-from run_many import runmany
-from run_many.util import PathLike, JsonLike
+from runmany import runmany
+from runmany.util import PathLike, JsonLike
 from contextlib import redirect_stderr
 
 

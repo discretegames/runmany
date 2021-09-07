@@ -6,6 +6,7 @@ scratch.py
 test.py
 test.many
 test.json
+indents.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

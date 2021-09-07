@@ -1,6 +1,6 @@
 import pathlib
 import pytest
-from run_many import runmany_to_s
+from runmany import runmany_to_s
 
 examples = []
 for path in pathlib.Path('examples').iterdir():

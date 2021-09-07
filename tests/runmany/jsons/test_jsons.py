@@ -3,7 +3,7 @@ import json
 import pathlib
 from typing import Dict, Any, Optional, Callable
 from contextlib import redirect_stderr
-from run_many import runmany_to_s
+from runmany import runmany_to_s
 
 base_settings_json = {
     "all_name": "All",

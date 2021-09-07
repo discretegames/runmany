@@ -45,7 +45,7 @@ def parametrize():
 @pytest.mark.slow
 @parametrize()
 def test_runmany(many_file, settings_json, from_string, expected):
-    from run_many import runmany
+    from runmany import runmany
 
     # Test outputting to stdout.
     with io.StringIO() as file, redirect_stdout(file):
@@ -67,13 +67,13 @@ def test_runmany(many_file, settings_json, from_string, expected):
 
 @parametrize()
 def test_runmany_to_s(many_file, settings_json, from_string, expected):
-    from run_many import runmany_to_s
+    from runmany import runmany_to_s
     assert runmany_to_s(many_file, settings_json, from_string=from_string) == expected
 
 
 @parametrize()
 def test_runmany_to_f(many_file, settings_json, from_string, expected):
-    from run_many import runmany_to_f
+    from runmany import runmany_to_f
     with io.StringIO() as file:
         runmany_to_f(file, many_file, settings_json, from_string=from_string)
         file.seek(0)
@@ -81,7 +81,7 @@ def test_runmany_to_f(many_file, settings_json, from_string, expected):
 
 
 def test_cmdline():
-    from run_many import cmdline
+    from runmany import cmdline
     many_path = str(path_to('input.many'))
     json_path = str(path_to('input.json'))
     _, output1 = file_data('output1.txt')
