@@ -1,6 +1,3 @@
-~~~| Python |~~~
-print("Hi")
-~~~| JavaScript |~~~
-console.log("Hi")
-~~~| Rust |~~~
-fn main() { println!("Hi"); }
+Python:     print("Hi")
+JavaScript: console.log("Hi")
+Rust:       fn main() { println!("Hi"); }

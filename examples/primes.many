@@ -1,89 +1,84 @@
-{
-	"show_time": true,
-	"show_output": false,
-	"show_argv": false,
-	"show_code": true,
-	"timeout": 120
-}
-@@@| All |@@@
-5000000
+Settings:
+	{
+		"show_time": true,
+		"show_output": false,
+		"show_argv": false,
+		"show_code": true,
+		"timeout": 120
+	}
+Argv for All: 5000000
 
-~~~| Python |~~~
-
-import sys
-
-def isprime(n):
-	if n == 2:
-		return True
-	if n < 2 or n % 2 == 0:
-		return False
-	for i in range(3, int(n**0.5) + 1, 2):
-		if n % i == 0:
+Python:
+	import sys
+	def isprime(n):
+		if n == 2:
+			return True
+		if n < 2 or n % 2 == 0:
 			return False
-	return True
+		for i in range(3, int(n**0.5) + 1, 2):
+			if n % i == 0:
+				return False
+		return True
 
-for n in range(int(sys.argv[1]) + 1):
-	if isprime(n):
-		print(n)
+	for n in range(int(sys.argv[1]) + 1):
+		if isprime(n):
+			print(n)
 
-~~~|~~~
+Also:
+	import sys
 
-import sys
+	def sieve(limit):
+		primes = [False] * 2 + [True] * (limit - 1)
+		for step in range(2, int(limit**0.5) + 1):
+			if primes[step]:
+				for composite in range(step**2, limit + 1, step):
+					primes[composite] = False
+		return primes
 
-def sieve(limit):
-    primes = [False] * 2 + [True] * (limit - 1)
-    for step in range(2, int(limit**0.5) + 1):
-        if primes[step]:
-            for composite in range(step**2, limit + 1, step):
-                primes[composite] = False
-    return primes
+	for n, isprime in enumerate(sieve(int(sys.argv[1]))):
+		if isprime:
+			print(n)
 
-for n, isprime in enumerate(sieve(int(sys.argv[1]))):
-	if isprime:
-		print(n)
-
-~~~| JavaScript |~~~
-
-function isprime(n) {
-	if (n === 2) {
-		return true;
-	}
-	if (n < 2 || n % 2 === 0) {
-		return false;
-	}
-	for (let i = 3; i <= Math.floor(Math.sqrt(n)); i += 2) {
-		if (n % i === 0) {
+JavaScript:
+	function isprime(n) {
+		if (n === 2) {
+			return true;
+		}
+		if (n < 2 || n % 2 === 0) {
 			return false;
 		}
-	}
-	return true;
-}
-
-for (let n = 0; n < parseInt(process.argv[2]); n++) {
-	if (isprime(n)) {
-		console.log(n);
-	}
-}
-
-~~~|~~~
-
-function sieve(limit) {
-	const primes = new Array(limit + 1).fill(true);
-	primes[0] = primes[1] = false;
-
-	for (let step = 2; step <= Math.floor(Math.sqrt(limit)); step++) {
-		if (primes[step]) {
-			for (let composite = step * step; composite <= limit; composite += step) {
-				primes[composite] = false;
+		for (let i = 3; i <= Math.floor(Math.sqrt(n)); i += 2) {
+			if (n % i === 0) {
+				return false;
 			}
 		}
+		return true;
 	}
-	return primes;
-}
 
-const primes = sieve(parseInt(process.argv[2]));
-for (let n = 0; n < primes.length; n++) {
-	if (primes[n]) {
-		console.log(n);
+	for (let n = 0; n < parseInt(process.argv[2]); n++) {
+		if (isprime(n)) {
+			console.log(n);
+		}
 	}
-}
+
+Also:
+	function sieve(limit) {
+		const primes = new Array(limit + 1).fill(true);
+		primes[0] = primes[1] = false;
+
+		for (let step = 2; step <= Math.floor(Math.sqrt(limit)); step++) {
+			if (primes[step]) {
+				for (let composite = step * step; composite <= limit; composite += step) {
+					primes[composite] = false;
+				}
+			}
+		}
+		return primes;
+	}
+
+	const primes = sieve(parseInt(process.argv[2]));
+	for (let n = 0; n < primes.length; n++) {
+		if (primes[n]) {
+			console.log(n);
+		}
+	}

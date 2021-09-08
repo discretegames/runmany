@@ -1,41 +1,37 @@
-%%%| Python and C++ programs that output the product of the ints on stdin and argv. |%%%
-%%%| 3 argvs tested (2, 4, 6) times 3 stdins tested (10, 100, 1000) times 2 languages gives 18 runs overall. |%%%
-{
-	"show_equal": false
-}
-@@@| All |@@@
-2
-@@@|@@@
-4
-@@@|@@@
-6
+% Python and C++ programs that output the product of the ints on stdin and argv.
+Settings:
+	{
+		"show_equal": false
+	}
 
-$$$| All |$$$
-10
-$$$|$$$
-100
-$$$|$$$
-1000
+% 3 argvs tested (2, 4, 6) times 3 stdins tested (10, 100, 1000) times 2 languages gives 18 runs overall.
+Argv for All:
+	2
+Also:
+	4
+Also:
+	6
 
-
-~~~| Python |~~~
-
-import sys
-
-a = int(sys.argv[1])
-s = int(input())
-print(a * s)
+Stdin for All: 10
+Also:          100
+Also:          1000
 
 
-~~~| C++ |~~~
+Python:
+	import sys
 
-using namespace std;
-#include <iostream>
+	a = int(sys.argv[1])
+	s = int(input())
+	print(a * s)
 
-int main(int argc, char *argv[]) {
-	int a = stoi(argv[1]);
-    int s;
-    cin >> s;
-    cout << s * a << endl;
-    return 0;
-}
+C++:
+	using namespace std;
+	#include <iostream>
+
+	int main(int argc, char *argv[]) {
+		int a = stoi(argv[1]);
+		int s;
+		cin >> s;
+		cout << s * a << endl;
+		return 0;
+	}

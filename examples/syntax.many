@@ -1,29 +1,36 @@
-%%%| This %%% syntax is a comment in a .many file. |%%%
-%%%| The hardcoded settings JSON is at the top. |%%%
-{ "show_argv": false, "show_stdin": false, "show_equal": false }
+% TODO rewrite a bit to better reflect new syntax.
+% Lines starting with % are comment in .many files.
 
-%%%| The $$$ syntax defines the stdins, in this case for Python. |%%%
-$$$| Python |$$$
-Alice
-$$$|$$$
-Bob
-$$$|$$$
-Carmen
+/% The first line of a multiline comment must start like this,
+and the matching comment-end must be at the end of a non-indented line. %/
 
-%%%| The ~~~ syntax defines a program that will be run. |%%%
-~~~| Python |~~~
-print(f'Hello, {input()}.')
 
-%%%| The @@@ syntax defines the argvs, in this case for all languages. |%%%
-@@@| All |@@@
---flag
+% A single hardcoded settings JSON may be the first section.
+Settings:
+	{ "show_argv": false, "show_stdin": false, "show_equal": false }
 
-!~~~| Python |~~~
-print('This section is disabled with ! so it never gets run.')
+% This Stdin...Also list defines the stdins, in this case for Python.
+Stdin for Python:
+	Alice
+Also:
+	Bob
+Also:
+	Carmen
 
-~~~| JavaScript |~~~
-console.log(`The arg was '${process.argv[2]}'.`)
+% This defines a Python program that will be run.
+Python:
+	print(f'Hello, {input()}.')
 
-%%%|%%%
-~~~| Python |~~~
-print('This section is after the EOF marker so it never gets run.')
+% This syntax defines the argvs, in this case for all languages.
+Argv:
+	--flag
+
+!Python:
+	print('This section is disabled with ! so it never gets run.')
+
+JavaScript:
+	console.log(`The arg was '${process.argv[2]}'.`)
+
+Exit.
+Python:
+	print('This section is after the EOF marker so it never gets run.')
