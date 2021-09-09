@@ -8,7 +8,7 @@ from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Ge
 
 from runmany.util import print_err
 from runmany.settings import Settings, LanguageData
-from runmany.parser import section_iterator, Section, SectionType
+from runmany.parser import section_iterator, Section, HeaderType
 
 OUTPUT_FILL_CHAR, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL_WIDTH * '*'
@@ -180,24 +180,24 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
 
     for section in cast(Iterator[Section], iterator):
         # todo rewrite to ignore also's below a disabled lead section or if disabled themselves
-        if section.disabled:
+        if section.is_disabled:
             continue
 
-        if section.is_sep:
-            if not lead_section or section.type is not lead_section.type:
+        if section.is_also:
+            if not lead_section or section.header_type is not lead_section.header_type:
                 print_err(  # todo probably will change
                     f'No matching lead section for "{section.header}" on line {section.line_number}. Skipping section.')
                 continue
         else:
             lead_section = section
 
-        if section.type is SectionType.ARGV or section.type is SectionType.STDIN:
-            input_dict = argvs if section.type is SectionType.ARGV else stdins
+        if section.header_type is HeaderType.ARGV or section.header_type is HeaderType.STDIN:
+            input_dict = argvs if section.header_type is HeaderType.ARGV else stdins
             for language in lead_section.languages:
-                if not section.is_sep:
+                if not section.is_also:
                     input_dict[language].clear()
                 input_dict[language].append(section)
-        else:
+        else:  # todo check header type here
             for language in lead_section.languages:
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
