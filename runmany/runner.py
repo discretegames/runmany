@@ -184,15 +184,15 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
             continue
 
         if section.is_also:
-            if not lead_section or section.header_type is not lead_section.header_type:
+            if not lead_section or section.type is not lead_section.type:
                 print_err(  # todo probably will change
                     f'No matching lead section for "{section.header}" on line {section.line_number}. Skipping section.')
                 continue
         else:
             lead_section = section
 
-        if section.header_type is SectionType.ARGV or section.header_type is SectionType.STDIN:
-            input_dict = argvs if section.header_type is SectionType.ARGV else stdins
+        if section.type is SectionType.ARGV or section.type is SectionType.STDIN:
+            input_dict = argvs if section.type is SectionType.ARGV else stdins
             for language in lead_section.languages:
                 if not section.is_also:
                     input_dict[language].clear()

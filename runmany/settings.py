@@ -59,9 +59,10 @@ class Settings:
             print_err(f'No "{NAME_KEY}" key found for json list item{end}')
             return False
 
-        if normalize(language_obj.name) == normalize(self.all_name):
-            print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
-            return False
+        # todo verify this error can't happen
+        # if normalize(language_obj.name) == normalize(self.all_name):
+        #     print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
+        #     return False
 
         default_obj = self[language_obj.name] if not is_default and language_obj.name in self else None
         if not hasattr(language_obj, COMMAND_KEY) and not hasattr(default_obj, COMMAND_KEY):

@@ -38,12 +38,13 @@ class Section:
     type: SectionType
     is_disabled: bool
     is_also: bool
+    is_all: bool
     line_number: int
     languages: List[str]
     content: str = ''
 
     @staticmethod
-    def try_start_section(line: str, line_number: int, settings: Settings) -> Optional[Tuple['Section', str]]:
+    def try_start_section(line: str, line_number: int) -> Optional[Tuple['Section', str]]:
         if Syntax.HEADER_END not in line:
             return None
 
@@ -53,12 +54,10 @@ class Section:
             if keyword == Syntax.ALSO:
                 section_type = SectionType.UNKNOWN
                 is_also = True
-                languages = []
             else:
                 section_type = SectionType.ARGV if keyword == Syntax.ARGV_ALL else SectionType.STDIN
                 is_also = False
-                languages = settings.all_languages()
-            return Section(section_type, bool(disabler), is_also, line_number, languages), top_line
+            return Section(section_type, bool(disabler), is_also, not is_also, line_number, []), top_line
 
         match = re.fullmatch(Syntax.PATTERN2, line)
         if match:  # Matched "Argv for Lang1, Lang2:" or "Stdin for Lang1, Lang2:" style header.
@@ -68,7 +67,7 @@ class Section:
                 section_type = SectionType.CODE
             else:
                 section_type = SectionType.ARGV if keyword.rstrip() == Syntax.ARGV_FOR else SectionType.STDIN
-            return Section(section_type, bool(disabler), False, line_number, languages), top_line
+            return Section(section_type, bool(disabler), False, False, line_number, languages), top_line
 
         return None
 
@@ -81,10 +80,12 @@ class Section:
             self.content = content  # Never strip code.
         self.has_content = bool(content.strip('\r\n'))  # todo combine with .content later
 
-    def finish_section(self, lead_section_type: SectionType, content: str) -> SectionType:
+    def finish_section(self, lead_section_type: SectionType, content: str, settings: Settings) -> SectionType:
         if self.type is SectionType.UNKNOWN:
             self.type = lead_section_type
         self.set_content(content)
+        if self.is_all:
+            self.languages = settings.all_languages()
         return self.type
 
 
@@ -96,6 +97,7 @@ def line_is_comment(line: str) -> bool:
     return line.startswith(Syntax.COMMENT)
 
 
+# todo handle empty lines properly
 def line_is_indented(line: str) -> bool:
     return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT)
 
@@ -116,26 +118,25 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
             content.append(line)
             continue
 
-        # TODO we need settings for all langs but don't yet know what it is, hmm
-        next_section = Section.try_start_section(line, line_number, settings)
-        if next_section is None:
-            print_err(f'Skipping line {line_number} "{line}" as it is not a section header and not indented.')
+        next_section = Section.try_start_section(line, line_number)
+        if not next_section:
+            print_err(f'Skipping line {line_number} "{line}" as it is not a valid section header nor indented.')
             continue
 
-        if section is None:
+        if section:
+            lead_section_type = section.finish_section(lead_section_type, ''.join(content), settings)
+            yield section
+        else:
             settings = yield ''.join(content)  # Yield JSON string at top. Only happens once.
             yield None  # Extra yield needed to send back to the send from run_iterator.
-        else:
-            lead_section_type = section.finish_section(lead_section_type, ''.join(content))
-            yield section
 
         section, top_line = next_section
         content.clear()
         content.append(top_line)
 
-    if section is None:  # Deal with last section header.
+    if section:  # Deal with last section header.
+        section.finish_section(lead_section_type, ''.join(content), settings)
+        yield section
+    else:
         yield ''.join(content)
         yield None
-    else:
-        section.finish_section(lead_section_type, ''.join(content))
-        yield section
