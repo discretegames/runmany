@@ -5,7 +5,7 @@
 		"show_code": true,
 		"timeout": 120
 	}
-Argv for All: 5000000
+Argv: 5000000
 
 Python:
 	import sys

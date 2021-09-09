@@ -1,12 +1,11 @@
 % TODO rewrite a bit to better reflect new syntax.
 % Lines starting with % are comment in .many files.
 
-/% The first line of a multiline comment must start like this,
-and the matching comment-end must be at the end of a non-indented line. %/
+% /% The first line of a multiline comment must start like this,
+% and the matching comment-end must be at the end of a non-indented line. %/
 
 
 % A single hardcoded settings JSON may be the first section.
-Settings:
 	{ "show_argv": false, "show_stdin": false, "show_equal": false }
 
 % This Stdin...Also list defines the stdins, in this case for Python.

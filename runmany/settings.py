@@ -113,3 +113,6 @@ def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settin
         settings_json_string = str({})
 
     return Settings(settings_json_string.strip() or str({}))
+
+# TODO a show_stderr option is a good idea frankly, e.g. for primes when you don't see the output
+# so revamp stdout/stderr showing a bit
