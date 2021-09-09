@@ -84,8 +84,8 @@ class Run:
             code_file.write(self.code_section.content)
             code_file_name = code_file.name
 
-        argv = self.argv_section.content if self.argv_section and self.argv_section.has_content else ''
-        stdin = self.stdin_section.content if self.stdin_section and self.stdin_section.has_content else None
+        argv = self.argv_section.content if self.argv_section else ''
+        stdin = self.stdin_section.content if self.stdin_section and self.stdin_section.content else None
         command = PathParts(code_file_name).fill_command(cast(str, self.language_data.command), argv)
 
         start_time = time.perf_counter()
@@ -129,9 +129,9 @@ class Run:
 
         if self.language_data.show_code:
             parts.append(self.make_output_part('code at', self.code_section))
-        if self.argv_section and self.argv_section.has_content and self.language_data.show_argv:
+        if self.argv_section and self.argv_section.content and self.language_data.show_argv:
             parts.append(self.make_output_part('argv at', self.argv_section))
-        if self.stdin_section and self.stdin_section.has_content and self.language_data.show_stdin:
+        if self.stdin_section and self.stdin_section.content and self.language_data.show_stdin:
             parts.append(self.make_output_part('stdin at', self.stdin_section))
         if self.language_data.show_output:
             parts.append(self.make_output_part('output from', self.code_section, stdout))

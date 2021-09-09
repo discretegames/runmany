@@ -71,13 +71,14 @@ class Section:
         return None
 
     def set_content(self, content: str) -> None:
-        if self.type is SectionType.ARGV:
-            self.content = content.strip('\r\n')  # Always strip argv.
-        elif self.type is SectionType.STDIN:
-            self.content = content.strip('\r\n') + '\n'  # Always strip stdin except trailing newline.
-        else:
-            self.content = content  # Never strip code.
-        self.has_content = bool(content.strip('\r\n'))  # todo combine with .content later
+        if self.type is SectionType.ARGV:  # Always strip argv.
+            self.content = content.strip('\r\n')
+        elif self.type is SectionType.STDIN:  # Always strip stdin except trailing newline unless empty.
+            self.content = content.strip('\r\n')
+            if self.content:
+                self.content += '\n'  # If there is content, add a newline because it is often expected.
+        else:  # Never strip code.
+            self.content = content
 
     def finish_section(self, lead_section_type: SectionType, content: str, settings: Settings) -> SectionType:
         if self.type is SectionType.UNKNOWN:
@@ -113,6 +114,7 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
             continue
         if line_is_content(line):
             line = removeprefix(line, Syntax.TAB_INDENT if line.startswith(Syntax.TAB_INDENT) else Syntax.SPACE_INDENT)
+            # todo handle lines with 1,2, or 3 leading spaces
             content.append(line)
             continue
 
