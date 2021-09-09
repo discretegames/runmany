@@ -15,11 +15,16 @@ class Syntax:
     DISABLER = '!'
     HEADER_END = ':'
     SEPARATOR = ','
-    COMMENT = '%'
+    INLINE_COMMENT = '%'
+    BLOCK_COMMENT_START = '/%'
+    BLOCK_COMMENT_END = '%/'
     EXIT = "Exit."
     TAB_INDENT = '\t'
-    SPACE_INDENT = '    '
-    SPACE_PATTERN = f'^{SPACE_INDENT[0]}{{1,{len(SPACE_INDENT)}}}'
+    SPACE = ' '
+    SPACE_INDENT_LENGTH = 4
+
+    SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
+    SPACE_PATTERN = f'^{SPACE}{{1,{SPACE_INDENT_LENGTH}}}'
     PATTERN1 = f'(?=\S)({DISABLER})?((?:{ARGV})|(?:{STDIN})|(?:{ALSO}))\s*(?:{HEADER_END})(.*)'
     PATTERN2 = f'(?=\S)({DISABLER})?(?:({ARGV}|{STDIN})\s+{FOR})?([^{HEADER_END}]*?)(?:{HEADER_END})(.*)'
     # todo tests for varying syntax that follow regex
@@ -89,35 +94,55 @@ class Section:
         return self.type
 
 
+def line_starts_block_comment(line: str) -> bool:
+    return line.startswith(Syntax.BLOCK_COMMENT_START)
+
+
+def line_ends_block_comment(line: str) -> bool:
+    return line.rstrip() == Syntax.BLOCK_COMMENT_END
+
+
+def line_is_inline_comment(line: str) -> bool:
+    return line.startswith(Syntax.INLINE_COMMENT)
+
+
 def line_is_exit(line: str) -> bool:
     return line.startswith(Syntax.EXIT)
-
-
-def line_is_comment(line: str) -> bool:
-    return line.startswith(Syntax.COMMENT)
 
 
 def line_is_content(line: str) -> bool:
     return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
 
-def unindent(line: str) -> str:  # Properly handles lines like "  \r\n", maintaining newlines.
+def unindent(line: str) -> str:
+    # Properly handles lines like "  \r\n", maintaining newlines.
     if line.startswith(Syntax.TAB_INDENT):
         return removeprefix(line, Syntax.TAB_INDENT)
     return re.sub(Syntax.SPACE_PATTERN, '', line, 1)
 
 
+# todo test block comments like exit, and error
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
     section: Optional[Section] = None
     lead_section_type = SectionType.UNKNOWN
+    block_comment_depth = 0
     content: List[str] = []
     settings: Settings
 
     for line_number, line in enumerate(file, 1):
+        if line_ends_block_comment(line):
+            if block_comment_depth:
+                block_comment_depth -= 1
+            else:
+                print_err(f'No block comment to finish. Skipping line {line_number}.')
+            continue
+        if line_starts_block_comment(line):
+            block_comment_depth += 1  # If there's no eventual match a block comment start bahaves the same as Exit.
+        if block_comment_depth or line_is_inline_comment(line):
+            continue
+
         if line_is_exit(line):
             break
-        if line_is_comment(line):
-            continue
         if line_is_content(line):
             content.append(unindent(line))
             continue

@@ -111,7 +111,6 @@ class Run:
     def make_output_part(title: str, section: Section, content: Optional[str] = None) -> str:
         if content is None:
             content = section.content.strip('\r\n')
-        # todo make sure removing the + 1 here fixed the potential line number confusion issues
         return f'{f" {title} line {section.line_number} ":{OUTPUT_FILL_CHAR}^{OUTPUT_FILL_WIDTH}}\n{content}'
 
     def make_output(self, run_number: int, time_taken: float, exit_code: Union[int, str], command: str,

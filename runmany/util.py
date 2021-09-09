@@ -11,7 +11,7 @@ JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
 
 def print_err(message: str) -> None:
     if display_errors:
-        print(f"!!!| RunMany Error: {message} |!!!", file=sys.stderr)  # todo maybe change error formatting
+        print(f"!!!| RunMany Error: {message} |!!!", file=sys.stderr)
 
 
 def set_show_errors(show_errors: bool) -> None:
