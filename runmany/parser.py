@@ -7,12 +7,11 @@ from runmany.util import removeprefix, removesuffix, print_err
 
 
 class Syntax:
-    ARGV_KEYWORD = "Argv"
-    STDIN_KEYWORD = "Stdin"
+    ARGV_KEYWORD = "Argv for"  # todo ensure whitespace after for
+    STDIN_KEYWORD = "Stdin for"
     ALSO_KEYWORD = "Also"
     EXIT_KEYWORD = "Exit."
     HEADER_SUFFIX = ':'
-    HEADER_PATTERN = "^( [^,:], "  # todo
 
     LANGUAGE_DIVIDER = ','
     DISABLE_PREFIX = '!'
@@ -22,8 +21,7 @@ class Syntax:
     # todo block comments?
 
 
-# todo
-class HeaderType(enum.Enum):
+class SectionType(enum.Enum):  # todo rename back to section type
     CODE = enum.auto()
     ARGV = enum.auto()
     STDIN = enum.auto()
@@ -32,13 +30,13 @@ class HeaderType(enum.Enum):
 
 class Section:
     def __init__(
-            self, header: str, header_type: HeaderType, line_number: int, content: str, settings: Settings) -> None:
+            self, header: str, header_type: SectionType, line_number: int, content: str, settings: Settings) -> None:
         self.header = header
         self.header_type = header_type
         self.line_number = line_number
 
         self.is_disabled = self.header.startswith(Syntax.DISABLE_PREFIX)
-        self.is_also = get_header_type(self.header) is HeaderType.UNKNOWN
+        self.is_also = get_header_type(self.header) is SectionType.UNKNOWN
         self.has_content = bool(content.strip('\r\n'))  # todo combine with .content later, need to change set_content
         self.init_content(content)
         self.init_languages(settings)
@@ -59,9 +57,9 @@ class Section:
                                   ' not found in json. Skipping language.')
 
     def init_content(self, content: str) -> None:
-        if self.header_type is HeaderType.ARGV:
+        if self.header_type is SectionType.ARGV:
             self.content = content.strip('\r\n')  # Always strip argv.
-        elif self.header_type is HeaderType.STDIN:
+        elif self.header_type is SectionType.STDIN:
             self.content = content.strip('\r\n') + '\n'  # Always strip stdin except trailing newline.
         else:
             self.content = content  # Never strip code.
@@ -69,6 +67,19 @@ class Section:
     def init_languages(self, settings: Settings) -> None:
         header = get_plain_header(self.header)
         pass
+
+    @staticmethod
+    def try_start_section(line: str, settings: Settings) -> Optional[Tuple['Section', str]]:
+        pass
+
+    def set_content(self, content: str):
+        # todo
+        pass
+
+    def update_type(self, section_type: SectionType) -> SectionType:
+        if self.type is SectionType.UNKNOWN:
+            self.type = section_type
+        return self.type
 
 
 def line_is_exit(line: str) -> bool:
@@ -82,36 +93,32 @@ def line_is_comment(line: str) -> bool:
 def line_is_indented(line: str) -> bool:
     return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT)
 
-
-def try_parse_header(line: str) -> Optional[Tuple[str, str]]:
-    return 'a', 'b'  # TODO be sure to handle disabled header
-
-
-def get_plain_header(header: str) -> str:
-    return removeprefix(header, Syntax.DISABLE_PREFIX)
+# todo remove
+# def get_plain_header(header: str) -> str:
+#     return removeprefix(header, Syntax.DISABLE_PREFIX)
 
 
-def get_header_type(header: str, last_header_type: HeaderType = HeaderType.UNKNOWN) -> HeaderType:
-    header = get_plain_header(header)
-    if header.startswith(Syntax.ALSO_KEYWORD + Syntax.HEADER_SUFFIX):
-        return last_header_type
-    if header.startswith(Syntax.ARGV_KEYWORD):
-        return HeaderType.ARGV
-    if header.startswith(Syntax.STDIN_KEYWORD):
-        return HeaderType.STDIN
-    return HeaderType.CODE
+# def get_header_type(header: str, last_header_type: SectionType = SectionType.UNKNOWN) -> SectionType:
+#     header = get_plain_header(header)
+#     if header.startswith(Syntax.ALSO_KEYWORD + Syntax.HEADER_SUFFIX):
+#         return last_header_type
+#     if header.startswith(Syntax.ARGV_KEYWORD):
+#         return SectionType.ARGV
+#     if header.startswith(Syntax.STDIN_KEYWORD):
+#         return SectionType.STDIN
+#     return SectionType.CODE
 
 
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
-    header: Optional[str] = None
-    header_type = HeaderType.UNKNOWN
-    header_line_number = 0
+    section: Optional[Section] = None
+    lead_section_type = SectionType.UNKNOWN
     content: List[str] = []
 
-    def current_section() -> Section:
-        nonlocal header_type
-        header_type = get_header_type(cast(str, header), header_type)
-        return Section(cast(str, header), header_type, header_line_number, ''.join(content), settings)
+    def finish_section() -> Section:
+        nonlocal lead_section_type
+        lead_section_type = section.update_type(lead_section_type)
+        section.set_content(''.join(content))
+        return section
 
     for line_number, line in enumerate(file, 1):
         if line_is_exit(line):
@@ -123,24 +130,23 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
             content.append(line)
             continue
 
-        maybe_header = try_parse_header(line)
-        if maybe_header is None:
+        next_section = Section.try_start_section(line, settings)
+        if next_section is None:
             print_err(f'Skipping line {line_number} "{line}" as it is not a section header and not indented.')
             continue
 
-        if header is None:
+        if section is None:
             settings = yield ''.join(content)  # Yield JSON string at top. Only happens once.
             yield None  # Extra yield needed to send back to the send from run_iterator.
         else:
-            yield current_section()
+            yield finish_section()
 
-        header, top_line = maybe_header
-        header_line_number = line_number
+        section, top_line = next_section
         content.clear()
         content.append(top_line)
 
-    if header is None:  # Deal with last section header.
+    if section is None:  # Deal with last section header.
         yield ''.join(content)
         yield None
     else:
-        yield current_section()
+        yield finish_section()

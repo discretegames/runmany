@@ -8,7 +8,7 @@ from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Ge
 
 from runmany.util import print_err
 from runmany.settings import Settings, LanguageData
-from runmany.parser import section_iterator, Section, HeaderType
+from runmany.parser import section_iterator, Section, SectionType
 
 OUTPUT_FILL_CHAR, OUTPUT_FILL_WIDTH = '-', 60
 OUTPUT_DIVIDER = OUTPUT_FILL_WIDTH * '*'
@@ -191,8 +191,8 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
         else:
             lead_section = section
 
-        if section.header_type is HeaderType.ARGV or section.header_type is HeaderType.STDIN:
-            input_dict = argvs if section.header_type is HeaderType.ARGV else stdins
+        if section.header_type is SectionType.ARGV or section.header_type is SectionType.STDIN:
+            input_dict = argvs if section.header_type is SectionType.ARGV else stdins
             for language in lead_section.languages:
                 if not section.is_also:
                     input_dict[language].clear()
