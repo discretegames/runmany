@@ -9,10 +9,9 @@ from runmany.util import removeprefix, removesuffix, print_err
 
 
 class Syntax:
-    ARGV_ALL = "Argv"
-    ARGV_FOR = f"{ARGV_ALL} for"
-    STDIN_ALL = "Stdin"
-    STDIN_FOR = f"{STDIN_ALL} for"
+    ARGV = "Argv"
+    STDIN = "Stdin"
+    FOR = "for"
     ALSO = "Also"
     DISABLER = '!'
     HEADER_END = ':'
@@ -21,9 +20,10 @@ class Syntax:
     EXIT = "Exit."
     TAB_INDENT = '\t'
     SPACE_INDENT = '    '
-    PATTERN1 = f'(?=\S)((?:{DISABLER})?)((?:{ARGV_ALL})|(?:{STDIN_ALL})|(?:{ALSO}))\s*(?:{HEADER_END})\s*(.*)'
-    PATTERN2 = f'(?=\S)((?:{DISABLER})?)((?:{ARGV_FOR}\s)|(?:{STDIN_FOR}\s)|)([^{HEADER_END}]*?)(?:{HEADER_END})\s*(.*)'
+    PATTERN1 = f'(?=\S)({DISABLER})?((?:{ARGV})|(?:{STDIN})|(?:{ALSO}))\s*(?:{HEADER_END})(.*)'
+    PATTERN2 = f'(?=\S)({DISABLER})?(?:({ARGV}|{STDIN})\s+{FOR})?([^{HEADER_END}]*?)(?:{HEADER_END})(.*)'
     # todo block comments?
+    # todo tests for varying syntax that follow regex
 
 
 class SectionType(enum.Enum):
@@ -48,25 +48,25 @@ class Section:
         if Syntax.HEADER_END not in line:
             return None
 
-        match = re.fullmatch(Syntax.PATTERN1, line)
+        match = re.fullmatch(Syntax.PATTERN1, line, re.DOTALL)
         if match:  # Matched "Argv:", "Stdin:", or "Also:" style header.
             disabler, keyword, top_line = match.groups()
             if keyword == Syntax.ALSO:
                 section_type = SectionType.UNKNOWN
                 is_also = True
             else:
-                section_type = SectionType.ARGV if keyword == Syntax.ARGV_ALL else SectionType.STDIN
+                section_type = SectionType.ARGV if keyword == Syntax.ARGV else SectionType.STDIN
                 is_also = False
             return Section(section_type, bool(disabler), is_also, not is_also, line_number, []), top_line
 
-        match = re.fullmatch(Syntax.PATTERN2, line)
+        match = re.fullmatch(Syntax.PATTERN2, line, re.DOTALL)
         if match:  # Matched "Argv for Lang1, Lang2:" or "Stdin for Lang1, Lang2:" style header.
             disabler, keyword, langs, top_line = match.groups()
             languages = [language.strip() for language in langs.split(Syntax.SEPARATOR)]
             if not keyword:
                 section_type = SectionType.CODE
             else:
-                section_type = SectionType.ARGV if keyword.rstrip() == Syntax.ARGV_FOR else SectionType.STDIN
+                section_type = SectionType.ARGV if keyword == Syntax.ARGV else SectionType.STDIN
             return Section(section_type, bool(disabler), False, False, line_number, languages), top_line
 
         return None
@@ -98,8 +98,8 @@ def line_is_comment(line: str) -> bool:
 
 
 # todo handle empty lines properly
-def line_is_indented(line: str) -> bool:
-    return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT)
+def line_is_content(line: str) -> bool:
+    return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
 
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
@@ -113,14 +113,14 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
             break
         if line_is_comment(line):
             continue
-        if line_is_indented(line):
+        if line_is_content(line):
             line = removeprefix(line, Syntax.TAB_INDENT if line.startswith(Syntax.TAB_INDENT) else Syntax.SPACE_INDENT)
             content.append(line)
             continue
 
         next_section = Section.try_start_section(line, line_number)
         if not next_section:
-            print_err(f'Skipping line {line_number} "{line}" as it is not a valid section header nor indented.')
+            print_err(f'Skipping line {line_number} "{line.strip()}" as it is not a valid section header nor indented.')
             continue
 
         if section:
@@ -132,7 +132,7 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
 
         section, top_line = next_section
         content.clear()
-        content.append(top_line)
+        content.append(top_line.lstrip())
 
     if section:  # Deal with last section header.
         section.finish_section(lead_section_type, ''.join(content), settings)

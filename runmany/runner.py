@@ -186,7 +186,7 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
         if section.is_also:
             if not lead_section or section.type is not lead_section.type:
                 print_err(  # todo probably will change
-                    f'No matching lead section for "{section.header}" on line {section.line_number}. Skipping section.')
+                    f'No matching lead section for "{section}" on line {section.line_number}. Skipping section.')
                 continue
         else:
             lead_section = section
