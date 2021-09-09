@@ -11,7 +11,7 @@ JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
 
 def print_err(message: str) -> None:
     if display_errors:
-        print(f"!!!| RunMany Error: {message} |!!!", file=sys.stderr)
+        print(f"!!!| RunMany Error: {message} |!!!", file=sys.stderr)  # todo maybe change error formatting
 
 
 def set_show_errors(show_errors: bool) -> None:
@@ -29,6 +29,7 @@ def debugging() -> bool:
     return os.environ.get('DEBUG_RUNMANY') == 'True'  # pragma: no cover
 
 
+# In 3.9 removeprefix/suffix are built in string methods.
 def removeprefix(string: str, prefix: str) -> str:
     return string[len(prefix):] if string.startswith(prefix) else string
 

@@ -1,3 +1,4 @@
+import re
 import enum
 from typing import List, Optional, Tuple, Generator, Union, TextIO, cast
 
@@ -6,24 +7,19 @@ from runmany.util import removeprefix, removesuffix, print_err
 
 
 class Syntax:
-    CODE_START = '~~~|'
-    CODE_END = '|~~~'
-    CODE_SEP = '~~~|~~~'
-    ARGV_START = '@@@|'
-    ARGV_END = '|@@@'
-    ARGV_SEP = '@@@|@@@'
-    STDIN_START = '$$$|'
-    STDIN_END = '|$$$'
-    STDIN_SEP = '$$$|$$$'
-    COMMENT_START = '%%%|'
-    COMMENT_END = '|%%%'
-    EXIT_MARKER = '%%%|%%%'
-    LANGUAGE_DIVIDER = '|'
-    DISABLE_PREFIX = '!'
+    COLON = ':'
+    STDIN_KEYWORD = "Stdin"
+    ARGV_KEYWORD = "Argv"
+    ALSO_KEYWORD = "Also{Sec"
+    EXIT_KEYWORD = "Exit."
+    HEADER_PATTERN = "^( [^,:], "
 
-    STARTS = CODE_START, ARGV_START, STDIN_START
-    ENDS = CODE_END, ARGV_END, STDIN_END
-    SEPS = CODE_SEP, ARGV_SEP, STDIN_SEP
+    LANGUAGE_DIVIDER = ','
+    DISABLE_PREFIX = '!'
+    INLINE_COMMENT = '%'
+    TAB_INDENT = '\t'
+    SPACE_INDENT = '    '
+    # todo block comments?
 
 
 class SectionType(enum.Enum):
@@ -33,8 +29,7 @@ class SectionType(enum.Enum):
 
 
 class Section:
-    def __init__(self, header: str, content: str, settings: Settings, line_number: int) -> None:
-        self.header = header.rstrip()
+    def __init__(self, header: str, content: str, line_number: int, settings: Settings) -> None:
         self.type, start, end = self.get_type_start_end(self.header)
         self.disabled = self.header.startswith(Syntax.DISABLE_PREFIX)
 
@@ -75,47 +70,57 @@ class Section:
 
 
 def line_is_exit(line: str) -> bool:
-    return line.rstrip() == Syntax.EXIT_MARKER
+    return line.startswith(Syntax.EXIT_KEYWORD)
 
 
 def line_is_comment(line: str) -> bool:
-    line = line.rstrip()
-    return line == Syntax.DISABLE_PREFIX + Syntax.EXIT_MARKER or line.endswith(Syntax.COMMENT_END) and \
-        (line.startswith(Syntax.COMMENT_START) or line.startswith(Syntax.DISABLE_PREFIX + Syntax.COMMENT_START))
+    return line.startswith(Syntax.INLINE_COMMENT)
 
 
-def line_is_header(line: str) -> bool:
-    line = removeprefix(line.rstrip(), Syntax.DISABLE_PREFIX)
-    return line in Syntax.SEPS or \
-        any(line.startswith(s) and line.endswith(e) for s, e in zip(Syntax.STARTS, Syntax.ENDS))
+def line_is_indented(line: str) -> bool:
+    return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT)
+
+
+def try_parse_header(line: str) -> Optional[Tuple[str, str]]:
+    return 'a', 'b'  # TODO be sure to handle disabled header
+    pass
 
 
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
     def current_section() -> Section:
-        return Section(cast(str, header), ''.join(section_lines), settings, header_line_number)
+        return Section(cast(str, header), ''.join(section_content), header_line_number, settings)
 
     header: Optional[str] = None
     header_line_number = 0
-    section_lines: List[str] = []
+    section_content: List[str] = []
     for line_number, line in enumerate(file, 1):
         if line_is_exit(line):
             break
         if line_is_comment(line):
             continue
-        if line_is_header(line):
-            if header:
-                yield current_section()
-            else:
-                settings = yield ''.join(section_lines)  # Yield JSON string at top. Only happens once.
-                yield None  # Extra yield needed to catch the send from run_iterator. Not ready to yield sections yet.
-            header = line
-            header_line_number = line_number
-            section_lines = []
-        else:
-            section_lines.append(line)
+        if line_is_indented(line):
+            line = removeprefix(line, Syntax.TAB_INDENT if line.startswith(Syntax.TAB_INDENT) else Syntax.SPACE_INDENT)
+            section_content.append(line)
+            continue
 
-    if header:
-        yield current_section()
+        maybe_header = try_parse_header(line)
+        if maybe_header is None:
+            print_err(f'Skipping line {line_number} "{line}" as it is not a section header and not indented.')
+            continue
+
+        if header is None:
+            settings = yield ''.join(section_content)  # Yield JSON string at top. Only happens once.
+            yield None  # Extra yield needed to send back to the send from run_iterator.
+        else:
+            yield current_section()
+
+        header, top_line = maybe_header
+        header_line_number = line_number
+        section_content.clear()
+        section_content.append(top_line)
+
+    if header is None:  # Deal with last section header.
+        yield ''.join(section_content)
+        yield None
     else:
-        yield ''.join(section_lines)  # Yield JSON string at top because it's expected but won't actually be used.
-        yield None  # Extra yield needed to catch the send from run_iterator.
+        yield current_section()

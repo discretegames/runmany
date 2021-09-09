@@ -111,7 +111,8 @@ class Run:
     def make_output_part(title: str, section: Section, content: Optional[str] = None) -> str:
         if content is None:
             content = section.content.strip('\r\n')
-        return f'{f" {title} line {section.line_number + 1} ":{OUTPUT_FILL_CHAR}^{OUTPUT_FILL_WIDTH}}\n{content}'
+        # todo make sure removing the + 1 here fixed the potential line number confusion issues
+        return f'{f" {title} line {section.line_number} ":{OUTPUT_FILL_CHAR}^{OUTPUT_FILL_WIDTH}}\n{content}'
 
     def make_output(self, run_number: int, time_taken: float, exit_code: Union[int, str], command: str,
                     stdout: str) -> str:
@@ -171,18 +172,20 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
     argvs: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
 
+    # Todo just make settings global, since it will no longer be a section really? no, nevermind this I think
     iterator = section_iterator(file)
     settings = yield cast(str, next(iterator))  # Specially yield JSON string at top.
-    yield None  # Extra yield needed to catch the send from runmany_to_f. Not ready to yield runs yet.
+    yield None  # Extra yield needed to send back to the send from runmany_to_f. Not ready to yield runs yet.
     iterator.send(settings)
 
     for section in cast(Iterator[Section], iterator):
+        # todo rewrite to ignore also's below a disabled lead section or if disabled themselves
         if section.disabled:
             continue
 
         if section.is_sep:
             if not lead_section or section.type is not lead_section.type:
-                print_err(
+                print_err(  # todo probably will change
                     f'No matching lead section for "{section.header}" on line {section.line_number}. Skipping section.')
                 continue
         else:

@@ -84,6 +84,7 @@ class Settings:
     def __contains__(self, language: str) -> bool:
         return normalize(language) in self.dict
 
+    # TODO needs to change since all is leaving
     def unpack(self, language: str) -> List[str]:
         language = normalize(language)
         if language == normalize(self.all_name):
