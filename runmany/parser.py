@@ -1,11 +1,10 @@
 import re
 import enum
-from typing import List, Optional, Tuple, Generator, Union, TextIO, cast
+from typing import List, Optional, Tuple, Generator, Union, TextIO
 
 from dataclasses import dataclass
-
-from runmany.settings import Settings
-from runmany.util import removeprefix, removesuffix, print_err
+from runmany.settings import Settings, normalize
+from runmany.util import removeprefix, print_err
 
 
 class Syntax:
@@ -62,7 +61,7 @@ class Section:
         match = re.fullmatch(Syntax.PATTERN2, line, re.DOTALL)
         if match:  # Matched "Argv for Lang1, Lang2:" or "Stdin for Lang1, Lang2:" style header.
             disabler, keyword, langs, top_line = match.groups()
-            languages = [language.strip() for language in langs.split(Syntax.SEPARATOR)]
+            languages = [normalize(language) for language in langs.split(Syntax.SEPARATOR)]
             if not keyword:
                 section_type = SectionType.CODE
             else:
@@ -97,7 +96,6 @@ def line_is_comment(line: str) -> bool:
     return line.startswith(Syntax.COMMENT)
 
 
-# todo handle empty lines properly
 def line_is_content(line: str) -> bool:
     return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 

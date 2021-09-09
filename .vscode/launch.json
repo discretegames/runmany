@@ -5,10 +5,10 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Python: Current File",
+			"name": "Debug RunMany",
 			"type": "python",
 			"request": "launch",
-			"program": "${file}",
+			"program": "runmany/runmany.py",
 			"console": "integratedTerminal",
 			"env": {
 				"DEBUG_RUNMANY": "True"

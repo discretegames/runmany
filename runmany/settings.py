@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Union, cast
 from runmany.util import JsonLike, print_err, set_show_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
-ALL_NAME_KEY, NAME_KEY, COMMAND_KEY, EXT_KEY = 'all_name', 'name', 'command', 'ext'
+NAME_KEY, COMMAND_KEY, EXT_KEY = 'name', 'command', 'ext'
 
 
 def normalize(language: str) -> str:
@@ -58,11 +58,6 @@ class Settings:
         if not hasattr(language_obj, NAME_KEY):
             print_err(f'No "{NAME_KEY}" key found for json list item{end}')
             return False
-
-        # todo verify this error can't happen
-        # if normalize(language_obj.name) == normalize(self.all_name):
-        #     print_err(f'Language name "{language_obj.name}" cannot match {ALL_NAME_KEY} "{self.all_name}"{end}')
-        #     return False
 
         default_obj = self[language_obj.name] if not is_default and language_obj.name in self else None
         if not hasattr(language_obj, COMMAND_KEY) and not hasattr(default_obj, COMMAND_KEY):

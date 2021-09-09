@@ -18,6 +18,8 @@ def test_no_name() -> None:
     expected = '!!!| RunMany Error: No "name" key found for json list item. Ignoring language. |!!!\n'
     assert stderr_of_run('', no_name_json) == expected
 
+# todo remove all_name tests
+
 
 def test_name_matches_all() -> None:
     all_match_json = {"languages": [{"name": " all ", "command": ""}]}
