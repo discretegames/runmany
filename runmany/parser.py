@@ -19,9 +19,9 @@ class Syntax:
     EXIT = "Exit."
     TAB_INDENT = '\t'
     SPACE_INDENT = '    '
+    SPACE_PATTERN = f'^{SPACE_INDENT[0]}{{1,{len(SPACE_INDENT)}}}'
     PATTERN1 = f'(?=\S)({DISABLER})?((?:{ARGV})|(?:{STDIN})|(?:{ALSO}))\s*(?:{HEADER_END})(.*)'
     PATTERN2 = f'(?=\S)({DISABLER})?(?:({ARGV}|{STDIN})\s+{FOR})?([^{HEADER_END}]*?)(?:{HEADER_END})(.*)'
-    # todo block comments?
     # todo tests for varying syntax that follow regex
 
 
@@ -101,6 +101,12 @@ def line_is_content(line: str) -> bool:
     return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
 
+def unindent(line: str) -> str:  # Properly handles lines like "  \r\n", maintaining newlines.
+    if line.startswith(Syntax.TAB_INDENT):
+        return removeprefix(line, Syntax.TAB_INDENT)
+    return re.sub(Syntax.SPACE_PATTERN, '', line, 1)
+
+
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
     section: Optional[Section] = None
     lead_section_type = SectionType.UNKNOWN
@@ -113,14 +119,13 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
         if line_is_comment(line):
             continue
         if line_is_content(line):
-            line = removeprefix(line, Syntax.TAB_INDENT if line.startswith(Syntax.TAB_INDENT) else Syntax.SPACE_INDENT)
-            # todo handle lines with 1,2, or 3 leading spaces
-            content.append(line)
+            content.append(unindent(line))
             continue
 
         next_section = Section.try_start_section(line, line_number)
         if not next_section:
-            print_err(f'Skipping line {line_number} "{line.strip()}" as it is not a valid section header nor indented.')
+            line = line.rstrip('\r\n')
+            print_err(f'Skipping line {line_number} "{line}" as it is not a valid section header nor indented.')
             continue
 
         if section:
