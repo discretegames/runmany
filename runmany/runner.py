@@ -7,7 +7,7 @@ from tempfile import NamedTemporaryFile
 from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 
 from runmany.util import print_err
-from runmany.settings import Settings, LanguageData
+from runmany.settings import Settings, LanguageData, normalize
 from runmany.parser import section_iterator, Section, SectionType, Syntax
 
 OUTPUT_FILL_CHAR, OUTPUT_FILL_WIDTH = '-', 60
@@ -188,11 +188,18 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
         if section.type in (SectionType.ARGV, SectionType.STDIN):
             input_dict = argvs if section.type is SectionType.ARGV else stdins
             for language in lead_section.languages:
+                language = normalize(language)
                 if not section.is_also:
                     input_dict[language].clear()
                 input_dict[language].append(section)
         else:
             for language in lead_section.languages:
+                if language not in settings:
+                    line_number = lead_section.line_number
+                    print_err(
+                        f'Language "{language}" on line {line_number} not found in settings JSON. Skipping language.')
+                    continue
+                language = normalize(language)
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
                         yield Run(section, argv_section, stdin_section, settings[language])

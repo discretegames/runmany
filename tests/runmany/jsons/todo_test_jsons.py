@@ -24,12 +24,9 @@ base_settings_json = {
 }
 
 default_many_file = '''\
-@@@| Python |@@@
-the argv
-$$$| Python |$$$
-the stdin
-~~~| Python |~~~
-print("the output")
+Argv for Python: the argv
+Stdin for Python: the stdin
+Python: print("the output")
 '''
 
 

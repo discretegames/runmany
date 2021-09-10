@@ -2,7 +2,7 @@ import re
 import enum
 from typing import List, Optional, Tuple, Generator, Union, TextIO
 
-from runmany.settings import Settings, normalize
+from runmany.settings import Settings
 from runmany.util import removeprefix, print_err
 
 
@@ -65,7 +65,7 @@ class Section:
         match = re.fullmatch(Syntax.PATTERN2, line, re.DOTALL)
         if match:  # Matched "Argv for Lang1, Lang2:" or "Stdin for Lang1, Lang2:" style header.
             disabler, keyword, langs, top_line = match.groups()
-            languages = [normalize(language) for language in langs.split(Syntax.SEPARATOR)]
+            languages = [language.strip() for language in langs.split(Syntax.SEPARATOR)]
             if not keyword:
                 section_type = SectionType.CODE
             else:
@@ -148,7 +148,8 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
         next_section = Section.try_start_section(line, line_number)
         if not next_section:
             line = line.rstrip('\r\n')
-            print_err(f'Skipping line {line_number} "{line}" as it is not a valid section header nor indented.')
+            print_err(
+                f'Skipping invalid section header "{line}" on line {line_number}. Be sure to indent section content.')
             continue
 
         if section:
