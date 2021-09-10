@@ -8,7 +8,7 @@ from runmany import runmany_to_s
 base_settings_json = {
     "languages": [],
     "timeout": 10.0,
-    "stderr": None,
+    "stderr": True,
     "ext": "",
     "spacing": 1,
     "show_runs": False,

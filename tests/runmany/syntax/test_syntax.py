@@ -1,18 +1,11 @@
 import pathlib
 from runmany import runmany_to_s
 
-# todo redo coverage when tests fixed
-
-# todo tests for varying syntax that follow regex !Argv  :  this is valid
-# todo test block comments like effective exit
-# todo test things like 3 spaces indent?
-
-
 # Some testing code duplicated from test_jsons.py but ehh.
 base_settings_json = {
     "languages": [],
     "timeout": 10.0,
-    "stderr": None,
+    "stderr": True,
     "ext": "",
     "spacing": 1,
     "show_runs": True,
@@ -43,6 +36,19 @@ def test_empty() -> None:
     verify('empty.txt', '')
 
 
+def test_indents() -> None:
+    many_file = '''\
+Python: print(0)
+
+ 
+  
+   
+    print(1)
+\tprint(2)
+'''
+    verify('indents.txt', many_file)
+
+
 def test_for_header() -> None:
     headers = '', ' for Python, Python 2', '\tfor  c,python 2 , python, \tjavascript  '
     for header in headers:
@@ -55,7 +61,7 @@ Python 2: print raw_input()
 
 
 def test_all_header() -> None:
-    many_file = f'''\
+    many_file = '''\
 Stdin:A
 Also: B
 Argv: 1
@@ -82,6 +88,26 @@ Argv: M
 Also: N
 '''
     verify('all_header.txt', many_file)
+
+
+def test_header_syntax() -> None:
+    many_file = '''\
+Argv    :  
+     A
+Also\t: B
+
+Stdin  for  python  :  1
+
+PYTHON : import sys
+\tprint(input(), sys.argv[1])
+
+ARGV:
+Argv for    python 2     :
+Stdin:
+STDIN: hmm
+Python\t , Python 2  :\tprint(9)
+'''
+    verify('header_syntax.txt', many_file)
 
 
 def test_code_list() -> None:
@@ -139,8 +165,6 @@ Python: print('stdin reset')
 '''
     verify('stdin.txt', many_file)
 
-# todo pick it up here
-
 
 def test_disabled_sections() -> None:
     many_file = '''\
@@ -153,10 +177,12 @@ Python:
 !Also: print(2, input())
 Also:
 	print(3, input())
+!\t Also: print(4, input())
 !JavaScript:
 	console.log('unseen 1')
 Also:
 	console.log('unseen 2')
+! Python: print('unseen 3')
 '''
     verify('disabled_sections.txt', many_file)
 
@@ -181,6 +207,32 @@ Python:
 	x = 5%1; print(input())
 '''
     verify('inline_comments.txt', many_file)
+
+
+def test_block_comments() -> None:
+    many_file = '''\
+/% ok
+    {"show_runs": false}
+woo
+%/
+/% stuff
+    foo %/
+Python: print(1)
+%/
+Python: print("/%")
+/%
+Python: print(3)
+/%
+Python: print(4)
+Python: print("%/")
+%/
+Python: print(5)
+%/
+python: print('is printed')
+/%
+python: print(6)
+'''
+    verify('block_comments.txt', many_file)
 
 
 def test_exit() -> None:
