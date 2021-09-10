@@ -6,7 +6,6 @@ from contextlib import redirect_stderr
 from runmany import runmany_to_s
 
 base_settings_json = {
-    "all_name": "All",
     "languages": [],
     "timeout": 10.0,
     "stderr": None,
@@ -65,6 +64,7 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     asserter(provided_json_result, expected)
 
 
+# todo test all in the new way
 def test_all_name() -> None:
     many_file = '''\
 $$$| Every Language |$$$

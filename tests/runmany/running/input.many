@@ -1,3 +1,2 @@
-{ "show_equal": false }
-~~~| Python |~~~
-print('simple')
+	{ "show_equal": false }
+Python:print('simple')

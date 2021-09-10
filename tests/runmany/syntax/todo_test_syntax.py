@@ -1,11 +1,14 @@
 import pathlib
-from typing import Dict, Any
 from runmany import runmany_to_s
+
+# todo redo coverage when tests fixed
+# todo tests for varying syntax that follow regex !Argv  :  this is valid
+# todo test block comments like effective exit
+# todo test things like 3 spaces indent?
 
 
 # Some testing code duplicated from test_jsons.py but ehh.
 base_settings_json = {
-    "all_name": "All",
     "languages": [],
     "timeout": 10.0,
     "stderr": None,

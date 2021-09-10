@@ -26,7 +26,6 @@ class Syntax:
     SPACE_PATTERN = f'^{SPACE}{{1,{SPACE_INDENT_LENGTH}}}'
     PATTERN1 = f'(?=\S)({DISABLER})?((?:{ARGV})|(?:{STDIN})|(?:{ALSO}))\s*(?:{HEADER_END})(.*)'
     PATTERN2 = f'(?=\S)({DISABLER})?(?:({ARGV}|{STDIN})\s+{FOR})?([^{HEADER_END}]*?)(?:{HEADER_END})(.*)'
-    # todo tests for varying syntax that follow regex
 
 
 class SectionType(enum.Enum):
@@ -121,7 +120,6 @@ def unindent(line: str) -> str:
     return re.sub(Syntax.SPACE_PATTERN, '', line, 1)
 
 
-# todo test block comments like exit, and error
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
     section: Optional[Section] = None
     lead_section_type = SectionType.UNKNOWN

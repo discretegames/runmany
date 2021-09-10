@@ -5,6 +5,9 @@ from runmany import runmany
 from runmany.util import PathLike, JsonLike
 from contextlib import redirect_stderr
 
+# todo test non matching block comment error
+# todo test non-indented non-header
+
 
 def stderr_of_run(many_file: Union[PathLike, str], settings_json: JsonLike = None, from_string: bool = True) -> str:
     with io.StringIO() as file, redirect_stderr(file):
@@ -18,21 +21,6 @@ def test_no_name() -> None:
     expected = '!!!| RunMany Error: No "name" key found for json list item. Ignoring language. |!!!\n'
     assert stderr_of_run('', no_name_json) == expected
 
-# todo remove all_name tests
-
-
-def test_name_matches_all() -> None:
-    all_match_json = {"languages": [{"name": " all ", "command": ""}]}
-    expected = '!!!| RunMany Error: Language name " all " cannot match all_name "All". Ignoring language. |!!!\n'
-    assert stderr_of_run('', all_match_json) == expected
-
-    new_all_json = {"all_name": " every ", "languages": [{"name": " all ", "command": ""}]}
-    assert stderr_of_run('', new_all_json) == ''
-
-    new_all_match_json = {"all_name": " every ", "languages": [{"name": "EVERY", "command": ""}]}
-    expected = '!!!| RunMany Error: Language name "EVERY" cannot match all_name " every ". Ignoring language. |!!!\n'
-    assert stderr_of_run('', new_all_match_json) == expected
-
 
 def test_no_command() -> None:
     no_command_json = {"languages": [{"name": "Name"}]}
@@ -40,15 +28,18 @@ def test_no_command() -> None:
     assert stderr_of_run('', no_command_json) == expected
 
 
-def test_unknown_language() -> None:
-    many_file = "~~~| C+ | Python | \t |~~~"
+# todo need to check for this style of error
+def todo_test_unknown_language() -> None:
+    many_file = "C+, Python,\t:"
     expected = '''\
 !!!| RunMany Error: Language "C+" in section header at line 1 not found in json. Skipping language. |!!!\n\
 !!!| RunMany Error: Language "" in section header at line 1 not found in json. Skipping language. |!!!\n'''
     assert stderr_of_run(many_file, {}) == expected
 
+# todo need to rewrite this one
 
-def test_no_lead_section() -> None:
+
+def todo_test_no_lead_section() -> None:
     def expected_error(divider: str, line: int = 1) -> str:
         return f'!!!| RunMany Error: No matching lead section for "{divider}" on line {line}. Skipping section. |!!!\n'
 
