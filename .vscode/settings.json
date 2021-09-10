@@ -33,8 +33,9 @@
 		".mypy_cache/": true,
 		"**/__pycache__/": true,
 		"**/*.egg-info/": true,
-		".eggs/": true,
+		"**/.eggs/": true,
 		".tox/": true,
 		"htmlcov/": true
-	}
+	},
+	"python.analysis.diagnosticMode": "openFilesOnly" // Change to "workspace" to reveal Problems everywhere.
 }

@@ -53,34 +53,17 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     settings_json = combine_with_base(settings_json)
     settings_json_string = json.dumps(settings_json)
 
-    hardcoded_json_result = runmany_to_s(f'{settings_json_string}\n{many_file}', from_string=True)
+    hardcoded_json_result = runmany_to_s(f'\t{settings_json_string}\n{many_file}', from_string=True)
     asserter(hardcoded_json_result, expected)
 
-    padding = len(settings_json_string.splitlines()) * '\n'
-    provided_json_result = runmany_to_s(padding + many_file, settings_json, from_string=True)
+    provided_json_result = runmany_to_s(f'\n{many_file}', settings_json, from_string=True)
     asserter(provided_json_result, expected)
-
-
-# todo test all in the new way
-def test_all_name() -> None:
-    many_file = '''\
-$$$| Every Language |$$$
-abc
-~~~| Python |~~~
-print(input())
-~~~| Python 2 |~~~
-print raw_input()
-'''
-    settings_json = {"all_name": " every language ", "show_runs": True, "show_output": True}
-    verify(settings_json, 'all_name.txt', many_file)
 
 
 def test_languages() -> None:
     many_file = '''\
-~~~| Python |~~~
-print(3)
-~~~| Python 2 |~~~
-print 2
+Python: print(3)
+Python 2: print 2
 '''
     settings_json = {"show_runs": True, "languages": [{"name": "Python", "show_code": True}]}
     verify(settings_json, 'languages1.txt', many_file)
@@ -91,9 +74,9 @@ print 2
 
 def test_timeout() -> None:
     many_file = '''\
-~~~| Python |~~~
-import time
-time.sleep(0.1)
+Python:
+    import time
+    time.sleep(0.1)
 '''
     settings_json = {"show_runs": True, "show_output": True, "timeout": 0.09}
     verify(settings_json, 'timeout1.txt', many_file)
@@ -103,11 +86,11 @@ time.sleep(0.1)
 
 def test_stderr() -> None:
     many_file = '''\
-~~~| Python |~~~
-import sys
-sys.stderr.write("to stderr\\n")
-print("to stdout")
-sys.exit(1)
+Python:
+    import sys
+    sys.stderr.write("to stderr\\n")
+    print("to stdout")
+    sys.exit(1)
 '''
     for name, alt in ('always', True), ('nzec', None), ('never', False):
         for value in (name, alt):
@@ -117,10 +100,8 @@ sys.exit(1)
 
 def test_spacing() -> None:
     many_file = '''\
-~~~| Python |~~~
-print("A")
-~~~| Python |~~~
-print("B")
+Python: print("A")
+Python: print("B")
 '''
     settings_json = {"spacing": 0, "show_runs": True, "show_output": False, "show_code": True}
     verify(settings_json, 'spacing1.txt', many_file)
@@ -130,8 +111,8 @@ print("B")
 
 def test_show_runs() -> None:
     many_file = '''\
-~~~| Python | Python | Python |~~~
-print("run")
+Python,Python,Python:print("\\
+\trun")
 '''
     verify({"show_runs": True}, "show_runs1.txt", many_file)
     verify({"show_runs": False}, "show_runs2.txt", many_file)
@@ -168,7 +149,7 @@ def test_show_output() -> None:
 
 
 def test_show_errors() -> None:
-    many_file = '~~~|~~~'
+    many_file = 'Also:'
     with io.StringIO() as file, redirect_stderr(file):
         runmany_to_s(many_file, combine_with_base({"show_errors": True}), from_string=True)
         file.seek(0)
@@ -185,9 +166,11 @@ def test_show_stats() -> None:
 
 def test_show_equal() -> None:
     many_file = '''\
-~~~| Python | Python |~~~
-print("A")
-~~~| Python |~~~
-print("B")
+Python, Python : print("A")
+Python:\n    print("B")
 '''
     verify({"show_equal": True}, "show_equal.txt", many_file)
+
+
+def test_nothing_shown() -> None:
+    verify({}, "nothing_shown.txt")

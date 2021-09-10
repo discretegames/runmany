@@ -5,6 +5,7 @@ from runmany import runmany_to_s
 # todo tests for varying syntax that follow regex !Argv  :  this is valid
 # todo test block comments like effective exit
 # todo test things like 3 spaces indent?
+# todo test all in the new way
 
 
 # Some testing code duplicated from test_jsons.py but ehh.
