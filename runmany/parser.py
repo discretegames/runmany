@@ -2,7 +2,6 @@ import re
 import enum
 from typing import List, Optional, Tuple, Generator, Union, TextIO
 
-from dataclasses import dataclass
 from runmany.settings import Settings, normalize
 from runmany.util import removeprefix, print_err
 
@@ -37,15 +36,16 @@ class SectionType(enum.Enum):
     UNKNOWN = enum.auto()
 
 
-@dataclass
 class Section:
-    type: SectionType
-    is_disabled: bool
-    is_also: bool
-    is_all: bool
-    line_number: int
-    languages: List[str]
-    content: str = ''
+    def __init__(self, type: SectionType, is_disabled: bool, is_also: bool, is_all: bool,
+                 line_number: int, languages: List[str]):
+        self.type = type
+        self.is_disabled = is_disabled
+        self.is_also = is_also
+        self.is_all = is_all
+        self.line_number = line_number
+        self.languages = languages
+        self.content = ''
 
     @staticmethod
     def try_start_section(line: str, line_number: int) -> Optional[Tuple['Section', str]]:

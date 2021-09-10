@@ -42,10 +42,10 @@ Defaults to False.
                 total_runs += 1
                 successful_runs += success
                 if settings.show_runs:
-                    print(output)
+                    print(output, flush=True)
                 if settings.show_equal:
                     equal_stdouts[stdout].append(run_number)
-            print(make_footer(settings, total_runs, successful_runs, equal_stdouts))
+            print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)
 
 
 def runmany_to_s(many_file: Union[PathLike, str], settings_json: JsonLike = None, *, from_string: bool = False) -> str:

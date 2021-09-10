@@ -1,12 +1,12 @@
 ************************************************************
 1. Python
--------------------- output from line 2 --------------------
+-------------------- output from line 1 --------------------
 This program runs in both Python and JS!
 
 
 ************************************************************
 2. JavaScript
--------------------- output from line 2 --------------------
+-------------------- output from line 1 --------------------
 This program runs in both Python and JS!
 
 

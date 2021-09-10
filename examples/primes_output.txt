@@ -1,8 +1,7 @@
 ************************************************************
-1. Python (14.32s)
---------------------- code at line 12 ----------------------
+1. Python (14.11s)
+--------------------- code at line 10 ----------------------
 import sys
-
 def isprime(n):
 	if n == 2:
 		return True
@@ -18,25 +17,25 @@ for n in range(int(sys.argv[1]) + 1):
 		print(n)
 
 ************************************************************
-2. Python (1.06s)
---------------------- code at line 30 ----------------------
+2. Python (1.08s)
+--------------------- code at line 26 ----------------------
 import sys
 
 def sieve(limit):
-    primes = [False] * 2 + [True] * (limit - 1)
-    for step in range(2, int(limit**0.5) + 1):
-        if primes[step]:
-            for composite in range(step**2, limit + 1, step):
-                primes[composite] = False
-    return primes
+	primes = [False] * 2 + [True] * (limit - 1)
+	for step in range(2, int(limit**0.5) + 1):
+		if primes[step]:
+			for composite in range(step**2, limit + 1, step):
+				primes[composite] = False
+	return primes
 
 for n, isprime in enumerate(sieve(int(sys.argv[1]))):
 	if isprime:
 		print(n)
 
 ************************************************************
-3. JavaScript (4.08s)
---------------------- code at line 46 ----------------------
+3. JavaScript (4.06s)
+--------------------- code at line 41 ----------------------
 function isprime(n) {
 	if (n === 2) {
 		return true;
@@ -59,8 +58,8 @@ for (let n = 0; n < parseInt(process.argv[2]); n++) {
 }
 
 ************************************************************
-4. JavaScript (1.69s)
---------------------- code at line 69 ----------------------
+4. JavaScript (1.64s)
+--------------------- code at line 63 ----------------------
 function sieve(limit) {
 	const primes = new Array(limit + 1).fill(true);
 	primes[0] = primes[1] = false;
