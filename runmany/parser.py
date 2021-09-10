@@ -25,7 +25,7 @@ class Syntax:
     SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
     SPACE_PATTERN = f'^{SPACE}{{1,{SPACE_INDENT_LENGTH}}}'
     PATTERN1 = f'(?=\\S)({DISABLER})?((?:{ARGV})|(?:{STDIN})|(?:{ALSO}))\\s*(?:{HEADER_END})(.*)'
-    PATTERN2 = f'(?=\\S)({DISABLER})?(?:({ARGV}|{STDIN})\\s+{FOR})?([^{HEADER_END}]*?)(?:{HEADER_END})(.*)'
+    PATTERN2 = f'(?=\\S)({DISABLER})?(?:({ARGV}|{STDIN})\\s+{FOR}\\s)?([^{HEADER_END}]*?)(?:{HEADER_END})(.*)'
 
 
 class SectionType(enum.Enum):

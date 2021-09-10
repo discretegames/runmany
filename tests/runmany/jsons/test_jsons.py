@@ -170,7 +170,3 @@ Python, Python : print("A")
 Python:\n    print("B")
 '''
     verify({"show_equal": True}, "show_equal.txt", many_file)
-
-
-def test_nothing_shown() -> None:
-    verify({}, "nothing_shown.txt")
