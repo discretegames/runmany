@@ -148,8 +148,7 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
         next_section = Section.try_start_section(line, line_number)
         if not next_section:
             line = line.rstrip('\r\n')
-            print_err(
-                f'Skipping invalid section header "{line}" on line {line_number}. Be sure to indent section content.')
+            print_err(f'Skipping line {line_number} "{line}" as it is not a valid section header and not indented.')
             continue
 
         if section:

@@ -179,9 +179,10 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
     for section in cast(Iterator[Section], iterator):
         if not section.is_also:
             lead_section = section
-        if not lead_section:
+        if not lead_section and not section.is_disabled:
             print_err(f'No lead section for {Syntax.ALSO} on line {section.line_number}. Skipping section.')
             continue
+        lead_section = cast(Section, lead_section)
         if section.is_disabled or lead_section.is_disabled:
             continue
 
