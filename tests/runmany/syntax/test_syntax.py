@@ -6,7 +6,6 @@ from runmany import runmany_to_s
 # todo tests for varying syntax that follow regex !Argv  :  this is valid
 # todo test block comments like effective exit
 # todo test things like 3 spaces indent?
-# todo test all in the new way
 
 
 # Some testing code duplicated from test_jsons.py but ehh.
@@ -44,7 +43,7 @@ def test_empty() -> None:
     verify('empty.txt', '')
 
 
-def test_section_header() -> None:
+def test_for_header() -> None:
     headers = '', ' for Python, Python 2', '\tfor  c,python 2 , python, \tjavascript  '
     for header in headers:
         many_file = f'''\
@@ -52,7 +51,37 @@ Stdin {header}: some input
 Python: print(input())
 Python 2: print raw_input()
 '''
-        verify('section_header.txt', many_file)
+        verify('for_header.txt', many_file)
+
+
+def test_all_header() -> None:
+    many_file = f'''\
+Stdin:A
+Also: B
+Argv: 1
+Also:2
+Python:
+	import sys
+	print(input(), sys.argv[1])
+Python 2:
+	import sys
+	print raw_input(), sys.argv[1]
+
+Stdin for Python: X
+Argv for Python: Y
+Python:
+	import sys
+	print(input(), sys.argv[1])
+Python 2:
+	import sys
+	print raw_input(), sys.argv[1]
+
+Stdin:C
+Also:D
+Argv: M
+Also: N
+'''
+    verify('all_header.txt', many_file)
 
 
 def test_code_list() -> None:
@@ -86,113 +115,110 @@ Python: print('argv reset')
 '''
     verify('argv.txt', many_file)
 
+
+def test_stdin() -> None:
+    many_file = '''\
+Stdin:1
+    2
+Also:
+    3
+    4
+Also:
+    5
+    6
+
+Python, Python 2: print(input())
+Stdin for Python 2: 0
+
+Python, Python 2: print(input())
+
+Stdin for Python:
+
+
+Python: print('stdin reset')
+'''
+    verify('stdin.txt', many_file)
+
 # todo pick it up here
 
-# def test_stdin() -> None:
-#     many_file = '''\
-# $$$| All |$$$
-# 1
-# 2
-# $$$|$$$
-# 3
-# 4
-# $$$|$$$
-# 5
-# 6
-# ~~~| Python | Python 2 |~~~
-# print(input())
-# $$$| Python 2 |$$$
-# 0
-# ~~~| Python | Python 2 |~~~
-# print(input())
 
-# $$$| Python |$$$
-
-
-# ~~~| Python |~~~
-# print('stdin reset')
-# '''
-#     verify('stdin.txt', many_file)
+def test_disabled_sections() -> None:
+    many_file = '''\
+Stdin for Python:
+	A
+!Stdin for Python:
+	B
+Python:
+	print(1, input())
+!Also: print(2, input())
+Also:
+	print(3, input())
+!JavaScript:
+	console.log('unseen 1')
+Also:
+	console.log('unseen 2')
+'''
+    verify('disabled_sections.txt', many_file)
 
 
-# def test_disabled_sections() -> None:
-#     many_file = '''\
-# $$$| Python |$$$
-# A
-# !$$$| Python |$$$
-# B
-# ~~~| Python |~~~
-# print(1, input())
-# !~~~|~~~
-# print(2, input())
-# ~~~|~~~
-# print(3, input())
-# !~~~| JavaScript |~~~
-# console.log('unseen')
-# ~~~|~~~
-# print(4, input())
-# '''
-#     verify('disabled_sections.txt', many_file)
+def test__inline_comments() -> None:
+    many_file = '''\
+% comment
+Stdin: % 1
+% 2
+    % 3
+% 4
+	% 5
+% 6
+Python:
+%Python:
+%% comment
+%Exit.
+	print(input())
+%
+	print(input())
+% % %
+	x = 5%1; print(input())
+'''
+    verify('inline_comments.txt', many_file)
 
 
-# def test_comments() -> None:
-#     many_file = '''\
-# %%%| comment |%%%
-# $$$| All |$$$
-# %%% |%%%
-# %%%||||%%%
-#  %%%||%%%
-# %%%||%%%
-# %%%| spacing matters |%%%
-# ~~~| Python |~~~
-# !%%%| exclamation is ok |%%%
-# !%%%|%%%
-# print(input())
-# %%%||%%%
-# print(input())
-# %%%| contents | don't |%%%
-# '''
-#     verify('comments.txt', many_file)
+def test_exit() -> None:
+    many_file = '''\
+Python:
+    print(1)
+%Exit.
+Python:print(2)
+Exit.
+Python:print(3)
+'''
+    verify('exit.txt', many_file)
 
 
-# def test_exit() -> None:
-#     many_file = '''\
-# ~~~| Python |~~~
-# print(1)
-# !%%%|%%%
-# ~~~| Python |~~~
-# print(2)
-# %%%|%%%
-# ~~~| Python |~~~
-# print(3)
-# '''
-#     verify('exit.txt', many_file)
+def test_similar() -> None:
+    many_file = '''\
+Stdin for Python:
+	Python:
+    Also:
+	Argv for:
+% Python:
+Python:
+	print(input())
+	print(input())
+	print(input())
+'''
+    verify('similar.txt', many_file)
 
 
-# def test_similar() -> None:
-#     many_file = '''\
-# $$$| Python |$$$
-# $$$|$$
-#  ~~~| Python |~~~
-# @@@|@@@!
-# ~~~| Python |~~~
-# print(input())
-# print(input())
-# print(input())
-# '''
-#     verify('similar.txt', many_file)
+def test_hardcoded_json() -> None:
+    many_file = '''\
+    { "show_stats": false, "show_equal": false }
+Python: print('x')
+'''
+    with open(path_to('hardcoded1.txt')) as file:
+        actual = runmany_to_s(many_file, from_string=True)
+        assert actual.strip('\r\n') == file.read().strip('\r\n')
 
-
-# def test_hardcoded_json() -> None:
-#     many_file = '''\
-# { "show_stats": false, "show_equal": false }
-# ~~~| Python |~~~
-# print('x')
-# '''
-#     with open(path_to('hardcoded1.txt')) as file:
-#         actual = runmany_to_s(many_file, from_string=True)
-#         assert actual.strip('\r\n') == file.read().strip('\r\n')
-
-#     with open(path_to('hardcoded2.txt')) as file:
-#         actual = runmany_to_s(many_file, {}, from_string=True)
-#         assert actual.strip('\r\n') == file.read().strip('\r\n')
+    with open(path_to('hardcoded2.txt')) as file:
+        actual = runmany_to_s(many_file, {}, from_string=True)
+        assert actual.strip('\r\n') == file.read().strip('\r\n')
