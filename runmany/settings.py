@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Union, cast
 from runmany.util import JsonLike, print_err, set_show_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
-NAME_KEY, COMMAND_KEY, EXT_KEY = 'name', 'command', 'ext'
+NAME_KEY, COMMAND_KEY = 'name', 'command'
 
 
 def normalize(language: str) -> str:
@@ -43,10 +43,12 @@ class Settings:
         self.dict: Dict[str, LanguageData] = {}
         for language_obj in self.default_languages:
             if self.language_obj_valid(language_obj, True):
+                language_obj.name = language_obj.name.strip()
                 self[language_obj.name] = LanguageData(language_obj, self)
 
         for language_obj in self.languages:
             if self.language_obj_valid(language_obj, False):
+                language_obj.name = language_obj.name.strip()
                 if language_obj.name in self:
                     self[language_obj.name].update_obj(language_obj)
                 else:

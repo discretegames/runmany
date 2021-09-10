@@ -34,5 +34,5 @@ def removeprefix(string: str, prefix: str) -> str:
     return string[len(prefix):] if string.startswith(prefix) else string
 
 
-def removesuffix(string: str, suffix: str) -> str:
-    return string[:-len(suffix)] if string.endswith(suffix) else string
+# def removesuffix(string: str, suffix: str) -> str:
+#    return string[:-len(suffix)] if string.endswith(suffix) else string

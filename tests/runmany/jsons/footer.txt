@@ -1,0 +1,4 @@
+************************************************************
+2/3 programs successfully run. 1 failed due to non-zero exit code or timeout.
+2/3 had the exact same stdout. Equal runs grouped: [2] [1 3]
+************************************************************

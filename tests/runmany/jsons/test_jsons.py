@@ -70,6 +70,9 @@ Python 2: print 2
     settings_json = {"show_runs": True, "show_output": True,
                      "languages": [{"name": "Python", "command": "echo $echoed"}]}
     verify(settings_json, 'languages2.txt', many_file)
+    settings_json = {"show_runs": True, "show_output": True,
+                     "languages": [{"name": "\tCUSTOM  language ", "command": "echo custom$thing"}]}
+    verify(settings_json, 'languages3.txt', 'Custom Language:\nCustom  Language:')
 
 
 def test_timeout() -> None:
@@ -170,3 +173,15 @@ Python, Python : print("A")
 Python:\n    print("B")
 '''
     verify({"show_equal": True}, "show_equal.txt", many_file)
+
+
+def test_footer() -> None:
+    many_file = '''\
+Python: print(0)
+Python:
+    import sys
+    print(1)
+    sys.exit(1)
+Python: print(0)
+'''
+    verify({"show_equal": True, "show_stats": True}, "footer.txt", many_file)

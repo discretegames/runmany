@@ -17,6 +17,9 @@ def test_invalid_header() -> None:
     expected = \
         '!!!| RunMany Error: Skipping line 1 " Argv:" as it is not a valid section header and not indented. |!!!\n'
     assert stderr_of_run(' Argv:', {}) == expected
+    expected = \
+        '!!!| RunMany Error: Skipping line 1 "Python" as it is not a valid section header and not indented. |!!!\n'
+    assert stderr_of_run('Python', {}) == expected
 
 
 def test_no_block_comment_match() -> None:
