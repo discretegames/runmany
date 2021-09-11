@@ -1,3 +1,4 @@
+# remember to pip install -e . too
 astroid==2.7.3
 atomicwrites==1.4.0
 attrs==21.2.0
@@ -48,4 +49,4 @@ urllib3==1.26.6
 virtualenv==20.7.2
 webencodings==0.5.1
 wrapt==1.12.1
-zipp==3.5.0
+zipp==3.5.0git 
