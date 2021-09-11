@@ -106,7 +106,7 @@ def line_is_inline_comment(line: str) -> bool:
 
 
 def line_is_exit(line: str) -> bool:
-    return line.startswith(Syntax.EXIT)
+    return line.rstrip() == Syntax.EXIT
 
 
 def line_is_content(line: str) -> bool:

@@ -1,6 +1,8 @@
 Python:
-	print("Hi")
+    print("Hi")
 JavaScript:
-	console.log("Hi")
+    console.log("Hi")
 Rust:
-	fn main() { println!("Hi"); }
+    fn main() {
+        println!("Hi");
+    }

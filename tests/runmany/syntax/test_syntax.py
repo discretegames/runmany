@@ -187,7 +187,7 @@ Also:
     verify('disabled_sections.txt', many_file)
 
 
-def test__inline_comments() -> None:
+def test_inline_comments() -> None:
     many_file = '''\
 % comment
 Stdin: % 1
@@ -240,8 +240,10 @@ def test_exit() -> None:
 Python:
     print(1)
 %Exit.
+Exit..
+ Exit.
 Python:print(2)
-Exit.
+Exit. 
 Python:print(3)
 '''
     verify('exit.txt', many_file)

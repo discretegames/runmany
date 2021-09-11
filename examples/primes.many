@@ -8,6 +8,7 @@
 Argv: 5000000
 
 Python:
+	# Python program that lists primes by checking for factors up to square root
 	import sys
 	def isprime(n):
 		if n == 2:
@@ -24,6 +25,7 @@ Python:
 			print(n)
 
 Also:
+	# Python program that lists primes using a sieve of Eratosthenes
 	import sys
 
 	def sieve(limit):
@@ -39,6 +41,7 @@ Also:
 			print(n)
 
 JavaScript:
+	// JavaScript program that lists primes by checking for factors up to square root
 	function isprime(n) {
 		if (n === 2) {
 			return true;
@@ -61,6 +64,7 @@ JavaScript:
 	}
 
 Also:
+	// JavaScript program that lists primes using a sieve of Eratosthenes
 	function sieve(limit) {
 		const primes = new Array(limit + 1).fill(true);
 		primes[0] = primes[1] = false;
