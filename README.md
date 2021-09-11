@@ -9,9 +9,9 @@
 
 **A tool to run many programs written in many languages from one file.**
 
-Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in *the same* file using any programming languages you like, and then run them all at once.
+Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in *the same* file using any programming languages you want, and then run them all at once.
 
-For example, give RunMany [this](https://github.com/discretegames/runmany/blob/main/examples/simple.many) simple file:
+For example, give RunMany [this](https://github.com/discretegames/runmany/blob/main/examples/simple.many) simple file
 
 ```text
 Python:
@@ -24,24 +24,24 @@ Rust:
     }
 ```
 
-And it will number and run each program, giving [this](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) output:
+and it will number and run each program, giving [this](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) output:
 
 ```text
 ************************************************************
 1. Python
--------------------- output from line 2 --------------------
+-------------------- output from line 1 --------------------
 Hi
 
 
 ************************************************************
 2. JavaScript
--------------------- output from line 4 --------------------
+-------------------- output from line 3 --------------------
 Hi
 
 
 ************************************************************
 3. Rust
--------------------- output from line 6 --------------------
+-------------------- output from line 5 --------------------
 Hi
 
 
@@ -57,12 +57,12 @@ In general, RunMany can be used for:
  ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
 - Performance Testing - Timing different implementations of a program, even across languages.
  ([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
-- Input Testing - Easily giving many combinations of argv or stdin input to programs.
+- Input Testing - Easily giving many combinations of argv or stdin to programs.
  ([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
 - Polyglots - Making esoteric code that can be executed in multiple languages at once.
  ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
-Overall RunMany is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
+Overall it is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
 
 # Installation (supports Python 3.6+)
 
@@ -92,7 +92,7 @@ runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <inp
 - `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
 - `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
 
-When a settings JSON file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) is used as a fallback.
+When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) is used as a fallback.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try.
 Note that RunMany expects the system to already have the necessary interpreters and compilers installed for the programming languages it runs.
@@ -201,6 +201,8 @@ import math
 print(math.pi)
 ```
 
+Blank lines above or below sections are only for readability and not required.
+
 As detailed below, only a few types of sections exist and some require comma (`,`) separated language lists in their headers.
 Language names are stripped of whitespace and matched to corresponding `"name"` keys in the languages arrays of the [settings JSON](https://github.com/discretegames/runmany#settings-json).
 
@@ -232,7 +234,7 @@ An Argv Section can either start `Argv:` to apply to all languages, or `Argv for
 Either way overwrites any previous argv set for those languages, but [Also Sections](https://github.com/discretegames/runmany#also-section)
 can be used to supply a series of argvs.
 
-The Argv Section's content is stripped of newlines and sent as the argument vector to all the subsequent programs from Code Sections for languages it applies to.
+The Argv Section's content is stripped of newlines and sent as the argument vector to all the subsequent programs in Code Sections it applies to.
 
 ```text
 Argv:
@@ -247,13 +249,13 @@ For argv to work the [`$argv` placeholder](https://github.com/discretegames/runm
 
 ### Stdin Section
 
-Almost exactly like Argv Sections but for stdin.
+Almost exactly like an Argv Section but for stdin.
 
 A Stdin Section can either start `Stdin:` to apply to all languages, or `Stdin for Language1, Language2, ...:` to apply to the listed languages.
 Either way overwrites any previous stdin set for those languages, but [Also Sections](https://github.com/discretegames/runmany#also-section)
-can be used to supply series of stdins.
+can be used to supply a series of stdins.
 
-The Stdin Section's content is stripped of trailing newlines except one and sent as the standard input stream to all the subsequent programs from Code Sections for languages it applies to.
+The Stdin Section's content is stripped of trailing newlines except one and sent as the standard input stream to all the subsequent programs in Code Sections it applies to.
 
 ```text
 Stdin:
@@ -269,7 +271,7 @@ When a program expects stdin but there is no Stdin Section to give it, the stdin
 ### Also Section
 
 An Also Section starts with `Also:` (with no language list) and is a way to add a series of argvs or stdins to run,
-or to avoid repeating a Code Section header. It must not be the first section in the file because it needs to attach to the Code, Stdin, or Argv Section above it.
+or to avoid repeating a Code Section header. It cannot be the first section in the file because it needs to attach to the Code, Stdin, or Argv Section above it.
 
 When below an Argv Section or Stdin Section, an Also Section adds an additional input
 to the list of argvs or stdins to run when applicable Code Sections are encountered.
@@ -295,7 +297,7 @@ This is the real power of the Also Section -- giving multiple argvs and stdins t
 
 When below a Code Section, an Also Section is simply shorthand for repeating the Code Section's header.
 
-For example, here, `Also:` behaves exactly the same as `Python, Python 2:` would:
+For example, `Also:` here behaves exactly the same as `Python, Python 2:` would:
 
 ```text
 Python, Python 2:
@@ -338,7 +340,7 @@ Python:
 
 ### Exit Command
 
-`Exit.` at the very start of a line by itself (possibly with trailing whitespace) will stop RunMany as if the file ended there.
+`Exit.` at the very start of a line by itself will stop RunMany as if the file ended there.
 
 ```text
 Exit.
@@ -366,16 +368,15 @@ For example, a settings JSON of
 ```json
 {
     "languages": [
-        {"name": "Rust", "timeout": 5.0 }
+        { "name": "Rust", "timeout": 5.0 }
     ],
     "show_code": true
 }
 ```
 
-will make Rust programs have a 5 second time limit rather than the default of 10, and `"command"` does not need to be present because Rust is already in the default `"default_languages"`.
-The JSON also makes all languages show their code in the RunMany output due to `"show_code": true` in the base object.
+will make Rust programs have a 5 second time limit rather than the default of 10, and `"command"` does not need to be present because Rust is already in the built-in `"default_languages"` array. The `"show_code": true` in the base object makes it so *all* languages in the RunMany output will show their code.
 
-You should never have to set `"default_languages"` in your custom settings JSON (though technically you can). Only set `"languages"`.
+You should not have to set `"default_languages"` in your custom settings JSON (though technically you can). Only set `"languages"`.
 
 ## List of Settings
 
@@ -391,7 +392,7 @@ All settings described and whether or not they they can be overridden in a langu
 | `"show_command"` | bool   | `false`  | yes         | Whether the command used to run each program is shown. Useful for debugging command setup for new languages.
 | `"show_code"`    | bool   | `false`  | yes         | Whether the source code of the program is shown.
 | `"show_argv"`    | bool   | `true`   | yes         | Whether the argv for the program is shown (when present and non-empty).
-| `"show_stdin"`   | bool   | `true`   | yes         | Whether the stdin for the program is shown (when present and not all blank lines).
+| `"show_stdin"`   | bool   | `true`   | yes         | Whether the stdin for the program is shown (when present and not all empty lines).
 | `"show_output"`  | bool   | `true`   | yes         | Whether the output for the program is shown. This includes the stdout, and, depending on the `"stderr"` setting, the stderr.
 | `"show_errors"`  | bool   | `true`   | no          | Whether RunMany errors like `!!!\| RunMany Error: ... \|!!!` are sent to stderr or silenced.
 | `"show_runs"`    | bool   | `true`   | no          | Whether the list of runs is shown. This is usually the bulk of the output.
@@ -423,7 +424,7 @@ Note that some placeholders are "quoted" and some are not. Some operating system
 <!-- markdownlint-disable-next-line MD038 -->
 If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
 
-Check [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) for some examples of commands.
+Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) for some examples of commands.
 
 # About
 
