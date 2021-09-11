@@ -13,13 +13,6 @@
 			"env": {
 				"DEBUG_RUNMANY": "True"
 			}
-		},
-		{
-			"name": "Debug Tox Tests",
-			"type": "python",
-			"request": "launch",
-			"program": "${workspaceFolder}/runtoxdebug.py",
-			"console": "integratedTerminal"
-		},
+		}
 	]
 }

@@ -2,11 +2,8 @@
 .idea/
 desktop.ini
 tempCodeRunnerFile.py
-scratch.py
-test.py
-test.many
-test.json
-notes.txt
+_scratch/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
