@@ -8,7 +8,7 @@
 			"name": "Debug RunMany",
 			"type": "python",
 			"request": "launch",
-			"program": "runmany/runmany.py",
+			"program": "src/runmany/runmany.py",
 			"console": "integratedTerminal",
 			"env": {
 				"DEBUG_RUNMANY": "True"

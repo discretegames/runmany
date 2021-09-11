@@ -1,6 +1,6 @@
 import re
 import enum
-from typing import List, Optional, Tuple, Generator, Union, TextIO
+from typing import List, Optional, Tuple, Generator, Union, TextIO, cast
 
 from runmany.settings import Settings
 from runmany.util import removeprefix, print_err
@@ -129,7 +129,7 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
     lead_section_type = SectionType.UNKNOWN
     block_comment_depth = 0
     content: List[str] = []
-    settings: Settings
+    settings: Optional[Settings] = None
 
     for line_number, line in enumerate(file, 1):
         if line_ends_block_comment(line):
@@ -156,7 +156,7 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
             continue
 
         if section:
-            lead_section_type = section.finish_section(lead_section_type, ''.join(content), settings)
+            lead_section_type = section.finish_section(lead_section_type, ''.join(content), cast(Settings, settings))
             yield section
         else:
             settings = yield ''.join(content)  # Yield JSON string at top. Only happens once.
@@ -167,7 +167,7 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
         content.append(top_line.lstrip())
 
     if section:  # Deal with last section header.
-        section.finish_section(lead_section_type, ''.join(content), settings)
+        section.finish_section(lead_section_type, ''.join(content), cast(Settings, settings))
         yield section
     else:
         yield ''.join(content)
