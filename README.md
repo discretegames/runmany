@@ -163,6 +163,8 @@ Also check [syntax.many](https://github.com/discretegames/runmany/blob/main/exam
 
 ## Syntax Specifics
 
+---
+
 ### Comments
 
 `%` at the very start of a line makes an inline comment.
