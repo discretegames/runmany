@@ -1,10 +1,10 @@
 Name                  Stmts   Miss  Cover
 -----------------------------------------
 runmany\__init__.py       5      0   100%
-runmany\parser.py       127      0   100%
+runmany\parser.py       131      0   100%
 runmany\runmany.py       47      0   100%
 runmany\runner.py       162      0   100%
 runmany\settings.py      86      0   100%
 runmany\util.py          18      0   100%
 -----------------------------------------
-TOTAL                   445      0   100%
+TOTAL                   449      0   100%

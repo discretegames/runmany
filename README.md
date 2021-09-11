@@ -149,7 +149,7 @@ JavaScript:
     console.log(process.argv[2])  // will be "foo"
 ```
 
-As can be guessed, the keywords `Argv` and `Stdin` are used to define the argument vector and standard input for a set of languages. Otherwise the section is assumed to be code.
+The keywords `Argv` and `Stdin` are used to define the argument vector and standard input for a set of languages. Otherwise the section is assumed to be code.
 
 So the RunMany program above will send "foo" to Python and JavaScript on argv, and "bar" to Python on stdin when it runs each language's code.
 
@@ -157,13 +157,11 @@ Importantly, a .many file always runs from top to bottom [just-in-time](https://
 that is, the top lines will run normally even if the bottom lines are invalid syntax.
 For this reason, argv and stdin sections only apply to code sections that come after them.
 
-Those are the essentials but read on for more details and nuance about the syntax of .many files. Notably the [Also Section](https://github.com/discretegames/runmany#also-section) and [hardcoding settings](https://github.com/discretegames/runmany#hardcoded-settings).
+Those are the essentials but read on for more details and nuance about the syntax of .many files. Notably the [Also Section](https://github.com/discretegames/runmany#also-section) and [hardcoded settings](https://github.com/discretegames/runmany#hardcoded-settings).
 
 Also check [syntax.many](https://github.com/discretegames/runmany/blob/main/examples/syntax.many) and the [other examples](https://github.com/discretegames/runmany/tree/main/examples) for concrete syntax samples.
 
 ## Syntax Specifics
-
----
 
 ### Comments
 
@@ -344,6 +342,8 @@ Python:
 Exit.
 % nothing from here on will be run
 ```
+
+---
 
 # Settings JSON
 
