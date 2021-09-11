@@ -1,22 +1,29 @@
-% This is an inline comment. The % must be at the start of the line.
+% This is an inline comment.
 
-/%
-This is a block comment. The /% and %/ must be at the start of their lines.
+/% This is
+a block comment.
 %/
 
 % A hardcoded, indented settings JSON may be put at the top of the file.
 	{ "show_argv": false, "show_stdin": false, "show_equal": false }
 
-% A series of stdins to give to all subsequent Python and Rust programs.
-Stdin for Python, Rust:	Alice
-Also: Bob
-Also: Cairo
-
-% A Python program.
+% A code section for a Python program. The first line is the section header and all indented lines after are the section content.
 Python:
-	print(f'Hello, {input()}.')
+	print('Hello, World!')
+	print('How are you?')
 
-% The series of argvs to give to all subsequent programs. The second one is disabled.
+% A stdin section with alsos that defines a series of stdins to give to all subsequent Python and Rust programs.
+Stdin for Python, Rust:
+	Alice
+Also:
+	Bob
+Also:
+	Cairo
+
+% Another Python program. Note how section content may appear on the same line as the section header.
+Python: print(f'Hello, {input()}.')
+
+% The series of argvs to give to all subsequent programs in any language. The second one is disabled with !.
 Argv: --flag1
 !Also: --flag2
 Also: --flag3
@@ -25,9 +32,12 @@ Also: --flag3
 JavaScript:
 	console.log(`The arg was '${process.argv[2]}'`)
 
-!Python: print('This program is disabled with ! so it never gets run.')
-Also: print('This Also has a disabled lead section so it never gets run.')
+!Python:
+	print('This program is disabled with ! so it never gets run.')
+Also:
+	print('This Also has a disabled lead section so it never gets run.')
 
 Exit.
 
-Python:	print('This program is after Exit. so it never gets run.')
+Python:
+	print('This program is after Exit. so it never gets run.')

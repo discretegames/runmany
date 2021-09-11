@@ -75,13 +75,17 @@ class Section:
         return None
 
     def set_content(self, content: str) -> None:
-        if self.type is SectionType.ARGV:  # Always strip argv.
+        if self.type is SectionType.ARGV:  # Strip argv of newlines.
             self.content = content.strip('\r\n')
-        elif self.type is SectionType.STDIN:  # Always strip stdin except trailing newline unless empty.
-            self.content = content.strip('\r\n')
-            if self.content:
-                self.content += '\n'  # If there is content, add a newline because it is often expected.
-        else:  # Never strip code.
+        elif self.type is SectionType.STDIN:  # Strip stdin of trailing newlines except one, unless all lines blank.
+            stripped_content = content.rstrip('\r\n')
+            trailing_newline = ''
+            if stripped_content:
+                for newline in '\r', '\n', '\r\n':
+                    if content.endswith(newline):
+                        trailing_newline = newline
+            self.content = stripped_content + trailing_newline
+        else:  # Never modify code.
             self.content = content
 
     def finish_section(self, lead_section_type: SectionType, content: str, settings: Settings) -> SectionType:
