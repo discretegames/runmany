@@ -358,7 +358,7 @@ holds the default values for all settings which are automatically used if not ot
 
 Most settings are simple flags or values that can be set in the base settings JSON object. See [List of Settings](https://github.com/discretegames/runmany#list-of-settings) below.
 
-The setting to add a custom language is the `"languages"` key which maps to an array of JSON objects we'll call language objects. Each language object must have a `"name"` 
+The setting to add a custom language is the `"languages"` key which maps to an array of JSON objects we'll call language objects. Each language object must have a `"name"`
 string to identify it and a `"command"` string to run it (see [command format](https://github.com/discretegames/runmany#command-format)).
 However, objects in `"languages"` with a matching `"name"` in the `"default_languages"` array will automatically inherit its other values, such as `"command"` and `"ext"`.
 Most settings that can be set in the base settings JSON object are also inherited by the language objects and can be overridden.

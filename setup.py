@@ -1,7 +1,7 @@
 """Package setup file for the Python 3 runmany package: https://pypi.org/project/runmany"""
 
 from pathlib import Path
-from setuptools import setup, find_packages
+from setuptools import setup
 
 version = "0.4.2"
 

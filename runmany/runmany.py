@@ -107,4 +107,4 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        runmany(pathlib.Path(__file__).parent.parent.joinpath(f'test.many'))
+        runmany(pathlib.Path(__file__).parent.parent.joinpath('test.many'))

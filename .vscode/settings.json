@@ -5,7 +5,11 @@
 		"--strict",
 		"--no-implicit-reexport"
 	],
-	"python.linting.pylintEnabled": false,
+	"python.linting.pylintEnabled": true,
+	"python.linting.flake8Enabled": true,
+	"python.linting.flake8Args": [
+		"--max-line-length=119"
+	],
 	"python.pythonPath": "venv\\Scripts\\python.exe",
 	"cSpell.words": [
 		"Errno",
