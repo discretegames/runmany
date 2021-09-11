@@ -201,7 +201,7 @@ For argv to work the [`$argv` placeholder](https://github.com/discretegames/runm
 
 ### Stdin Section
 
-Almost exactly like the argv section but for stdin.
+Almost exactly like Argv Sections but for stdin.
 
 A Stdin Section can either start `Stdin:` to apply to all languages, or `Stdin for Language1, Language2, ...:` to apply to the languages in the comma separated list. Either way overwrites any previous stdin set for those languages, but [Also Sections](https://github.com/discretegames/runmany#also-section)
 can be used to supply multiple stdins.
@@ -219,7 +219,43 @@ When a program expects stdin but there is no Stdin Section to give it, the stdin
 
 ### Also Section
 
-TODO
+An Also Section starts with `Also:` (with no language list) and is a way to add a series of argvs or stdins to run,
+or to avoid repeating a Code Section header. It must not be the first section in the file because it needs to attach to the Code, Stdin, or Argv Section above it.
+
+When below an Argv Section or Stdin Section, an Also Section adds an additional input
+to the list of argvs or stdins to run when the applicable languages are encountered.
+
+For example, here, the final Python program is run 6 times for all the combinations of argvs and stdins that apply to it
+(`1A 1B 2A 2B 3A 3B`):
+
+```text
+Argv: 1
+Also: 2
+Also: 3
+
+Stdin: A
+Also:  B
+
+Python:
+    import sys
+    print(sys.argv[1] + input())
+```
+
+This is the real power of the Also Section -- giving multiple argvs and stdins to a program without repeating code.
+[Another example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many) with [output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt).
+
+When below a Code Section, an Also Section is simply shorthand for repeating the Code Section's header.
+
+For example, here, `Also:` behaves exactly the same as `Python, Python 2:` would:
+
+```text
+Python, Python 2:
+    print(123)
+Also:
+    print(456)
+Also:
+    print(789)
+```
 
 ### Disabling Sections
 
