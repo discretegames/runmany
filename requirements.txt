@@ -49,4 +49,4 @@ urllib3==1.26.6
 virtualenv==20.7.2
 webencodings==0.5.1
 wrapt==1.12.1
-zipp==3.5.0git 
+zipp==3.5.0
