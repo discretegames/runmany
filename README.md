@@ -92,7 +92,7 @@ runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <inp
 - `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
 - `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
 
-When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) is used as a fallback.
+When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try.
 Note that RunMany expects the system to already have the necessary interpreters and compilers installed for the programming languages it runs.
@@ -123,7 +123,7 @@ with open('output.txt', 'w') as file_obj:
     runmany_to_f(file_obj, 'path/to/input.many', 'path/to/settings.json')
 ```
 
-As with the command line, the settings JSON provided as an argument takes precedence over the one that may be at the top of the .many file, and [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) is used as a fallback for all settings.
+As with the command line, the settings JSON provided as an argument takes precedence over the one that may be at the top of the .many file, and [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback for all settings.
 
 In each of the 3 runmany functions, the settings JSON argument may be given as a path to the .json file or a JSON-like Python dictionary.
 
@@ -353,7 +353,7 @@ Exit.
 
 The settings JSON defines what languages RunMany can run and how it will run them. It also defines how the RunMany output will be formatted.
 
-As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json)
+As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
 holds the default values for all settings which are automatically used if not otherwise present in a provided or hardcoded JSON.
 
 Most settings are simple flags or values that can be set in the base settings JSON object. See [List of Settings](https://github.com/discretegames/runmany#list-of-settings) below.
@@ -424,7 +424,7 @@ Note that some placeholders are "quoted" and some are not. Some operating system
 <!-- markdownlint-disable-next-line MD038 -->
 If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
 
-Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/runmany/default_settings.json) for some examples of commands.
+Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) for some examples of commands.
 
 # About
 
