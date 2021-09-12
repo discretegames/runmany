@@ -2,7 +2,6 @@
 import io
 import os
 import json
-from sys import path
 import pytest
 import pathlib
 from contextlib import redirect_stdout

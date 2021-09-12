@@ -20,7 +20,7 @@ if __name__ == '__main__':
         url='https://github.com/discretegames/runmany',
         packages=find_packages('src'),
         package_dir={'': 'src'},
-        package_data={'': ['*.json']},
+        package_data={'': ['*.json', 'py.typed']},
         zip_safe=False,
         license="MIT",
         keywords=['run', 'execute', 'other languages', 'multiple languages', 'manyfile',

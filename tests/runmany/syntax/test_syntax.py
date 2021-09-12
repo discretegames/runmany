@@ -1,3 +1,4 @@
+# flake8: noqa
 import pathlib
 from runmany import runmany_to_s
 
@@ -67,20 +68,20 @@ Also: B
 Argv: 1
 Also:2
 Python:
-	import sys
-	print(input(), sys.argv[1])
+    import sys
+    print(input(), sys.argv[1])
 Python 2:
-	import sys
-	print raw_input(), sys.argv[1]
+    import sys
+    print raw_input(), sys.argv[1]
 
 Stdin for Python: X
 Argv for Python: Y
 Python:
-	import sys
-	print(input(), sys.argv[1])
+    import sys
+    print(input(), sys.argv[1])
 Python 2:
-	import sys
-	print raw_input(), sys.argv[1]
+    import sys
+    print raw_input(), sys.argv[1]
 
 Stdin:C
 Also:D
@@ -169,19 +170,19 @@ Python: print('stdin reset')
 def test_disabled_sections() -> None:
     many_file = '''\
 Stdin for Python:
-	A
+    A
 !Stdin for Python:
-	B
+    B
 Python:
-	print(1, input())
+    print(1, input())
 !Also: print(2, input())
 Also:
-	print(3, input())
+    print(3, input())
 !\t Also: print(4, input())
 !JavaScript:
-	console.log('unseen 1')
+    console.log('unseen 1')
 Also:
-	console.log('unseen 2')
+    console.log('unseen 2')
 ! Python: print('unseen 3')
 '''
     verify('disabled_sections.txt', many_file)
@@ -194,17 +195,17 @@ Stdin: % 1
 % 2
     % 3
 % 4
-	% 5
+    % 5
 % 6
 Python:
 %Python:
 %% comment
 %Exit.
-	print(input())
+    print(input())
 %
-	print(input())
+    print(input())
 % % %
-	x = 5%1; print(input())
+    x = 5%1; print(input())
 '''
     verify('inline_comments.txt', many_file)
 
@@ -252,14 +253,14 @@ Python:print(3)
 def test_similar() -> None:
     many_file = '''\
 Stdin for Python:
-	Python:
+    Python:
     Also:
-	Argv for:
+    Argv for:
 % Python:
 Python:
-	print(input())
-	print(input())
-	print(input())
+    print(input())
+    print(input())
+    print(input())
 '''
     verify('similar.txt', many_file)
 
