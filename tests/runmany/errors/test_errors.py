@@ -28,14 +28,18 @@ def test_no_block_comment_match() -> None:
 
 
 def test_no_name() -> None:
-    no_name_json = {"languages": [{"command": ""}]}
     expected = '!!!| RunMany Error: No "name" key found for json list item. Ignoring language. |!!!\n'
+    no_name_json = {"languages": [{"command": ""}]}
+    assert stderr_of_run('', no_name_json) == expected
+    no_name_json = {"default_languages": [{"command": ""}]}
     assert stderr_of_run('', no_name_json) == expected
 
 
 def test_no_command() -> None:
-    no_command_json = {"languages": [{"name": "Name"}]}
     expected = '!!!| RunMany Error: No "command" key found for Name. Ignoring language. |!!!\n'
+    no_command_json = {"languages": [{"name": "Name"}]}
+    assert stderr_of_run('', no_command_json) == expected
+    no_command_json = {"default_languages": [{"name": "Name"}]}
     assert stderr_of_run('', no_command_json) == expected
 
 
