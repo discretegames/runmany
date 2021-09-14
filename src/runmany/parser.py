@@ -132,11 +132,8 @@ def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Setti
     settings: Optional[Settings] = None
 
     for line_number, line in enumerate(file, 1):
-        if line_ends_block_comment(line):
-            if block_comment_depth:
-                block_comment_depth -= 1
-            else:
-                print_err(f'No block comment to finish. Skipping line {line_number}.')
+        if line_ends_block_comment(line) and block_comment_depth:
+            block_comment_depth -= 1
             continue
         if line_starts_block_comment(line):
             block_comment_depth += 1  # If there's no eventual match a block comment start bahaves the same as Exit.

@@ -22,11 +22,6 @@ def test_invalid_header() -> None:
     assert stderr_of_run('Python', {}) == expected
 
 
-def test_no_block_comment_match() -> None:
-    expected = '!!!| RunMany Error: No block comment to finish. Skipping line 3. |!!!\n'
-    assert stderr_of_run('/%\n%/\n%/', {}) == expected
-
-
 def test_no_name() -> None:
     expected = '!!!| RunMany Error: No "name" key found for json list item. Ignoring language. |!!!\n'
     no_name_json = {"languages": [{"command": ""}]}
