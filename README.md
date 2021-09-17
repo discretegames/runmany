@@ -169,15 +169,11 @@ Also check [syntax.many](https://github.com/discretegames/runmany/blob/main/exam
 
 `%` at the very start of a line makes an inline comment.
 
-`/%` at the very start of a line up to a matching `%/` at the very start of another line makes a multiline comment.
-
 ```text
 % this is a comment
-
-/%
-this is a block comment
-%/
 ```
+
+There are no block comments.
 
 ---
 

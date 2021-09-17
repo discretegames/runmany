@@ -1,9 +1,5 @@
 % This is an inline comment.
 
-/% This is
-a block comment.
-%/
-
 % A hardcoded, indented settings JSON may be put at the top of the file.
 	{ "show_argv": false, "show_stdin": false, "show_equal": false }
 

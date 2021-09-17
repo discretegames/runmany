@@ -15,8 +15,6 @@ class Syntax:
     HEADER_END = ':'
     SEPARATOR = ','
     INLINE_COMMENT = '%'
-    BLOCK_COMMENT_START = '/%'
-    BLOCK_COMMENT_END = '%/'
     EXIT = "Exit."
     TAB_INDENT = '\t'
     SPACE = ' '
@@ -97,14 +95,6 @@ class Section:
         return self.type
 
 
-def line_starts_block_comment(line: str) -> bool:
-    return line.startswith(Syntax.BLOCK_COMMENT_START)
-
-
-def line_ends_block_comment(line: str) -> bool:
-    return line.rstrip() == Syntax.BLOCK_COMMENT_END
-
-
 def line_is_inline_comment(line: str) -> bool:
     return line.startswith(Syntax.INLINE_COMMENT)
 
@@ -127,21 +117,14 @@ def unindent(line: str) -> str:
 def section_iterator(file: TextIO) -> Generator[Union[str, None, Section], Settings, None]:
     section: Optional[Section] = None
     lead_section_type = SectionType.UNKNOWN
-    block_comment_depth = 0
     content: List[str] = []
     settings: Optional[Settings] = None
 
     for line_number, line in enumerate(file, 1):
-        if line_ends_block_comment(line) and block_comment_depth:
-            block_comment_depth -= 1
-            continue
-        if line_starts_block_comment(line):
-            block_comment_depth += 1  # If there's no eventual match a block comment start bahaves the same as Exit.
-        if block_comment_depth or line_is_inline_comment(line):
-            continue
-
         if line_is_exit(line):
             break
+        if line_is_inline_comment(line):
+            continue
         if line_is_content(line):
             content.append(unindent(line))
             continue

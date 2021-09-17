@@ -210,32 +210,6 @@ Python:
     verify('inline_comments.txt', many_file)
 
 
-def test_block_comments() -> None:
-    many_file = '''\
-/% ok
-    {"show_runs": false}
-woo
-%/
-/% stuff
-    foo %/
-Python: print(1)
-%/
-Python: print("/%")
-/%
-Python: print(3)
-/%
-Python: print(4)
-Python: print("%/")
-%/
-Python: print(5)
-%/
-python: print('is printed')
-/%
-python: print(6)
-'''
-    verify('block_comments.txt', many_file)
-
-
 def test_exit() -> None:
     many_file = '''\
 Python:
