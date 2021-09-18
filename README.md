@@ -315,6 +315,8 @@ Putting `!` at the very start of any section header will disable that section an
     # this is disabled
 Also:
     # this is effectively disabled too
+!Also:
+    # this is disabled in two ways
 ```
 
 ---
