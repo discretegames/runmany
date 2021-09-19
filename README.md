@@ -181,7 +181,7 @@ There are no block comments.
 
 A .many file can be split up into sections, each of which has an unindented header line that ends in a colon (`:`),
 and a potentially multiline string of content that can appear after the colon and on indented lines below the header.
-The indents must be either single tabs or 4 spaces and do not end up as part of the content.
+Each indent must be either a single tab or 4 spaces and the indents do not end up as part of the section content.
 
 Any whitespace just after the colon of the section header is ignored, so this is a working Code Section:
 
@@ -324,6 +324,7 @@ Also:
 ### Hardcoded Settings
 
 A [settings JSON](https://github.com/discretegames/runmany#settings-json) may be placed, indented, before the first section in a .many file. It is only used if a custom setting JSON is not otherwise provided as an argument, and only for the .many file it is in.
+As with section content, the indents may be either single tabs or 4 spaces.
 
 ```text
     {
