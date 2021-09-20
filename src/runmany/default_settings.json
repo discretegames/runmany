@@ -21,6 +21,16 @@
 			"ext": ".adb"
 		},
 		{
+			"name": "C",
+			"command": "gcc $file -o $branch && $branch $argv",
+			"ext": ".c"
+		},
+		{
+			"name": "C#",
+			"command": "csc /nologo /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
+			"ext": ".cs"
+		},
+		{
 			"name": "Python",
 			"command": "python",
 			"ext": ".py"
@@ -61,19 +71,9 @@
 			"ext": ".go"
 		},
 		{
-			"name": "C",
-			"command": "gcc $file -o $branch && $branch $argv",
-			"ext": ".c"
-		},
-		{
 			"name": "C++",
 			"command": "g++ $file -o $branch && $branch $argv",
 			"ext": ".cpp"
-		},
-		{
-			"name": "C#",
-			"command": "csc /nologo /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
-			"ext": ".cs"
 		}
 	]
 }

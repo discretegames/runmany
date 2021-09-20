@@ -7,6 +7,24 @@ Ada:
 		Put_Line("Hello, World!");
 	end HelloWorld;
 
+C:
+	#include <stdio.h>
+
+	int main() {
+		printf("Hello, World!\n");
+		return 0;
+	}
+
+C#:
+	namespace Hello {
+		class HelloWorld {         
+			static void Main(string[] args)
+			{
+				System.Console.WriteLine("Hello, World!");
+			}
+		}
+	}
+
 Python: print('Hello, World!')
 
 Python 2: print 'Hello, World!'
@@ -39,29 +57,10 @@ Go:
 	func main() {
 		fmt.Println("Hello, World!")
 	}
-
-C:
-	#include <stdio.h>
-
-	int main() {
-		printf("Hello, World!\n");
-		return 0;
-	}
-
 C++:
 	#include <iostream>
 
 	int main() {
 		std::cout << "Hello, World!\n";
 		return 0;
-	}
-
-C#:
-	namespace Hello {
-		class HelloWorld {         
-			static void Main(string[] args)
-			{
-				System.Console.WriteLine("Hello, World!");
-			}
-		}
 	}

@@ -3,7 +3,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-version = "0.6.2"
+version = "0.6.3"
 
 if __name__ == '__main__':
     with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:

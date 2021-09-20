@@ -10,6 +10,24 @@ Ada:
 		Put_Line(Argument(1));
 	end Argv;
 
+C:
+	#include <stdio.h>
+
+	int main(int argc, char *argv[]) {
+	printf("%s\n", argv[1]);
+	return 0;
+	}
+
+C#:
+	namespace Argv {
+		class Argv {         
+			static void Main(string[] args)
+			{
+				System.Console.WriteLine(args[0]);
+			}
+		}
+	}
+
 Python:
 	import sys
 	print(sys.argv[1])
@@ -53,14 +71,6 @@ Go:
 		fmt.Println(os.Args[1])
 	}
 
-C:
-	#include <stdio.h>
-
-	int main(int argc, char *argv[]) {
-	printf("%s\n", argv[1]);
-	return 0;
-	}
-
 C++:
 	using namespace std;
 	#include <iostream>
@@ -68,14 +78,4 @@ C++:
 	int main(int argc, char *argv[]) {
 		cout << argv[1] << endl;
 		return 0;
-	}
-
-C#:
-	namespace Argv {
-		class Argv {         
-			static void Main(string[] args)
-			{
-				System.Console.WriteLine(args[0]);
-			}
-		}
 	}
