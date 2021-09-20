@@ -25,6 +25,30 @@ C#:
 		}
 	}
 
+!Clojure: (println "Hello, World!")
+
+!COBOL:
+	program-id. helloworld.
+	procedure division.
+		display "Hello, World!".
+		stop run.
+
+C++:
+	#include <iostream>
+
+	int main() {
+		std::cout << "Hello, World!\n";
+		return 0;
+	}
+
+Dart:
+	void main() {
+		print('Hello, World!');
+	}
+
+
+Exit.
+
 Python: print('Hello, World!')
 
 Python 2: print 'Hello, World!'
@@ -56,11 +80,4 @@ Go:
 
 	func main() {
 		fmt.Println("Hello, World!")
-	}
-C++:
-	#include <iostream>
-
-	int main() {
-		std::cout << "Hello, World!\n";
-		return 0;
 	}

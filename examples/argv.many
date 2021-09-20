@@ -28,6 +28,22 @@ C#:
 		}
 	}
 
+C++:
+	using namespace std;
+	#include <iostream>
+
+	int main(int argc, char *argv[]) {
+		cout << argv[1] << endl;
+		return 0;
+	}
+
+Dart:
+	void main(List<String> args) {
+		print(args[0]);
+	}
+
+Exit.
+
 Python:
 	import sys
 	print(sys.argv[1])
@@ -69,13 +85,4 @@ Go:
 
 	func main() {
 		fmt.Println(os.Args[1])
-	}
-
-C++:
-	using namespace std;
-	#include <iostream>
-
-	int main(int argc, char *argv[]) {
-		cout << argv[1] << endl;
-		return 0;
 	}

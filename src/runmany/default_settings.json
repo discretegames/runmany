@@ -31,6 +31,16 @@
 			"ext": ".cs"
 		},
 		{
+			"name": "C++",
+			"command": "g++ $file -o $branch && $branch $argv",
+			"ext": ".cpp"
+		},
+		{
+			"name": "Dart",
+			"command": "dart",
+			"ext": ".dart"
+		},
+		{
 			"name": "Python",
 			"command": "python",
 			"ext": ".py"
@@ -69,11 +79,6 @@
 			"name": "Go",
 			"command": "go run",
 			"ext": ".go"
-		},
-		{
-			"name": "C++",
-			"command": "g++ $file -o $branch && $branch $argv",
-			"ext": ".cpp"
 		}
 	]
 }
