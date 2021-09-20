@@ -41,6 +41,17 @@
 			"ext": ".dart"
 		},
 		{
+			"name": "Fortran",
+			"command": "gfortran $file -o $branch && $branch $argv",
+			"ext": ".f90"
+		},
+		{
+			"name": "Go",
+			"command": "go run",
+			"ext": ".go"
+		},
+
+		{
 			"name": "Python",
 			"command": "python",
 			"ext": ".py"
@@ -74,11 +85,6 @@
 			"name": "Rust",
 			"command": "rustc $file --out-dir $dir && $branch $argv",
 			"ext": ".rs"
-		},
-		{
-			"name": "Go",
-			"command": "go run",
-			"ext": ".go"
 		}
 	]
 }

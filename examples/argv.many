@@ -1,6 +1,6 @@
 % Programs that print the first command line argument to stdout.
 
-Argv: foobar
+Argv: foobar foobaz
 
 Ada:
 	with Ada.Command_line; use Ada.Command_Line;
@@ -42,6 +42,22 @@ Dart:
 		print(args[0]);
 	}
 
+Fortran:
+	program argv
+		character(len=256) :: arg
+		call getarg(1, arg)
+		write(*, "(a)") trim(arg)
+	end program
+
+Go:
+	package main
+	import "fmt"
+	import "os"
+
+	func main() {
+		fmt.Println(os.Args[1])
+	}
+
 Exit.
 
 Python:
@@ -76,13 +92,4 @@ Rust:
 	fn main() {
 		let args: Vec<String> = env::args().collect();
 		println!("{}", &args[1]);
-	}
-
-Go:
-	package main
-	import "fmt"
-	import "os"
-
-	func main() {
-		fmt.Println(os.Args[1])
 	}
