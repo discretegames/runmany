@@ -58,6 +58,9 @@ Go:
 		fmt.Println(os.Args[1])
 	}
 
+	
+Groovy: println args[0]
+
 Exit.
 
 Python:

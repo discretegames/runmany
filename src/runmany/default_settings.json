@@ -50,6 +50,11 @@
 			"command": "go run",
 			"ext": ".go"
 		},
+		{
+			"name": "Groovy",
+			"command": "groovy",
+			"ext": ".groovy"
+		},
 
 		{
 			"name": "Python",

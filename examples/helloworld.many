@@ -61,6 +61,12 @@ Go:
 		fmt.Println("Hello, World!")
 	}
 
+Groovy: print "Hello, World!\n"
+
+
+!Haskell: main = putStrLn "Hello world!"
+
+
 Exit.
 
 Python: print('Hello, World!')
