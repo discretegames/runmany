@@ -1,7 +1,22 @@
+% Programs that print the first command line argument to stdout.
+
 Argv: foobar
+
+Ada:
+	with Ada.Command_line; use Ada.Command_Line;
+	with Ada.Text_IO; use Ada.Text_IO;
+	procedure Argv is
+	begin
+		Put_Line(Argument(1));
+	end Argv;
+
 Python:
 	import sys
 	print(sys.argv[1])
+
+Python 2:
+	import sys
+	print sys.argv[1]
 
 JavaScript:
 	console.log(process.argv[2])
@@ -10,7 +25,7 @@ TypeScript:
 	console.log(Deno.args[0])
 
 Java:
-	public class HelloWorld {
+	public class Argv {
 		public static void main(String[] args) {
 			System.out.println(args[0]);
 		}
@@ -56,8 +71,8 @@ C++:
 	}
 
 C#:
-	namespace Hello {
-		class HelloWorld {         
+	namespace Argv {
+		class Argv {         
 			static void Main(string[] args)
 			{
 				System.Console.WriteLine(args[0]);

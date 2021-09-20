@@ -1,4 +1,4 @@
-% This is an inline comment.
+% This file shows the syntax of RunMany. This line is an inline comment.
 
 % A hardcoded, indented settings JSON may be put at the top of the file.
 	{ "show_argv": false, "show_stdin": false, "show_equal": false }

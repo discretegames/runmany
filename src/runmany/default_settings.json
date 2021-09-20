@@ -16,6 +16,11 @@
 	"show_equal": true,
 	"default_languages": [
 		{
+			"name": "Ada",
+			"command": "cd $dir && gcc -c $file && gnatmake $file && $branch $argv",
+			"ext": ".adb"
+		},
+		{
 			"name": "Python",
 			"command": "python",
 			"ext": ".py"
@@ -57,7 +62,7 @@
 		},
 		{
 			"name": "C",
-			"command": "g++ $file -o $branch && $branch $argv",
+			"command": "gcc $file -o $branch && $branch $argv",
 			"ext": ".c"
 		},
 		{

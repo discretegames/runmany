@@ -1,6 +1,7 @@
-	{ "show_equal": false }
 % Python and C++ programs that output the product of the ints on stdin and argv.
 % 3 argvs tested (2, 4, 6) times 3 stdins tested (10, 100, 1000) times 2 languages gives 18 runs overall.
+	{ "show_equal": false }
+
 Argv: 2
 Also: 4
 Also: 6

@@ -13,7 +13,7 @@
 	"python.pythonPath": "c:\\Users\\r\\Desktop\\RunMany\\venv\\Scripts\\python.exe",
 	"cSpell.words": [
 		"Errno",
-		"f'Hello",
+		"gnatmake",
 		"htmlcov",
 		"infile",
 		"isprime",
@@ -27,8 +27,7 @@
 		"runmanys",
 		"runpytest",
 		"runtox",
-		"Stmts",
-		"tdin"
+		"Stmts"
 	],
 	"files.exclude": {
 		".coverage": true,

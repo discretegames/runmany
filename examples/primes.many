@@ -1,3 +1,4 @@
+% Timing two ways of listing primes in both Python and JavaScript.
 	{
 		"show_time": true,
 		"show_output": false,
@@ -5,6 +6,7 @@
 		"show_code": true,
 		"timeout": 120
 	}
+
 Argv: 5000000
 
 Python:
