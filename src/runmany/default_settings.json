@@ -70,6 +70,26 @@
 			"command": "node",
 			"ext": ".js"
 		},
+		{
+			"name": "Julia",
+			"command": "julia",
+			"ext": ".jl"
+		},
+		{
+			"name": "Kotlin",
+			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\" $argv",
+			"ext": ".kt"
+		},
+		{
+			"name": "Lisp",
+			"command": "sbcl --script",
+			"ext": ".lisp"
+		},
+		{
+			"name": "Lua",
+			"command": "lua",
+			"ext": ".lua"
+		},
 
 		{
 			"name": "Python",
@@ -85,11 +105,6 @@
 			"name": "TypeScript",
 			"command": "deno run",
 			"ext": ".ts"
-		},
-		{
-			"name": "Kotlin",
-			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\" $argv",
-			"ext": ".kt"
 		},
 		{
 			"name": "Rust",

@@ -1,4 +1,5 @@
 % Programs that print "Hello, World!" to stdout.
+% Disabled languages do not have commands built-in to RunMany but do have syntax highlighting support in the RunMany VSCode extension. 
 
 Ada:
 	with Text_IO; use Text_IO;
@@ -74,20 +75,33 @@ Java:
 
 JavaScript: console.log("Hello, World!")
 
-Exit.
-
-Python: print('Hello, World!')
-
-Python 2: print 'Hello, World!'
-
-
-TypeScript: console.log("Hello, World!")
-
+Julia: println("Hello, World!")
 
 Kotlin:
 	fun main() {
 		println("Hello, World!")
 	}
+
+Lisp: (format t "Hello, World!~%")
+
+Lua: print "Hello, World!"
+
+!Objective-C:
+	#import <Foundation/Foundation.h>
+
+	int main(int argc, char * argv[]) {
+		NSLog(@"Hello, World!");
+		return 0;
+	}
+
+Exit.
+
+Python: print('Hello, World!')
+
+Python 2: print 'Hello, World!'
+ia
+
+TypeScript: console.log("Hello, World!")
 
 Rust:
 	fn main() {

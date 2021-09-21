@@ -28,6 +28,7 @@
 		"runmanys",
 		"runpytest",
 		"runtox",
+		"sbcl",
 		"Stmts"
 	],
 	"files.exclude": {

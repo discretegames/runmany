@@ -64,8 +64,7 @@ Groovy: println args[0]
 Haskell:
 	import System.Environment
 	main = do
-		args <- getArgs
-		let arg = args !! 0
+		arg <- head <$> getArgs
 		putStrLn arg
 
 Java:
@@ -76,6 +75,20 @@ Java:
 	}
 
 JavaScript: console.log(process.argv[2])
+
+
+Julia: println(ARGS[1])
+
+Kotlin:
+	fun main(args: Array<String>) { 
+		println(args[0])
+	}
+
+Lisp:
+	(format t (nth 1 sb-ext:*posix-argv*))
+	(terpri)
+
+Lua: print(arg[1])
 
 Exit.
 
@@ -90,11 +103,6 @@ Python 2:
 TypeScript:
 	console.log(Deno.args[0])
 
-
-Kotlin:
-	fun main(args: Array<String>) { 
-		println(args[0])
-	}
 
 Rust:
 	use std::env;
