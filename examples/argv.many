@@ -1,6 +1,6 @@
 % Programs that print the first command line argument to stdout.
 
-Argv: foobar foobaz
+Argv: foobar arg2
 
 Ada:
 	with Ada.Command_line; use Ada.Command_Line;
@@ -58,7 +58,6 @@ Go:
 		fmt.Println(os.Args[1])
 	}
 
-	
 Groovy: println args[0]
 
 Haskell:
@@ -75,7 +74,6 @@ Java:
 	}
 
 JavaScript: console.log(process.argv[2])
-
 
 Julia: println(ARGS[1])
 
@@ -96,7 +94,12 @@ Pascal:
 		writeln(ParamStr(1));
 	end.
 
-Exit.
+Perl: print $ARGV[0] . "\n";
+
+PHP:
+	<?php
+	echo $argv[1];
+	?>
 
 Python:
 	import sys
@@ -106,9 +109,16 @@ Python 2:
 	import sys
 	print sys.argv[1]
 
-TypeScript:
-	console.log(Deno.args[0])
+R:
+	args <- (commandArgs(TRUE))
+	writeLines(args[1])
 
+Racket:
+	#lang racket
+	(printf (vector-ref (current-command-line-arguments) 0))
+	(newline)
+
+Ruby: puts ARGV[0]
 
 Rust:
 	use std::env;
@@ -117,3 +127,17 @@ Rust:
 		let args: Vec<String> = env::args().collect();
 		println!("{}", &args[1]);
 	}
+
+Scala: println(args(0))
+
+TypeScript:
+	console.log(Deno.args[0])
+
+VBScript: WScript.Echo WScript.Arguments.item(0)
+
+Visual Basic:
+	Module Argv
+		Sub Main(ByVal args As String())
+			Console.WriteLine(args(0))
+		End Sub
+	End Module

@@ -1,5 +1,5 @@
 % Programs that print "Hello, World!" to stdout.
-% Disabled languages do not have commands built-in to RunMany but do have syntax highlighting support in the RunMany VSCode extension. 
+% Commands for the disabled languages are not built into RunMany but do have syntax highlighting support in the RunMany VSCode extension.
 
 Ada:
 	with Text_IO; use Text_IO;
@@ -100,16 +100,45 @@ Pascal:
 		writeln('Hello, World!');
 	end.
 
-Exit.
+Perl: print "Hello, World!\n";
+
+PHP:
+	<?php
+	echo "Hello, World!";
+	?>
 
 Python: print('Hello, World!')
 
 Python 2: print 'Hello, World!'
-ia
 
-TypeScript: console.log("Hello, World!")
+R: writeLines("Hello, World!")
+
+Racket:
+	#lang racket
+	(printf "Hello, World!\n")
+
+Ruby: puts "Hello, World!"
 
 Rust:
 	fn main() {
 		println!("Hello, World!");
 	}
+
+Scala: println("Hello, World!")
+
+!Scheme:
+	(display "Hello, World!")
+	(newline)
+
+!Swift: print("Hello, World!")
+
+TypeScript: console.log("Hello, World!")
+
+VBScript: WScript.Echo "Hello, World!"
+
+Visual Basic:
+	Module HelloWorld
+		Sub Main()
+			Console.WriteLine("Hello, World!")
+		End Sub 
+	End Module

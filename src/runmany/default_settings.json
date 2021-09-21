@@ -92,10 +92,19 @@
 		},
 		{
 			"name": "Pascal",
-			"command": "fpc $file -vq > NUL && $branch $argv",
+			"command": "fpc $file -v0 -l- && $branch $argv",
 			"ext": ".pas"
 		},
-
+		{
+			"name": "Perl",
+			"command": "perl",
+			"ext": ".pl"
+		},
+		{
+			"name": "PHP",
+			"command": "php",
+			"ext": ".php"
+		},
 		{
 			"name": "Python",
 			"command": "python",
@@ -107,14 +116,44 @@
 			"ext": ".py"
 		},
 		{
-			"name": "TypeScript",
-			"command": "deno run",
-			"ext": ".ts"
+			"name": "R",
+			"command": "rscript",
+			"ext": ".r"
+		},
+		{
+			"name": "Racket",
+			"command": "racket",
+			"ext": ".rkt"
+		},
+		{
+			"name": "Ruby",
+			"command": "ruby",
+			"ext": ".rb"
 		},
 		{
 			"name": "Rust",
 			"command": "rustc $file --out-dir $dir && $branch $argv",
 			"ext": ".rs"
+		},
+		{
+			"name": "Scala",
+			"command": "cd $dir && scala \"$name\" $argv",
+			"ext": ".scala"
+		},
+		{
+			"name": "TypeScript",
+			"command": "deno run",
+			"ext": ".ts"
+		},
+		{
+			"name": "VBScript",
+			"command": "cscript //nologo",
+			"ext": ".vbs"
+		},
+		{
+			"name": "Visual Basic",
+			"command": "vbc /nologo /out:$branch $file && $branch $argv",
+			"ext": ".vb"
 		}
 	]
 }

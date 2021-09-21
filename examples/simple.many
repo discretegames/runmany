@@ -1,5 +1,3 @@
-% Simple RunMany file.
-
 Python:
     print("Hi")
 JavaScript:
