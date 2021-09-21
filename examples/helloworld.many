@@ -63,19 +63,7 @@ Go:
 
 Groovy: print "Hello, World!\n"
 
-
-!Haskell: main = putStrLn "Hello world!"
-
-
-Exit.
-
-Python: print('Hello, World!')
-
-Python 2: print 'Hello, World!'
-
-JavaScript: console.log("Hello, World!")
-
-TypeScript: console.log("Hello, World!")
+Haskell: main = putStrLn "Hello, World!"
 
 Java:
 	public class HelloWorld {
@@ -83,6 +71,18 @@ Java:
 			System.out.println("Hello, World!");
 		}
 	}
+
+JavaScript: console.log("Hello, World!")
+
+Exit.
+
+Python: print('Hello, World!')
+
+Python 2: print 'Hello, World!'
+
+
+TypeScript: console.log("Hello, World!")
+
 
 Kotlin:
 	fun main() {

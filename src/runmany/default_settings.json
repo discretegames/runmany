@@ -55,6 +55,21 @@
 			"command": "groovy",
 			"ext": ".groovy"
 		},
+		{
+			"name": "Haskell",
+			"command": "ghc $file -v0 && $branch $argv",
+			"ext": ".hs"
+		},
+		{
+			"name": "Java",
+			"command": "java",
+			"ext": ".java"
+		},
+		{
+			"name": "JavaScript",
+			"command": "node",
+			"ext": ".js"
+		},
 
 		{
 			"name": "Python",
@@ -67,19 +82,9 @@
 			"ext": ".py"
 		},
 		{
-			"name": "JavaScript",
-			"command": "node",
-			"ext": ".js"
-		},
-		{
 			"name": "TypeScript",
 			"command": "deno run",
 			"ext": ".ts"
-		},
-		{
-			"name": "Java",
-			"command": "java",
-			"ext": ".java"
 		},
 		{
 			"name": "Kotlin",

@@ -61,6 +61,22 @@ Go:
 	
 Groovy: println args[0]
 
+Haskell:
+	import System.Environment
+	main = do
+		args <- getArgs
+		let arg = args !! 0
+		putStrLn arg
+
+Java:
+	public class Argv {
+		public static void main(String[] args) {
+			System.out.println(args[0]);
+		}
+	}
+
+JavaScript: console.log(process.argv[2])
+
 Exit.
 
 Python:
@@ -71,18 +87,9 @@ Python 2:
 	import sys
 	print sys.argv[1]
 
-JavaScript:
-	console.log(process.argv[2])
-
 TypeScript:
 	console.log(Deno.args[0])
 
-Java:
-	public class Argv {
-		public static void main(String[] args) {
-			System.out.println(args[0]);
-		}
-	}
 
 Kotlin:
 	fun main(args: Array<String>) { 
