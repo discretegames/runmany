@@ -3,141 +3,141 @@
 Argv: foobar arg2
 
 Ada:
-	with Ada.Command_line; use Ada.Command_Line;
-	with Ada.Text_IO; use Ada.Text_IO;
-	procedure Argv is
-	begin
-		Put_Line(Argument(1));
-	end Argv;
+    with Ada.Command_line; use Ada.Command_Line;
+    with Ada.Text_IO; use Ada.Text_IO;
+    procedure Argv is
+    begin
+        Put_Line(Argument(1));
+    end Argv;
 
 C:
-	#include <stdio.h>
+    #include <stdio.h>
 
-	int main(int argc, char *argv[]) {
-	printf("%s\n", argv[1]);
-	return 0;
-	}
+    int main(int argc, char *argv[]) {
+    printf("%s\n", argv[1]);
+    return 0;
+    }
 
 C#:
-	namespace Argv {
-		class Argv {         
-			static void Main(string[] args)
-			{
-				System.Console.WriteLine(args[0]);
-			}
-		}
-	}
+    namespace Argv {
+        class Argv {         
+            static void Main(string[] args)
+            {
+                System.Console.WriteLine(args[0]);
+            }
+        }
+    }
 
 C++:
-	using namespace std;
-	#include <iostream>
+    using namespace std;
+    #include <iostream>
 
-	int main(int argc, char *argv[]) {
-		cout << argv[1] << endl;
-		return 0;
-	}
+    int main(int argc, char *argv[]) {
+        cout << argv[1] << endl;
+        return 0;
+    }
 
 Dart:
-	void main(List<String> args) {
-		print(args[0]);
-	}
+    void main(List<String> args) {
+        print(args[0]);
+    }
 
 Fortran:
-	program argv
-		character(len=256) :: arg
-		call getarg(1, arg)
-		write(*, "(a)") trim(arg)
-	end program
+    program argv
+        character(len=256) :: arg
+        call getarg(1, arg)
+        write(*, "(a)") trim(arg)
+    end program
 
 Go:
-	package main
-	import "fmt"
-	import "os"
+    package main
+    import "fmt"
+    import "os"
 
-	func main() {
-		fmt.Println(os.Args[1])
-	}
+    func main() {
+        fmt.Println(os.Args[1])
+    }
 
 Groovy: println args[0]
 
 Haskell:
-	import System.Environment
-	main = do
-		arg <- head <$> getArgs
-		putStrLn arg
+    import System.Environment
+    main = do
+        arg <- head <$> getArgs
+        putStrLn arg
 
 Java:
-	public class Argv {
-		public static void main(String[] args) {
-			System.out.println(args[0]);
-		}
-	}
+    public class Argv {
+        public static void main(String[] args) {
+            System.out.println(args[0]);
+        }
+    }
 
 JavaScript: console.log(process.argv[2])
 
 Julia: println(ARGS[1])
 
 Kotlin:
-	fun main(args: Array<String>) { 
-		println(args[0])
-	}
+    fun main(args: Array<String>) { 
+        println(args[0])
+    }
 
 Lisp:
-	(format t (nth 1 sb-ext:*posix-argv*))
-	(terpri)
+    (format t (nth 1 sb-ext:*posix-argv*))
+    (terpri)
 
 Lua: print(arg[1])
 
 Pascal:
-	program argv;
-	begin
-		writeln(ParamStr(1));
-	end.
+    program argv;
+    begin
+        writeln(ParamStr(1));
+    end.
 
 Perl: print $ARGV[0] . "\n";
 
 PHP:
-	<?php
-	echo $argv[1];
-	?>
+    <?php
+    echo $argv[1];
+    ?>
 
 Python:
-	import sys
-	print(sys.argv[1])
+    import sys
+    print(sys.argv[1])
 
 Python 2:
-	import sys
-	print sys.argv[1]
+    import sys
+    print sys.argv[1]
 
 R:
-	args <- (commandArgs(TRUE))
-	writeLines(args[1])
+    args <- (commandArgs(TRUE))
+    writeLines(args[1])
 
 Racket:
-	#lang racket
-	(printf (vector-ref (current-command-line-arguments) 0))
-	(newline)
+    #lang racket
+    (printf (vector-ref (current-command-line-arguments) 0))
+    (newline)
 
 Ruby: puts ARGV[0]
 
 Rust:
-	use std::env;
+    use std::env;
 
-	fn main() {
-		let args: Vec<String> = env::args().collect();
-		println!("{}", &args[1]);
-	}
+    fn main() {
+        let args: Vec<String> = env::args().collect();
+        println!("{}", &args[1]);
+    }
 
 Scala: println(args(0))
 
 TypeScript:
-	console.log(Deno.args[0])
+    console.log(Deno.args[0])
 
 VBScript: WScript.Echo WScript.Arguments.item(0)
 
 Visual Basic:
-	Module Argv
-		Sub Main(ByVal args As String())
-			Console.WriteLine(args(0))
-		End Sub
-	End Module
+    Module Argv
+        Sub Main(ByVal args As String())
+            Console.WriteLine(args(0))
+        End Sub
+    End Module

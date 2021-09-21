@@ -1,20 +1,20 @@
 % This file shows the syntax of RunMany. This line is an inline comment.
 
 % A hardcoded, indented settings JSON may be put at the top of the file.
-	{ "show_argv": false, "show_stdin": false, "show_equal": false }
+    { "show_argv": false, "show_stdin": false, "show_equal": false }
 
 % A code section for a Python program. The first line is the section header and all indented lines after are the section content.
 Python:
-	print('Hello, World!')
-	print('How are you?')
+    print('Hello, World!')
+    print('How are you?')
 
 % A stdin section with alsos that defines a series of stdins to give to all subsequent Python and Rust programs.
 Stdin for Python, Rust:
-	Alice
+    Alice
 Also:
-	Bob
+    Bob
 Also:
-	Cairo
+    Cairo
 
 % Another Python program. Note how section content may appear on the same line as the section header.
 Python: print(f'Hello, {input()}.')
@@ -26,14 +26,14 @@ Also: --flag3
 
 % A JavaScript program.
 JavaScript:
-	console.log(`The arg was '${process.argv[2]}'`)
+    console.log(`The arg was '${process.argv[2]}'`)
 
 !Python:
-	print('This program is disabled with ! so it never gets run.')
+    print('This program is disabled with ! so it never gets run.')
 Also:
-	print('This Also has a disabled lead section so it never gets run.')
+    print('This Also has a disabled lead section so it never gets run.')
 
 Exit.
 
 Python:
-	print('This program is after Exit. so it never gets run.')
+    print('This program is after Exit. so it never gets run.')

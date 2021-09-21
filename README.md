@@ -1,7 +1,8 @@
 <!-- markdownlint-disable-next-line MD041 -->
+
 [![PyPI Version](https://badge.fury.io/py/runmany.svg)](https://badge.fury.io/py/runmany)
- [![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
- [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runmany)](https://www.python.org/downloads/)
+[![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runmany)](https://www.python.org/downloads/)
 
 # [RunMany](https://pypi.org/project/runmany/)
 
@@ -9,7 +10,7 @@
 
 **A tool to run many programs written in many languages from one file.**
 
-Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in *the same* file using any programming languages you want, and then run them all at once.
+Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in _the same_ file using any programming languages you want, and then run them all at once.
 
 For example, give RunMany [this](https://github.com/discretegames/runmany/blob/main/examples/simple.many) simple file
 
@@ -53,14 +54,14 @@ Hi
 
 In general, RunMany can be used for:
 
-- Crestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
- ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
-- Performance Testing - Timing different implementations of a program, even across languages.
- ([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
-- Input Testing - Easily giving many combinations of argv or stdin to programs.
- ([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
-- Polyglots - Making esoteric code that can be executed in multiple languages at once.
- ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
+-   Crestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
+    ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
+-   Performance Testing - Timing different implementations of a program, even across languages.
+    ([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
+-   Input Testing - Easily giving many combinations of argv or stdin to programs.
+    ([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
+-   Polyglots - Making esoteric code that can be executed in multiple languages at once.
+    ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
 Overall it is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
 
@@ -88,9 +89,9 @@ More generally:
 runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <input-file>
 ```
 
-- `<input-file>` is the required .many file to run.
-- `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
-- `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
+-   `<input-file>` is the required .many file to run.
+-   `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
+-   `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
 
 When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
 
@@ -213,7 +214,7 @@ Language names cannot contain `,` or `:` and to be safe they should not start wi
 
 A Code Section starts right out with a comma separated list of languages and its content is the program to be run in those languages.
 
-One language in the list is almost always sufficient unless you are writing [polyglots](https://en.wikipedia.org/wiki/Polyglot_(computing)),
+One language in the list is almost always sufficient unless you are writing [polyglots](<https://en.wikipedia.org/wiki/Polyglot_(computing)>),
 
 ```text
 JavaScript:
@@ -366,14 +367,12 @@ For example, a settings JSON of
 
 ```json
 {
-    "languages": [
-        { "name": "Rust", "timeout": 5.0 }
-    ],
-    "show_code": true
+	"languages": [{ "name": "Rust", "timeout": 5.0 }],
+	"show_code": true
 }
 ```
 
-will make Rust programs have a 5 second time limit rather than the default of 10, and `"command"` does not need to be present because Rust is already in the built-in `"default_languages"` array. The `"show_code": true` in the base object makes it so *all* languages in the RunMany output will show their code.
+will make Rust programs have a 5 second time limit rather than the default of 10, and `"command"` does not need to be present because Rust is already in the built-in `"default_languages"` array. The `"show_code": true` in the base object makes it so _all_ languages in the RunMany output will show their code.
 
 You should not have to set `"default_languages"` in your custom settings JSON (though technically you can). Only set `"languages"`.
 
@@ -381,22 +380,22 @@ You should not have to set `"default_languages"` in your custom settings JSON (t
 
 All settings described and whether or not they they can be overridden in a language object in the `"languages"` array:
 
-| JSON Key         | Type   | Default  | Overridable | Description |
-| ---------------- | ------ | -------- | ----------  | ----------- |
-| `"timeout"`      | float  | `10.0`   | yes         | The time limit of each program in seconds.
+| JSON Key         | Type   | Default  | Overridable | Description                                                                                                                                                                                                                   |
+| ---------------- | ------ | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"timeout"`      | float  | `10.0`   | yes         | The time limit of each program in seconds.                                                                                                                                                                                    |
 | `"stderr"`       | string | `"nzec"` | yes         | `"always"` or `true` to always combine program stderr streams with stdout. `"never"` or `false` to always hide program stderr streams. `"nzec"` or `null` to only show stderr streams when programs have non-zero exit codes. |
-| `"ext"`          | string | `""`     | yes         | The file extension of a language including the dot. Best to always define in the language object.
-| `"spacing"`      | int    | `1`      | yes         | The number of blank lines to add after each run. Note that trailing newlines are not stripped from stdouts.
-| `"show_time"`    | bool   | `false`  | yes         | Whether the execution time of each program is shown.
-| `"show_command"` | bool   | `false`  | yes         | Whether the command used to run each program is shown. Useful for debugging command setup for new languages.
-| `"show_code"`    | bool   | `false`  | yes         | Whether the source code of the program is shown.
-| `"show_argv"`    | bool   | `true`   | yes         | Whether the argv for the program is shown (when present and non-empty).
-| `"show_stdin"`   | bool   | `true`   | yes         | Whether the stdin for the program is shown (when present and not all empty lines).
-| `"show_output"`  | bool   | `true`   | yes         | Whether the output for the program is shown. This includes the stdout, and, depending on the `"stderr"` setting, the stderr.
-| `"show_errors"`  | bool   | `true`   | no          | Whether RunMany errors like `!!!\| RunMany Error: ... \|!!!` are sent to stderr or silenced.
-| `"show_runs"`    | bool   | `true`   | no          | Whether the list of runs is shown. This is usually the bulk of the output.
-| `"show_stats"`   | bool   | `true`   | no          | Whether the success and failure counts are shown after everything has run.
-| `"show_equal"`   | bool   | `true`   | no          | Whether the matching stdouts are compared and grouped after everything has run.
+| `"ext"`          | string | `""`     | yes         | The file extension of a language including the dot. Best to always define in the language object.                                                                                                                             |
+| `"spacing"`      | int    | `1`      | yes         | The number of blank lines to add after each run. Note that trailing newlines are not stripped from stdouts.                                                                                                                   |
+| `"show_time"`    | bool   | `false`  | yes         | Whether the execution time of each program is shown.                                                                                                                                                                          |
+| `"show_command"` | bool   | `false`  | yes         | Whether the command used to run each program is shown. Useful for debugging command setup for new languages.                                                                                                                  |
+| `"show_code"`    | bool   | `false`  | yes         | Whether the source code of the program is shown.                                                                                                                                                                              |
+| `"show_argv"`    | bool   | `true`   | yes         | Whether the argv for the program is shown (when present and non-empty).                                                                                                                                                       |
+| `"show_stdin"`   | bool   | `true`   | yes         | Whether the stdin for the program is shown (when present and not all empty lines).                                                                                                                                            |
+| `"show_output"`  | bool   | `true`   | yes         | Whether the output for the program is shown. This includes the stdout, and, depending on the `"stderr"` setting, the stderr.                                                                                                  |
+| `"show_errors"`  | bool   | `true`   | no          | Whether RunMany errors like `!!!\| RunMany Error: ... \|!!!` are sent to stderr or silenced.                                                                                                                                  |
+| `"show_runs"`    | bool   | `true`   | no          | Whether the list of runs is shown. This is usually the bulk of the output.                                                                                                                                                    |
+| `"show_stats"`   | bool   | `true`   | no          | Whether the success and failure counts are shown after everything has run.                                                                                                                                                    |
+| `"show_equal"`   | bool   | `true`   | no          | Whether the matching stdouts are compared and grouped after everything has run.                                                                                                                                               |
 
 ## Command Format
 
@@ -421,6 +420,7 @@ Placeholders like `$file` and `$dir` are used in a command to refer to the tempo
 Note that some placeholders are "quoted" and some are not. Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
 
 <!-- markdownlint-disable-next-line MD038 -->
+
 If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
 
 Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) for some examples of commands.

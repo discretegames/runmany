@@ -1,5 +1,5 @@
 % Code that runs both in Python and JavaScript.
 
 Python, JavaScript:
-	1//1; console = {'log': print}
-	console['log']('This program runs in both Python and JS!')
+    1//1; console = {'log': print}
+    console['log']('This program runs in both Python and JS!')

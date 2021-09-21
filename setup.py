@@ -1,9 +1,10 @@
+
 """Package setup file for the Python 3 runmany package: https://pypi.org/project/runmany"""
 
-from pathlib import Path
 from setuptools import setup, find_packages
+from pathlib import Path
 
-version = "0.7.0"
+version = "0.7.1"
 
 if __name__ == '__main__':
     with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
