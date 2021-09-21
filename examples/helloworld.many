@@ -94,6 +94,12 @@ Lua: print "Hello, World!"
 		return 0;
 	}
 
+Pascal:
+	program helloworld;
+	begin
+		writeln('Hello, World!');
+	end.
+
 Exit.
 
 Python: print('Hello, World!')

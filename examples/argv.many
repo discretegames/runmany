@@ -90,6 +90,12 @@ Lisp:
 
 Lua: print(arg[1])
 
+Pascal:
+	program argv;
+	begin
+		writeln(ParamStr(1));
+	end.
+
 Exit.
 
 Python:

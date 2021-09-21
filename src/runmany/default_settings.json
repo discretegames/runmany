@@ -90,6 +90,11 @@
 			"command": "lua",
 			"ext": ".lua"
 		},
+		{
+			"name": "Pascal",
+			"command": "fpc $file -vq > NUL && $branch $argv",
+			"ext": ".pas"
+		},
 
 		{
 			"name": "Python",
