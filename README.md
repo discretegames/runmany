@@ -1,5 +1,4 @@
 <!-- markdownlint-disable-next-line MD041 -->
-
 [![PyPI Version](https://badge.fury.io/py/runmany.svg)](https://badge.fury.io/py/runmany)
 [![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runmany)](https://www.python.org/downloads/)
@@ -54,13 +53,13 @@ Hi
 
 In general, RunMany can be used for:
 
--   Crestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
+- Crestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
     ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
--   Performance Testing - Timing different implementations of a program, even across languages.
+- Performance Testing - Timing different implementations of a program, even across languages.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
--   Input Testing - Easily giving many combinations of argv or stdin to programs.
+- Input Testing - Easily giving many combinations of argv or stdin to programs.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
--   Polyglots - Making esoteric code that can be executed in multiple languages at once.
+- Polyglots - Making esoteric code that can be executed in multiple languages at once.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
 Overall it is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
@@ -89,9 +88,9 @@ More generally:
 runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <input-file>
 ```
 
--   `<input-file>` is the required .many file to run.
--   `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
--   `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
+- `<input-file>` is the required .many file to run.
+- `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
+- `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
 
 When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
 
@@ -367,8 +366,8 @@ For example, a settings JSON of
 
 ```json
 {
-	"languages": [{ "name": "Rust", "timeout": 5.0 }],
-	"show_code": true
+    "languages": [{ "name": "Rust", "timeout": 5.0 }],
+    "show_code": true
 }
 ```
 
@@ -420,7 +419,6 @@ Placeholders like `$file` and `$dir` are used in a command to refer to the tempo
 Note that some placeholders are "quoted" and some are not. Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
 
 <!-- markdownlint-disable-next-line MD038 -->
-
 If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
 
 Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) for some examples of commands.

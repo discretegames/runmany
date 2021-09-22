@@ -20,7 +20,7 @@ C:
 
 C#:
     namespace Argv {
-        class Argv {         
+        class Argv {
             static void Main(string[] args)
             {
                 System.Console.WriteLine(args[0]);
