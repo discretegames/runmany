@@ -5,7 +5,7 @@
 
 # [RunMany](https://pypi.org/project/runmany/)
 
-**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [About](https://github.com/discretegames/runmany#about)**
+**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [VSCode Extension](https://github.com/discretegames/vscode-extension) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [Commands](https://github.com/discretegames/runmany#command-format) | [About](https://github.com/discretegames/runmany#about)**
 
 **A tool to run many programs written in many languages from one file.**
 
@@ -74,6 +74,20 @@ If that doesn't work try `pip3 install runmany` or `python -m pip install runman
 
 [PyPI Package Page](https://pypi.org/project/runmany/) | [Bleeding edge version on TestPyPI](https://test.pypi.org/project/runmany/)
 
+## VSCode Extension
+
+The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
+adds syntax highlighting to RunMany files, including almost all common embedded programming languages.
+
+Using RunMany from [VSCode](https://code.visualstudio.com/) with the extension is strongly recommended.
+
+Get the extension for free at the [Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
+or run this to install it directly:
+
+```text
+code --install-extension discretegames.runmany
+```
+
 # Usage
 
 ## Running From Command Line
@@ -95,14 +109,17 @@ runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <inp
 When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try.
-Note that RunMany expects the system to already have the necessary interpreters and compilers installed for the programming languages it runs.
-RunMany runs them internally with normal console commands.
+**Note that RunMany expects the system to already have the necessary interpreters and compilers installed for the programming languages it runs.**
+RunMany runs them internally with normal console [commands](https://github.com/discretegames/runmany#command-format).
 
-By default, RunMany has preset commands for a handful of languages
-(Python, Python 2, JavaScript, TypeScript, Java, Kotlin, Rust, Go, C, C++, and C#)
-but these may fail depending on OS and system configuration.
+RunMany has preset commands for a number of languages:
+
+> Ada, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript, Julia, Kotlin, Lisp, Lua, Pascal,
+Perl, PHP, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, Visual Basic
+
+But these presets may fail depending on OS and system configuration.
 However, commands can be overridden and new languages can be added by modifying the settings JSON.
-[See more information below.](https://github.com/discretegames/runmany#settings-json)
+[See more below.](https://github.com/discretegames/runmany#settings-json)
 
 ## Running From Python
 
@@ -426,5 +443,3 @@ Check the `"default_languages"` array in [default_settings.json](https://github.
 # About
 
 I was driven to make RunMany by my desire to learn more programming languages combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
-
-The obvious limitation of RunMany and the .many file format is that syntax highlighting and tooling like IntelliSense doesn't work. Making a VSCode extension that can syntax highlight .many files is definitely on my radar.
