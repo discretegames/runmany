@@ -53,7 +53,7 @@ Hi
 
 In general, RunMany can be used for:
 
-- Crestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
+- Chrestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
     ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
 - Performance Testing - Timing different implementations of a program, even across languages.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
@@ -77,12 +77,13 @@ If that doesn't work try `pip3 install runmany` or `python -m pip install runman
 ## VSCode Extension
 
 The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
-adds syntax highlighting to RunMany files, including almost all common embedded programming languages.
+adds syntax highlighting to RunMany files and a large number of embedded languages.
 
-Using RunMany from [VSCode](https://code.visualstudio.com/) with the extension is strongly recommended.
+With and without syntax highlighting:
 
-Get the extension for free at the [Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
-or run this to install it directly:
+TODO add image
+
+[Get VSCode here](https://code.visualstudio.com/) and [get the RunMany extension here](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany), or install it directly with:
 
 ```text
 code --install-extension discretegames.runmany
@@ -115,9 +116,9 @@ RunMany runs them internally with normal console [commands](https://github.com/d
 RunMany has preset commands for a number of languages:
 
 > Ada, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript, Julia, Kotlin, Lisp, Lua, Pascal,
-Perl, PHP, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, Visual Basic
+Perl, PHP, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
 
-But these presets may fail depending on OS and system configuration.
+But these presets were made for a Windows machine and may fail depending on OS and system configuration.
 However, commands can be overridden and new languages can be added by modifying the settings JSON.
 [See more below.](https://github.com/discretegames/runmany#settings-json)
 
@@ -417,7 +418,7 @@ All settings described and whether or not they they can be overridden in a langu
 
 The `"command"` key of a language object in the `"languages"` array defines the terminal command that is run to execute the language.
 
-Placeholders like `$file` and `$dir` are used in a command to refer to the temporary file RunMany creates for the code of each program it runs, or the directory that file is stored in.
+Placeholders like `$file` and `$dir` are used in a command to refer to the temporary file RunMany creates for the code of each program it runs, or the directory that file is stored in:
 
 | Placeholder  | Portion of `.../dir/file.ext`   |
 | ------------ | ------------------------------- |
@@ -436,9 +437,10 @@ Placeholders like `$file` and `$dir` are used in a command to refer to the tempo
 Note that some placeholders are "quoted" and some are not. Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
 
 <!-- markdownlint-disable-next-line MD038 -->
-If `$` is not present anywhere in the command string, ` $file $argv` is appended to it. For example, the command `python` is implicitly `python $file $argv`.
+If `$` is not present anywhere in the command string, ` $file $argv` is appended to it.
+For example, the command `python` is implicitly `python $file $argv`.
 
-Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) for some examples of commands.
+Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) for more examples of commands.
 
 # About
 
