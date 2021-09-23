@@ -78,12 +78,13 @@ If that doesn't work try `pip3 install runmany` or `python -m pip install runman
 
 The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
 adds syntax highlighting to RunMany files and a large number of embedded languages.
+It is highly recommended for use with RunMany.
 
 With and without syntax highlighting:
 
-TODO add image
+![syntax highlighting example](https://raw.githubusercontent.com/discretegames/runmany/main/syntax_highlighting.png)
 
-[Get VSCode here](https://code.visualstudio.com/) and [get the RunMany extension here](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany), or install it directly with:
+[Get VSCode here](https://code.visualstudio.com/) and [get the RunMany extension here](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany), or install it directly once you have VSCode with:
 
 ```text
 code --install-extension discretegames.runmany

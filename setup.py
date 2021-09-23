@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-version = "0.7.3"
+version = "0.7.4"
 
 if __name__ == '__main__':
     with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
