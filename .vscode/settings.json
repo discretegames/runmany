@@ -24,6 +24,7 @@
 		"myfile",
 		"nologo",
 		"printfn",
+		"pypa",
 		"rawbranch",
 		"rawdir",
 		"rawfile",

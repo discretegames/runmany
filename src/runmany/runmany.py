@@ -31,8 +31,8 @@ Defaults to False.
         equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
 
         context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
-        with context_manager as manyfile, TemporaryDirectory() as directory:
-            iterator = run_iterator(manyfile)
+        with context_manager as file, TemporaryDirectory() as directory:
+            iterator = run_iterator(file)
             settings = load_settings(settings_json, cast(str, next(iterator)))
             iterator.send(settings)
 
