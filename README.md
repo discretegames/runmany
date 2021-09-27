@@ -77,7 +77,7 @@ If that doesn't work try `pip3 install runmany` or `python -m pip install runman
 ## VSCode Extension
 
 The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
-adds syntax highlighting to RunMany files and makes them runnable with F5 from a launch configuration.
+adds syntax highlighting to RunMany files and makes them runnable with one button.
 It is highly recommended for use with RunMany.
 
 With and without syntax highlighting:
