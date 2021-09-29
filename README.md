@@ -5,7 +5,7 @@
 
 # [RunMany](https://pypi.org/project/runmany/)
 
-**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [VSCode Extension](https://github.com/discretegames/vscode-extension) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [Commands](https://github.com/discretegames/runmany#command-format) | [About](https://github.com/discretegames/runmany#about)**
+**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [VSCode Extension](https://github.com/discretegames/vscode-extension) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [About](https://github.com/discretegames/runmany#about)**
 
 **A tool to run many programs written in many languages from one file.**
 
@@ -446,3 +446,7 @@ Check the `"default_languages"` array in [default_settings.json](https://github.
 # About
 
 I was driven to make RunMany by my desire to learn more programming languages combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
+
+I plan to use it to practice solving code challenges in multiple languages from code challenge websites.
+
+[Check out some of my other Python packages.](https://pypi.org/user/discretegames/)
