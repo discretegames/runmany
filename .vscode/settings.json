@@ -8,9 +8,9 @@
 	"python.linting.pylintEnabled": true,
 	"python.linting.flake8Enabled": true,
 	"python.linting.flake8Args": [
-		"--max-line-length=119"
+		"--max-line-length=120"
 	],
-	"python.pythonPath": "c:\\Users\\r\\Desktop\\GitHub\\RunMany\\venv\\Scripts\\python.exe",
+	"python.pythonPath": ".\\venv\\Scripts\\python.exe",
 	"cSpell.words": [
 		"cscript",
 		"Errno",

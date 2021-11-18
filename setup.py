@@ -1,10 +1,10 @@
 
 """Package setup file for the Python 3 runmany package: https://pypi.org/project/runmany"""
 
-from setuptools import setup, find_packages
 from pathlib import Path
+from setuptools import setup, find_packages
 
-version = "1.0.3"
+VERSION = "2.0.0"
 
 if __name__ == '__main__':
     with open(Path(__file__).with_name('README.md'), encoding='utf-8') as file:
@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     setup(
         name='runmany',
-        version=version,
+        version=VERSION,
         author='discretegames',
         author_email='discretizedgames@gmail.com',
         description="A tool to run many programs written in many languages from one file.",
