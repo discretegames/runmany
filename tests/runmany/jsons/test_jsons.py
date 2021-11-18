@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional, Callable
 from contextlib import redirect_stderr
 from runmany import runmany_to_s
 
-base_settings_json = {
+BASE_SETTINGS_JSON = {
     "languages": [],
     "timeout": 10.0,
     "stderr": True,
@@ -23,7 +23,7 @@ base_settings_json = {
     "show_equal": False
 }
 
-default_many_file = '''\
+DEFAULT_MANY_FILE = '''\
 Argv for Python: the argv
 Stdin for Python: the stdin
 Python: print("the output")
@@ -35,19 +35,19 @@ def path_to(filename: str) -> pathlib.Path:
 
 
 def combine_with_base(settings_json: Dict[str, Any]) -> Dict[str, Any]:
-    return {key: settings_json.get(key, base_settings_json[key]) for key in base_settings_json}
+    return {key: settings_json.get(key, val) for key, val in BASE_SETTINGS_JSON.items()}
 
 
 def default_asserter(actual: str, expected: str) -> None:
     assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
-def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, many_file: str = default_many_file,
+def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, many_file: str = DEFAULT_MANY_FILE,
            asserter: Callable[[str, str], None] = default_asserter) -> None:
     if output_file is None:
         expected = ''
     else:
-        with open(path_to(output_file)) as file:
+        with open(path_to(output_file), encoding='utf-8') as file:
             expected = file.read()
 
     settings_json = combine_with_base(settings_json)
@@ -125,14 +125,14 @@ def test_show_time() -> None:
     def asserter(actual: str, _: str) -> None:
         assert actual.splitlines()[1].startswith("1. Python (0.")
     settings_json = {"show_runs": True, "show_time": True}
-    verify(settings_json, None, default_many_file, asserter)
+    verify(settings_json, None, DEFAULT_MANY_FILE, asserter)
 
 
 def test_show_command() -> None:
     def asserter(actual: str, _: str) -> None:
         assert actual.splitlines()[1].startswith("1. Python > python")
     settings_json = {"show_runs": True, "show_command": True}
-    verify(settings_json, None, default_many_file, asserter)
+    verify(settings_json, None, DEFAULT_MANY_FILE, asserter)
 
 
 def test_show_code() -> None:

@@ -2,9 +2,9 @@
 import io
 import os
 import json
-import pytest
 import pathlib
 from contextlib import redirect_stdout
+import pytest
 
 
 def path_to(filename):
@@ -13,11 +13,11 @@ def path_to(filename):
 
 def file_data(filename):
     path = path_to(filename)
-    with open(path) as file:
+    with open(path, encoding='utf-8') as file:
         return path, file.read()
 
 
-def build_cases():
+def build_cases():  # pylint: disable=too-many-locals
     many_path, many_contents = file_data('input.many')
     json_path, json_contents = file_data('input.json')
     many_file_values = many_path, str(many_path), many_contents
@@ -37,6 +37,7 @@ def build_cases():
     return cases
 
 
+# pylint: disable=no-member
 def parametrize():
     return pytest.mark.parametrize('many_file,settings_json,from_string,expected', build_cases())
 
@@ -44,7 +45,7 @@ def parametrize():
 @pytest.mark.slow
 @parametrize()
 def test_runmany(many_file, settings_json, from_string, expected):
-    from runmany import runmany
+    from runmany import runmany  # pylint: disable=import-outside-toplevel
 
     # Test outputting to stdout.
     with io.StringIO() as file, redirect_stdout(file):
@@ -55,8 +56,8 @@ def test_runmany(many_file, settings_json, from_string, expected):
     # Test outputting to file:
     def verify_output_file(output_path):
         runmany(many_file, settings_json, output_path, from_string=from_string)
-        with open(output_path) as f:
-            assert f.read() == expected
+        with open(output_path, encoding='utf-8') as file:
+            assert file.read() == expected
         os.remove(output_path)
 
     output_path = path_to('test_output')
@@ -66,13 +67,13 @@ def test_runmany(many_file, settings_json, from_string, expected):
 
 @parametrize()
 def test_runmany_to_s(many_file, settings_json, from_string, expected):
-    from runmany import runmany_to_s
+    from runmany import runmany_to_s  # pylint: disable=import-outside-toplevel
     assert runmany_to_s(many_file, settings_json, from_string=from_string) == expected
 
 
 @parametrize()
 def test_runmany_to_f(many_file, settings_json, from_string, expected):
-    from runmany import runmany_to_f
+    from runmany import runmany_to_f  # pylint: disable=import-outside-toplevel
     with io.StringIO() as file:
         runmany_to_f(file, many_file, settings_json, from_string=from_string)
         file.seek(0)
@@ -80,7 +81,7 @@ def test_runmany_to_f(many_file, settings_json, from_string, expected):
 
 
 def test_cmdline():
-    from runmany import cmdline
+    from runmany import cmdline  # pylint: disable=import-outside-toplevel
     many_path = str(path_to('input.many'))
     json_path = str(path_to('input.json'))
     _, output1 = file_data('output1.txt')
@@ -101,8 +102,8 @@ def test_cmdline():
 
     def verify_to_file(argv, output):
         cmdline(argv)
-        with open(output_path) as f:
-            assert f.read() == output
+        with open(output_path, encoding='utf-8') as file:
+            assert file.read() == output
         os.remove(output_path)
 
     verify_to_file([many_path, '-o', output_path], output1)

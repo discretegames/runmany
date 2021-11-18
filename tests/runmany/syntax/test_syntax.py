@@ -1,11 +1,11 @@
-# flake8: noqa
 import pathlib
 from runmany import runmany_to_s
+# flake8: noqa
 
 # Some testing code duplicated from test_jsons.py but ehh.
-base_settings_json = {
+BASE_SETTINGS_JSON = {
     "languages": [],
-    "timeout": 10.0,
+    "timeout": 11.0,
     "stderr": True,
     "ext": "",
     "spacing": 1,
@@ -27,9 +27,9 @@ def path_to(filename: str) -> pathlib.Path:
 
 
 def verify(output_file: str, many_file: str) -> None:
-    with open(path_to(output_file)) as file:
+    with open(path_to(output_file), encoding='utf-8') as file:
         expected = file.read()
-        actual = runmany_to_s(many_file, base_settings_json, from_string=True)
+        actual = runmany_to_s(many_file, BASE_SETTINGS_JSON, from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
@@ -244,10 +244,10 @@ def test_hardcoded_json() -> None:
     { "show_stats": false, "show_equal": false }
 Python: print('x')
 '''
-    with open(path_to('hardcoded1.txt')) as file:
+    with open(path_to('hardcoded1.txt'), encoding='utf-8') as file:
         actual = runmany_to_s(many_file, from_string=True)
         assert actual.strip('\r\n') == file.read().strip('\r\n')
 
-    with open(path_to('hardcoded2.txt')) as file:
+    with open(path_to('hardcoded2.txt'), encoding='utf-8') as file:
         actual = runmany_to_s(many_file, {}, from_string=True)
         assert actual.strip('\r\n') == file.read().strip('\r\n')

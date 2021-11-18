@@ -6,7 +6,7 @@ from runmany.settings import Settings
 from runmany.util import removeprefix, print_err
 
 
-class Syntax:
+class Syntax:  # pylint: disable=too-few-public-methods
     ARGV = "Argv"
     STDIN = "Stdin"
     FOR = "for"
@@ -34,9 +34,9 @@ class SectionType(enum.Enum):
 
 
 class Section:
-    def __init__(self, type: SectionType, is_disabled: bool, is_also: bool, is_all: bool,
-                 line_number: int, languages: List[str]):
-        self.type = type
+    def __init__(self, type_: SectionType, is_disabled: bool, is_also: bool,  # pylint: disable=too-many-arguments
+                 is_all: bool, line_number: int, languages: List[str]):
+        self.type = type_
         self.is_disabled = is_disabled
         self.is_also = is_also
         self.is_all = is_all

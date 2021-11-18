@@ -1,6 +1,7 @@
 """File to quickly run and open html coverage.py report."""
 
 # py runcoverage.py
+# pylint: disable=subprocess-run-check
 
 import os
 from subprocess import run

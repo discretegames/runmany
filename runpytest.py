@@ -1,6 +1,7 @@
 """File to quickly run Pytest tests."""
 
 # py runpytest.py
+# pylint: disable=subprocess-run-check
 
 from subprocess import run
 

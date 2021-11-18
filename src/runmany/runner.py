@@ -15,7 +15,7 @@ OUTPUT_DIVIDER = OUTPUT_FILL_WIDTH * '*'
 STDERR_NZEC, STDERR_NEVER = ('nzec', None), ('never', False)
 
 
-class Placeholders:
+class Placeholders:  # pylint: disable=too-few-public-methods
     prefix = '$'
     ARGV = 'argv'
     # For file .../dir/file.ext the parts are:
@@ -33,22 +33,23 @@ class Placeholders:
 
 class PathParts:
     def __init__(self, path: str) -> None:
-        def quote(s: str) -> str:
-            return f'"{s}"'
-        p = pathlib.PurePath(path)
+        def quote(string: str) -> str:
+            return f'"{string}"'
+        purepath = pathlib.PurePath(path)
         self.parts: Dict[str, str] = {}
-        self.parts[Placeholders.RAWDIR] = str(p.parent)
+        self.parts[Placeholders.RAWDIR] = str(purepath.parent)
         self.parts[Placeholders.DIR] = quote(self.parts[Placeholders.RAWDIR])
-        self.parts[Placeholders.RAWFILE] = str(p)
+        self.parts[Placeholders.RAWFILE] = str(purepath)
         self.parts[Placeholders.FILE] = quote(self.parts[Placeholders.RAWFILE])
-        self.parts[Placeholders.RAWBRANCH] = str(p.with_suffix(''))
+        self.parts[Placeholders.RAWBRANCH] = str(purepath.with_suffix(''))
         self.parts[Placeholders.BRANCH] = quote(self.parts[Placeholders.RAWBRANCH])
-        self.parts[Placeholders.NAME] = p.name
-        self.parts[Placeholders.STEM] = p.stem
-        self.parts[Placeholders.EXT] = p.suffix
+        self.parts[Placeholders.NAME] = purepath.name
+        self.parts[Placeholders.STEM] = purepath.stem
+        self.parts[Placeholders.EXT] = purepath.suffix
         self.parts[Placeholders.SEP] = os.sep
 
-    def fill_part(self, command: str, part: str, fill: str) -> str:
+    @staticmethod
+    def fill_part(command: str, part: str, fill: str) -> str:
         return command.replace(f'{Placeholders.prefix}{part}', fill)
 
     def fill_command(self, command: str, argv: str) -> str:
@@ -74,10 +75,9 @@ class Run:
     def get_stderr(self) -> int:
         if self.language_data.stderr in STDERR_NZEC:
             return subprocess.PIPE
-        elif self.language_data.stderr in STDERR_NEVER:
+        if self.language_data.stderr in STDERR_NEVER:
             return subprocess.DEVNULL
-        else:
-            return subprocess.STDOUT
+        return subprocess.STDOUT
 
     def run(self, directory: str, run_number: int) -> Tuple[str, str, bool]:
         with NamedTemporaryFile(mode='w', suffix=self.language_data.ext, dir=directory, delete=False) as code_file:
@@ -91,7 +91,7 @@ class Run:
         start_time = time.perf_counter()
         try:
             # Using universal_newlines=True instead of text=True here for backwards compatability with Python 3.6.
-            result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout, shell=True,
+            result = subprocess.run(command, input=stdin, timeout=self.language_data.timeout, shell=True, check=False,
                                     universal_newlines=True, stdout=subprocess.PIPE, stderr=self.get_stderr())
             time_taken = time.perf_counter() - start_time
         except subprocess.TimeoutExpired:
@@ -113,8 +113,8 @@ class Run:
             content = section.content.strip('\r\n')
         return f'{f" {title} line {section.line_number} ":{OUTPUT_FILL_CHAR}^{OUTPUT_FILL_WIDTH}}\n{content}'
 
-    def make_output(self, run_number: int, time_taken: float, exit_code: Union[int, str], command: str,
-                    stdout: str) -> str:
+    def make_output(self, run_number: int, time_taken: float,  # pylint: disable=too-many-arguments
+                    exit_code: Union[int, str], command: str, stdout: str) -> str:
         parts = [OUTPUT_DIVIDER]
 
         headline = f'{run_number}. {self.language_data.name}'
@@ -172,7 +172,7 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
     stdins: DefaultDict[str, List[Optional[Section]]] = defaultdict(lambda: [None])
 
     iterator = section_iterator(file)
-    settings = yield cast(str, next(iterator))  # Specially yield JSON string at top.
+    settings = yield cast(str, next(iterator))  # pylint: disable=stop-iteration-return
     yield None  # Extra yield needed to send back to the send from runmany_to_f. Not ready to yield runs yet.
     iterator.send(settings)
 

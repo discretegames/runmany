@@ -1,9 +1,9 @@
 import io
 import pathlib
 from typing import Dict, Any, Union
+from contextlib import redirect_stderr
 from runmany import runmany
 from runmany.util import PathLike, JsonLike
-from contextlib import redirect_stderr
 
 
 def stderr_of_run(many_file: Union[PathLike, str], settings_json: JsonLike = None, from_string: bool = True) -> str:

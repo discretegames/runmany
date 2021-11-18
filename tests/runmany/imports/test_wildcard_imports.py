@@ -1,5 +1,5 @@
 # Separate file is needed to test wildcard imports since the syntax is not allowed in functions.
-from runmany import *  # pylint: disable=unused-wildcard-import # noqa
+from runmany import *  # pylint: disable=wildcard-import,unused-wildcard-import # noqa
 
 
 def test_wildcard_imports() -> None:

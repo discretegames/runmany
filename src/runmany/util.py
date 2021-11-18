@@ -3,20 +3,20 @@ import sys
 from contextlib import contextmanager
 from typing import Any, Union, TextIO, Iterator
 
-display_errors = True  # The only mutating global.
+DISPLAY_ERRORS = True  # The only mutating global.
 
 PathLike = Union[str, bytes, 'os.PathLike[Any]']
 JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
 
 
 def print_err(message: str) -> None:
-    if display_errors:
+    if DISPLAY_ERRORS:
         print(f"!!!| RunMany Error: {message} |!!!", file=sys.stderr)
 
 
 def set_show_errors(show_errors: bool) -> None:
-    global display_errors
-    display_errors = show_errors
+    global DISPLAY_ERRORS  # pylint: disable=global-statement
+    DISPLAY_ERRORS = show_errors
 
 
 @contextmanager

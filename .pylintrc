@@ -1,0 +1,5 @@
+# run pylint with: `pylint src tests`
+
+[MESSAGES CONTROL]
+max-line-length=120
+disable=missing-module-docstring,missing-class-docstring,missing-function-docstring

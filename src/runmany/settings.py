@@ -36,7 +36,7 @@ class LanguageData:
 class Settings:
     def __init__(self, settings_json_string: str) -> None:
         self.data = json_to_class(settings_json_string)
-        with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE)) as file:
+        with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE), encoding='utf-8') as file:
             self.default_data = json_to_class(file.read())
         set_show_errors(self.show_errors)
 
@@ -98,20 +98,20 @@ def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settin
         if isinstance(provided_json, dict):
             try:
                 settings_json_string = json.dumps(provided_json)
-            except (TypeError, ValueError) as e:
-                json_err(e)
+            except (TypeError, ValueError) as err:
+                json_err(err)
         else:
             try:
-                with open(provided_json) as file:
+                with open(provided_json, encoding='utf-8') as file:
                     settings_json_string = file.read()
-            except IOError as e:
-                json_err(e)
+            except IOError as err:
+                json_err(err)
 
     try:  # Validate settings_json_string.
         if not isinstance(json.loads(settings_json_string.strip() or str({})), dict):
             json_err('The JSON must be an object/dict')
-    except json.decoder.JSONDecodeError as e:
-        json_err(e)
+    except json.decoder.JSONDecodeError as err:
+        json_err(err)
         settings_json_string = str({})
 
     return Settings(settings_json_string.strip() or str({}))

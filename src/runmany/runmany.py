@@ -9,13 +9,13 @@ from typing import List, DefaultDict, Union, Optional, TextIO, Iterator, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa: E402
-from runmany.runner import run_iterator, make_footer, Run  # noqa: E402
-from runmany.settings import load_settings  # noqa: E402
+from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
+from runmany.runner import run_iterator, make_footer, Run  # noqa # pylint: disable=wrong-import-position
+from runmany.settings import load_settings  # noqa # pylint: disable=wrong-import-position
 
 
-def runmany_to_f(file: TextIO, many_file: Union[PathLike, str], settings_json: JsonLike = None, *,
-                 from_string: bool = False) -> None:
+def runmany_to_f(file: TextIO, many_file: Union[PathLike, str],  # pylint: disable=too-many-locals
+                 settings_json: JsonLike = None, *, from_string: bool = False) -> None:
     """Runs `many_file` with the settings from `settings_json`, writing the results to the open file object `file`.
 
     Args:
@@ -30,9 +30,10 @@ Defaults to False.
         total_runs, successful_runs = 0, 0
         equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
 
-        context_manager = io.StringIO(cast(str, many_file)) if from_string else open(many_file)
-        with context_manager as file, TemporaryDirectory() as directory:
-            iterator = run_iterator(file)
+        context_manager = open(many_file, encoding='utf-8'  # pylint: disable=consider-using-with
+                               ) if not from_string else io.StringIO(cast(str, many_file))
+        with context_manager as cm_file, TemporaryDirectory() as directory:
+            iterator = run_iterator(cm_file)
             settings = load_settings(settings_json, cast(str, next(iterator)))
             iterator.send(settings)
 
@@ -80,7 +81,8 @@ Defaults to None.
         - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
 Defaults to False.
     """
-    with cast(TextIO, nullcontext(sys.stdout)) if output_file is None else open(output_file, 'w') as file:
+    with cast(TextIO, nullcontext(sys.stdout)) if output_file is None else \
+            open(output_file, 'w', encoding='utf-8') as file:
         runmany_to_f(file, many_file, settings_json, from_string=from_string)
 
 

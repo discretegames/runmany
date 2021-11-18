@@ -1,5 +1,7 @@
 import pytest
 
+# pylint: disable=import-outside-toplevel,possibly-unused-variable,no-name-in-module,unused-import
+
 
 def test_imports() -> None:
     import runmany
@@ -18,8 +20,9 @@ def test_from_imports() -> None:
     assert 'runmany_to_f' in locals()
     assert 'cmdline' in locals()
 
+    # pylint: disable=no-member
     with pytest.raises(ImportError):
-        from runmany import main  # type: ignore # noqa # pylint: disable=no-name-in-module
+        from runmany import main  # type: ignore # noqa
 
     with pytest.raises(ImportError):
-        from runmany import run_iterator  # type: ignore # noqa # pylint: disable=no-name-in-module
+        from runmany import run_iterator  # type: ignore # noqa
