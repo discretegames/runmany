@@ -13,8 +13,8 @@ def get_examples() -> List[pathlib.Path]:
 
 
 # pylint: disable=no-member
-@pytest.mark.slow  # type: ignore
-@pytest.mark.parametrize('path', get_examples())  # type: ignore
+@pytest.mark.slow
+@pytest.mark.parametrize('path', get_examples())
 def test_example(path: pathlib.Path) -> None:
     with open(path.with_name(f'{path.stem}_output.txt'), encoding='utf-8') as output:
         assert runmany_to_s(path) == output.read()
