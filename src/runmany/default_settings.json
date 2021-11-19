@@ -6,7 +6,7 @@
 	"spacing": 1,
 	"show_runs": true,
 	"show_time": false,
-	"show_command": false,
+	"show_command": true,
 	"show_code": false,
 	"show_argv": true,
 	"show_stdin": true,
@@ -16,9 +16,28 @@
 	"show_equal": true,
 	"default_languages": [
 		{
+			"name": "Print",
+			"command": "type"
+		},
+		{
 			"name": "Ada",
 			"command": "cd $dir && gcc -c $file && gnatmake $file && $branch $argv",
 			"ext": ".adb"
+		},
+		{
+			"name": "Bash",
+			"command": "bash",
+			"ext": ".sh"
+		},
+		{
+			"name": "WSLBash",
+			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
+			"ext": ".sh"
+		},
+		{
+			"name": "Batch",
+			"command": "",
+			"ext": ".bat"
 		},
 		{
 			"name": "C",
@@ -91,6 +110,11 @@
 			"ext": ".lua"
 		},
 		{
+			"name": "MIPS",
+			"command": "java -jar mars.jar nc",
+			"ext": ".asm"
+		},
+		{
 			"name": "Pascal",
 			"command": "fpc $file -v0 -l- && $branch $argv",
 			"ext": ".pas"
@@ -104,6 +128,11 @@
 			"name": "PHP",
 			"command": "php",
 			"ext": ".php"
+		},
+		{
+			"name": "Powershell",
+			"command": "Powershell -Command",
+			"ext": ".ps1"
 		},
 		{
 			"name": "Python",

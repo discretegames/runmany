@@ -43,7 +43,8 @@
 		"sbcl",
 		"Stmts",
 		"terpri",
-		"writeln"
+		"writeln",
+		"wslpath"
 	],
 	"files.exclude": {
 		"LICENSE.txt": true,
