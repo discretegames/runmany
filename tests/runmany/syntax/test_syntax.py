@@ -1,5 +1,5 @@
 import pathlib
-from runmany import runmany_to_s
+from runmany import runmanys
 # flake8: noqa
 
 # Some testing code duplicated from test_jsons.py but ehh.
@@ -29,7 +29,7 @@ def path_to(filename: str) -> pathlib.Path:
 def verify(output_file: str, many_file: str) -> None:
     with open(path_to(output_file), encoding='utf-8') as file:
         expected = file.read()
-        actual = runmany_to_s(many_file, BASE_SETTINGS_JSON, from_string=True)
+        actual = runmanys(many_file, BASE_SETTINGS_JSON, from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
@@ -245,9 +245,9 @@ def test_hardcoded_json() -> None:
 Python: print('x')
 '''
     with open(path_to('hardcoded1.txt'), encoding='utf-8') as file:
-        actual = runmany_to_s(many_file, from_string=True)
+        actual = runmanys(many_file, from_string=True)
         assert actual.strip('\r\n') == file.read().strip('\r\n')
 
     with open(path_to('hardcoded2.txt'), encoding='utf-8') as file:
-        actual = runmany_to_s(many_file, {}, from_string=True)
+        actual = runmanys(many_file, {}, from_string=True)
         assert actual.strip('\r\n') == file.read().strip('\r\n')

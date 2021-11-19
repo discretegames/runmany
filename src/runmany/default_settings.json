@@ -1,27 +1,9 @@
 {
 	"languages": [],
-	"languages_windows": [],
-	"languages_linux": [],
-	"languages_mac": [],
-
-	"extension": "",
 	"timeout": 10.0,
 	"stderr": "nzec",
-	"run_backwards": false,
-	"output_spacing": 1,
-	"minimalist": false,
-
-	"change_tab": null,
-	"change_newline": null,
-
-	"strip_argv": null,
-	"strip_stdin": null,
-	"strip_code": null,
-
-	"ignore_errors": false,
-	"ignore_comments": false,
-	"ignore_blanks": true,
-
+	"ext": "",
+	"spacing": 1,
 	"show_runs": true,
 	"show_time": false,
 	"show_command": false,
@@ -29,187 +11,178 @@
 	"show_argv": true,
 	"show_stdin": true,
 	"show_output": true,
+	"show_errors": true,
 	"show_stats": true,
 	"show_equal": true,
-
-	"supplied_languages_windows": [
+	"default_languages": [
 		{
-			"name": "PRINT",
+			"name": "Print",
 			"command": "type"
 		},
 		{
-			"name": "BASH",
-			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
-			"extension": ".sh",
-			"change_newline": "\r"
-		}
-	],
-	"supplied_languages_linux": [],
-	"supplied_languages_mac": [],
-	"supplied_languages": [
-		{
-			"name": "PRINT",
-			"command": "cat"
-		},
-		{
-			"name": "ADA",
+			"name": "Ada",
 			"command": "cd $dir && gcc -c $file && gnatmake $file && $branch $argv",
-			"extension": ".adb"
+			"ext": ".adb"
 		},
 		{
-			"name": "BASH",
+			"name": "Bash",
 			"command": "bash",
-			"extension": ".sh"
+			"ext": ".sh"
 		},
 		{
-			"name": "BATCH",
+			"name": "WSLBash",
+			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
+			"ext": ".sh"
+		},
+		{
+			"name": "Batch",
 			"command": "",
-			"extension": ".bat"
+			"ext": ".bat"
 		},
 		{
 			"name": "C",
 			"command": "gcc $file -o $branch && $branch $argv",
-			"extension": ".c"
+			"ext": ".c"
 		},
 		{
 			"name": "C#",
 			"command": "csc /nologo /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
-			"extension": ".cs"
+			"ext": ".cs"
 		},
 		{
 			"name": "C++",
 			"command": "g++ $file -o $branch && $branch $argv",
-			"extension": ".cpp"
+			"ext": ".cpp"
 		},
 		{
-			"name": "DART",
+			"name": "Dart",
 			"command": "dart",
-			"extension": ".dart"
+			"ext": ".dart"
 		},
 		{
-			"name": "FORTRAN",
+			"name": "Fortran",
 			"command": "gfortran $file -o $branch && $branch $argv",
-			"extension": ".f90"
+			"ext": ".f90"
 		},
 		{
-			"name": "GO",
+			"name": "Go",
 			"command": "go run",
-			"extension": ".go"
+			"ext": ".go"
 		},
 		{
-			"name": "GROOVY",
+			"name": "Groovy",
 			"command": "groovy",
-			"extension": ".groovy"
+			"ext": ".groovy"
 		},
 		{
-			"name": "HASKELL",
+			"name": "Haskell",
 			"command": "ghc $file -v0 && $branch $argv",
-			"extension": ".hs"
+			"ext": ".hs"
 		},
 		{
-			"name": "JAVA",
+			"name": "Java",
 			"command": "java",
-			"extension": ".java"
+			"ext": ".java"
 		},
 		{
-			"name": "JAVASCRIPT",
+			"name": "JavaScript",
 			"command": "node",
-			"extension": ".js"
+			"ext": ".js"
 		},
 		{
-			"name": "JULIA",
+			"name": "Julia",
 			"command": "julia",
-			"extension": ".jl"
+			"ext": ".jl"
 		},
 		{
-			"name": "KOTLIN",
+			"name": "Kotlin",
 			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\" $argv",
-			"extension": ".kt"
+			"ext": ".kt"
 		},
 		{
-			"name": "LISP",
+			"name": "Lisp",
 			"command": "sbcl --script",
-			"extension": ".lisp"
+			"ext": ".lisp"
 		},
 		{
-			"name": "LUA",
+			"name": "Lua",
 			"command": "lua",
-			"extension": ".lua"
+			"ext": ".lua"
 		},
 		{
 			"name": "MIPS",
 			"command": "java -jar mars.jar nc",
-			"extension": ".asm"
+			"ext": ".asm"
 		},
 		{
-			"name": "PASCAL",
+			"name": "Pascal",
 			"command": "fpc $file -v0 -l- && $branch $argv",
-			"extension": ".pas"
+			"ext": ".pas"
 		},
 		{
-			"name": "PERL",
+			"name": "Perl",
 			"command": "perl",
-			"extension": ".pl"
+			"ext": ".pl"
 		},
 		{
 			"name": "PHP",
 			"command": "php",
-			"extension": ".php"
+			"ext": ".php"
 		},
 		{
-			"name": "POWERSHELL",
+			"name": "Powershell",
 			"command": "Powershell -Command",
-			"extension": ".ps1"
+			"ext": ".ps1"
 		},
 		{
-			"name": "PYTHON",
+			"name": "Python",
 			"command": "python",
-			"extension": ".py"
+			"ext": ".py"
 		},
 		{
-			"name": "PYTHON 2",
+			"name": "Python 2",
 			"command": "py -2.7",
-			"extension": ".py"
+			"ext": ".py"
 		},
 		{
 			"name": "R",
 			"command": "rscript",
-			"extension": ".r"
+			"ext": ".r"
 		},
 		{
-			"name": "RACKET",
+			"name": "Racket",
 			"command": "racket",
-			"extension": ".rkt"
+			"ext": ".rkt"
 		},
 		{
-			"name": "RUBY",
+			"name": "Ruby",
 			"command": "ruby",
-			"extension": ".rb"
+			"ext": ".rb"
 		},
 		{
-			"name": "RUST",
+			"name": "Rust",
 			"command": "rustc $file --out-dir $dir && $branch $argv",
-			"extension": ".rs"
+			"ext": ".rs"
 		},
 		{
-			"name": "SCALA",
+			"name": "Scala",
 			"command": "cd $dir && scala \"$name\" $argv",
-			"extension": ".scala"
+			"ext": ".scala"
 		},
 		{
-			"name": "TYPESCRIPT",
+			"name": "TypeScript",
 			"command": "deno run",
-			"extension": ".ts"
+			"ext": ".ts"
 		},
 		{
-			"name": "VBSCRIPT",
+			"name": "VBScript",
 			"command": "cscript //nologo",
-			"extension": ".vbs"
+			"ext": ".vbs"
 		},
 		{
-			"name": "VISUAL BASIC",
+			"name": "Visual Basic",
 			"command": "vbc /nologo /out:$branch $file && $branch $argv",
-			"extension": ".vb"
+			"ext": ".vb"
 		}
 	]
 }

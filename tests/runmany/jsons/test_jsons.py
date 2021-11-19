@@ -3,7 +3,7 @@ import json
 import pathlib
 from typing import Dict, Any, Optional, Callable
 from contextlib import redirect_stderr
-from runmany import runmany_to_s
+from runmany import runmanys
 
 BASE_SETTINGS_JSON = {
     "languages": [],
@@ -53,10 +53,10 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     settings_json = combine_with_base(settings_json)
     settings_json_string = json.dumps(settings_json)
 
-    hardcoded_json_result = runmany_to_s(f'\t{settings_json_string}\n{many_file}', from_string=True)
+    hardcoded_json_result = runmanys(f'\t{settings_json_string}\n{many_file}', from_string=True)
     asserter(hardcoded_json_result, expected)
 
-    provided_json_result = runmany_to_s(f'\n{many_file}', settings_json, from_string=True)
+    provided_json_result = runmanys(f'\n{many_file}', settings_json, from_string=True)
     asserter(provided_json_result, expected)
 
 
@@ -154,11 +154,11 @@ def test_show_output() -> None:
 def test_show_errors() -> None:
     many_file = 'Also:'
     with io.StringIO() as file, redirect_stderr(file):
-        runmany_to_s(many_file, combine_with_base({"show_errors": True}), from_string=True)
+        runmanys(many_file, combine_with_base({"show_errors": True}), from_string=True)
         file.seek(0)
         assert file.read()
     with io.StringIO() as file, redirect_stderr(file):
-        runmany_to_s(many_file, combine_with_base({"show_errors": False}), from_string=True)
+        runmanys(many_file, combine_with_base({"show_errors": False}), from_string=True)
         file.seek(0)
         assert not file.read()
 

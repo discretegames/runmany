@@ -14,27 +14,20 @@ from runmany.runner import run_iterator, make_footer, Run  # noqa # pylint: disa
 from runmany.settings import load_settings  # noqa # pylint: disable=wrong-import-position
 
 
-def runmany_to_f(file: TextIO, many_file: Union[PathLike, str],  # pylint: disable=too-many-locals
-                 settings_json: JsonLike = None, *, from_string: bool = False) -> None:
-    """Runs `many_file` with the settings from `settings_json`, writing the results to the open file object `file`.
+def load_many_file(manyfile: Union[PathLike, str], from_string: bool) -> str:
+    if from_string:
+        return cast(str, manyfile)
+    with open(manyfile, encoding='utf-8') as file:
+        return file.read()
 
-    Args:
-        - `file` (TextIO): The opened file object to write the run results to.
-        - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
-        - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
-        - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
-Defaults to False.
-    """
-    with redirect_stdout(file):
+
+def run_many_file(manyfile: str, settings: JsonLike, outfile: TextIO) -> None:
+    with redirect_stdout(outfile):
         total_runs, successful_runs = 0, 0
         equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
-
-        context_manager = open(many_file, encoding='utf-8'  # pylint: disable=consider-using-with
-                               ) if not from_string else io.StringIO(cast(str, many_file))
-        with context_manager as cm_file, TemporaryDirectory() as directory:
-            iterator = run_iterator(cm_file)
-            settings = load_settings(settings_json, cast(str, next(iterator)))
+        with io.StringIO(manyfile) as file, TemporaryDirectory() as directory:
+            iterator = run_iterator(file)
+            settings = load_settings(settings, cast(str, next(iterator)))
             iterator.send(settings)
 
             for run in cast(Iterator[Run], iterator):
@@ -49,56 +42,69 @@ Defaults to False.
             print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)
 
 
-def runmany_to_s(many_file: Union[PathLike, str], settings_json: JsonLike = None, *, from_string: bool = False) -> str:
-    """Runs `many_file` with the settings from `settings_json`, returning the results as a string.
+def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
+            outfile: Optional[Union[PathLike, TextIO]] = None, *, from_string: bool = False) -> None:
+    """Runs `manyfile` with the settings from `settings` JSON, outputting the results to stdout or `outfile`.
 
     Args:
-        - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
-        - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
-        - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
-Defaults to False.
+        - `manyfile` (PathLike | str): The file path to or the string contents of the .many file to run.
+        - `settings` (optional JsonLike): The file path to or the loaded dict of the settings JSON to use.
+          Undefined settings default to their values in [default_settings.json](https://git.io/J16Z1).
+          When `None`, all default settings are used. Defaults to `None`
+        - `outfile` (optional PathLike | TextIO | None): The file path to or the opened file object of the file to send
+          output to, or `None` to send output to stdout. Defaults to `None`.
+        - `from_string` (named optional bool): When `True`, `manyfile` is read as a string rather than a file path.
+          Defaults to `False`.
 
-    Returns:
-        str: The results of the run that would normally appear on stdout.
+    Returns: `None`
     """
-    with io.StringIO() as file:
-        runmany_to_f(file, many_file, settings_json, from_string=from_string)
-        file.seek(0)
-        return file.read()
+
+    def opener() -> TextIO:
+        if outfile is None:
+            return cast(TextIO, nullcontext(sys.stdout))
+        if isinstance(cast(TextIO, outfile), io.TextIOBase):
+            return cast(TextIO, outfile)
+        return open(cast(PathLike, outfile), 'w', encoding='utf-8')
+
+    with opener() as output_file:
+        run_many_file(load_many_file(manyfile, from_string), settings, output_file)
 
 
-def runmany(many_file: Union[PathLike, str], settings_json: JsonLike = None, output_file: Optional[PathLike] = None, *,
-            from_string: bool = False) -> None:
-    """Runs `many_file` with the settings from `settings_json`, outputting the results to `output_file` or stdout.
+def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, *, from_string: bool = False) -> str:
+    """Runs `manyfile` with the settings from `settings` JSON, returning the results as a string.
 
     Args:
-        - `many_file` (PathLike | str): The path to or the string contents of the .many file to run.
-        - `settings_json` (optional JsonLike): The path to or the loaded json dict of the settings to use. \
-Undefined settings fallback to [default_settings.json](https://git.io/JEEkL).
-        - `output_file` (optional None | PathLike): The path to the file to send output to, or None for stdout. \
-Defaults to None.
-        - `from_string` (optional bool): When True, `many_file` is read as a string rather than a path. \
-Defaults to False.
+        - `manyfile` (PathLike | str): The file path to or the string contents of the .many file to run.
+        - `settings` (optional JsonLike): The file path to or the loaded dict of the settings JSON to use.
+          Undefined settings default to their values in [default_settings.json](https://git.io/J16Z1).
+          When `None`, all default settings are used. Defaults to `None`
+        - `from_string` (named optional bool): When `True`, `manyfile` is read as a string rather than a file path.
+          Defaults to `False`.
+
+    Returns: (str) The results of the run that would normally appear on stdout as a string.
     """
-    with cast(TextIO, nullcontext(sys.stdout)) if output_file is None else \
-            open(output_file, 'w', encoding='utf-8') as file:
-        runmany_to_f(file, many_file, settings_json, from_string=from_string)
+    with io.StringIO() as output_file:
+        run_many_file(load_many_file(manyfile, from_string), settings, output_file)
+        output_file.seek(0)
+        return output_file.read()
 
 
 def cmdline(argv: List[str]) -> None:
-    """The command line parser for runmany. Normally called via "runmany <argv>" from terminal. \
-Can alternatively be called from code.
+    """The command line parser for runmany. Usually called via "runmany <argv>" in terminal but can be called from code.
 
     Args:
         - `argv` (List[str]): The space separated args that would normally be given on the command line.
+
+    Returns: `None`
     """
-    parser = argparse.ArgumentParser(prog='runmany', description='Runs a .many file.')
-    parser.add_argument('input', help='the .many file to run', metavar='<input-file>')
-    parser.add_argument('-j', '--json', help='the .json settings file to use', metavar='<settings-file>')
-    parser.add_argument('-o', '--output', help='the file output is redirected to', metavar='<output-file>')
+
+    description = 'Runs a .many file. Full documentation: https://github.com/discretegames/runmany/blob/main/README.md'
+    parser = argparse.ArgumentParser(prog='runmany', description=description)
+    parser.add_argument('manyfile', help='the path to the .many file to run', metavar='<manyfile>')
+    parser.add_argument('-s', '--settings', help='the path to the .json settings file to use', metavar='<settings>')
+    parser.add_argument('-o', '--outfile', help='the path to the file output is redirected to', metavar='<outfile>')
     args = parser.parse_args(argv)
-    runmany(args.input, args.json, args.output)
+    runmany(args.manyfile, args.settings, args.outfile)
 
 
 def main() -> None:
@@ -109,4 +115,4 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('_scratch/scratch.many'))
+        runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many'))

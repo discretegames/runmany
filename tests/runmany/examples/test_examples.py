@@ -1,7 +1,7 @@
 import pathlib
 from typing import List
 import pytest
-from runmany import runmany_to_s
+from runmany import runmanys
 
 
 def get_examples() -> List[pathlib.Path]:
@@ -17,4 +17,4 @@ def get_examples() -> List[pathlib.Path]:
 @pytest.mark.parametrize('path', get_examples())
 def test_example(path: pathlib.Path) -> None:
     with open(path.with_name(f'{path.stem}_output.txt'), encoding='utf-8') as output:
-        assert runmany_to_s(path) == output.read()
+        assert runmanys(path) == output.read()

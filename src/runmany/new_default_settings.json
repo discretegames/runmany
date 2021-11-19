@@ -1,0 +1,215 @@
+{
+	"extension": "",
+	"timeout": 10.0,
+	"stderr": "nzec",
+
+	"strip_argv": "smart",
+	"strip_stdin": "smart",
+	"strip_code": "smart",
+	"replace_tab": null,
+	"replace_newline": null,
+
+	"ignore_errors": false,
+	"ignore_comments": false,
+	"ignore_blanks": true,
+
+	"show_runs": true,
+	"show_time": false,
+	"show_command": false,
+	"show_code": false,
+	"show_argv": true,
+	"show_stdin": true,
+	"show_output": true,
+	"show_stats": true,
+	"show_equal": true,
+
+	"output_spacing": 1,
+	"minimalist": false,
+	"run_backwards": false,
+
+	"languages": [],
+	"languages_windows": [],
+	"languages_linux": [],
+	"languages_mac": [],
+
+	"supplied_languages_windows": [
+		{
+			"name": "PRINT",
+			"command": "type"
+		},
+		{
+			"name": "BASH",
+			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
+			"extension": ".sh",
+			"change_newline": "\r"
+		}
+	],
+	"supplied_languages_linux": [],
+	"supplied_languages_mac": [],
+	"supplied_languages": [
+		{
+			"name": "PRINT",
+			"command": "cat"
+		},
+		{
+			"name": "ADA",
+			"command": "cd $dir && gcc -c $file && gnatmake $file && $branch $argv",
+			"extension": ".adb"
+		},
+		{
+			"name": "BASH",
+			"command": "bash",
+			"extension": ".sh"
+		},
+		{
+			"name": "BATCH",
+			"command": "",
+			"extension": ".bat"
+		},
+		{
+			"name": "C",
+			"command": "gcc $file -o $branch && $branch $argv",
+			"extension": ".c"
+		},
+		{
+			"name": "C#",
+			"command": "csc /nologo /out:\"$rawbranch.exe\" $file && \"$rawbranch.exe\" $argv",
+			"extension": ".cs"
+		},
+		{
+			"name": "C++",
+			"command": "g++ $file -o $branch && $branch $argv",
+			"extension": ".cpp"
+		},
+		{
+			"name": "DART",
+			"command": "dart",
+			"extension": ".dart"
+		},
+		{
+			"name": "FORTRAN",
+			"command": "gfortran $file -o $branch && $branch $argv",
+			"extension": ".f90"
+		},
+		{
+			"name": "GO",
+			"command": "go run",
+			"extension": ".go"
+		},
+		{
+			"name": "GROOVY",
+			"command": "groovy",
+			"extension": ".groovy"
+		},
+		{
+			"name": "HASKELL",
+			"command": "ghc $file -v0 && $branch $argv",
+			"extension": ".hs"
+		},
+		{
+			"name": "JAVA",
+			"command": "java",
+			"extension": ".java"
+		},
+		{
+			"name": "JAVASCRIPT",
+			"command": "node",
+			"extension": ".js"
+		},
+		{
+			"name": "JULIA",
+			"command": "julia",
+			"extension": ".jl"
+		},
+		{
+			"name": "KOTLIN",
+			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\" $argv",
+			"extension": ".kt"
+		},
+		{
+			"name": "LISP",
+			"command": "sbcl --script",
+			"extension": ".lisp"
+		},
+		{
+			"name": "LUA",
+			"command": "lua",
+			"extension": ".lua"
+		},
+		{
+			"name": "MIPS",
+			"command": "java -jar mars.jar nc",
+			"extension": ".asm"
+		},
+		{
+			"name": "PASCAL",
+			"command": "fpc $file -v0 -l- && $branch $argv",
+			"extension": ".pas"
+		},
+		{
+			"name": "PERL",
+			"command": "perl",
+			"extension": ".pl"
+		},
+		{
+			"name": "PHP",
+			"command": "php",
+			"extension": ".php"
+		},
+		{
+			"name": "POWERSHELL",
+			"command": "Powershell -Command",
+			"extension": ".ps1"
+		},
+		{
+			"name": "PYTHON",
+			"command": "python",
+			"extension": ".py"
+		},
+		{
+			"name": "PYTHON 2",
+			"command": "py -2.7",
+			"extension": ".py"
+		},
+		{
+			"name": "R",
+			"command": "rscript",
+			"extension": ".r"
+		},
+		{
+			"name": "RACKET",
+			"command": "racket",
+			"extension": ".rkt"
+		},
+		{
+			"name": "RUBY",
+			"command": "ruby",
+			"extension": ".rb"
+		},
+		{
+			"name": "RUST",
+			"command": "rustc $file --out-dir $dir && $branch $argv",
+			"extension": ".rs"
+		},
+		{
+			"name": "SCALA",
+			"command": "cd $dir && scala \"$name\" $argv",
+			"extension": ".scala"
+		},
+		{
+			"name": "TYPESCRIPT",
+			"command": "deno run",
+			"extension": ".ts"
+		},
+		{
+			"name": "VBSCRIPT",
+			"command": "cscript //nologo",
+			"extension": ".vbs"
+		},
+		{
+			"name": "VISUAL BASIC",
+			"command": "vbc /nologo /out:$branch $file && $branch $argv",
+			"extension": ".vb"
+		}
+	]
+}

@@ -3,10 +3,10 @@ import sys
 from contextlib import contextmanager
 from typing import Any, Union, TextIO, Iterator
 
-DISPLAY_ERRORS = True  # The only mutating global.
-
 PathLike = Union[str, bytes, 'os.PathLike[Any]']
 JsonLike = Union[None, str, bytes, 'os.PathLike[Any]', Any]
+
+DISPLAY_ERRORS = True  # The only mutating global.
 
 
 def print_err(message: str) -> None:

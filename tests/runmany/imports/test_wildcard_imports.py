@@ -4,8 +4,7 @@ from runmany import *  # pylint: disable=wildcard-import,unused-wildcard-import 
 
 def test_wildcard_imports() -> None:
     assert 'runmany' in globals()
-    assert 'runmany_to_s' in globals()
-    assert 'runmany_to_f' in globals()
+    assert 'runmanys' in globals()
     assert 'cmdline' in globals()
     assert 'main' not in globals()
     assert 'run_iterator' not in globals()

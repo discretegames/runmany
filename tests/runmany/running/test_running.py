@@ -66,24 +66,24 @@ def test_runmany(many_file, settings_json, from_string, expected):
 
 
 @parametrize()
-def test_runmany_to_s(many_file, settings_json, from_string, expected):
-    from runmany import runmany_to_s  # pylint: disable=import-outside-toplevel
-    assert runmany_to_s(many_file, settings_json, from_string=from_string) == expected
+def test_runmanys(many_file, settings_json, from_string, expected):
+    from runmany import runmanys  # pylint: disable=import-outside-toplevel
+    assert runmanys(many_file, settings_json, from_string=from_string) == expected
 
-
-@parametrize()
-def test_runmany_to_f(many_file, settings_json, from_string, expected):
-    from runmany import runmany_to_f  # pylint: disable=import-outside-toplevel
-    with io.StringIO() as file:
-        runmany_to_f(file, many_file, settings_json, from_string=from_string)
-        file.seek(0)
-        assert file.read() == expected
+# TODO redo test
+# @parametrize()
+# def test_runmany_to_f(many_file, settings_json, from_string, expected):
+#     from runmany import runmany_to_f  # pylint: disable=import-outside-toplevel
+#     with io.StringIO() as file:
+#         runmany_to_f(file, many_file, settings_json, from_string=from_string)
+#         file.seek(0)
+#         assert file.read() == expected
 
 
 def test_cmdline():
     from runmany import cmdline  # pylint: disable=import-outside-toplevel
-    many_path = str(path_to('input.many'))
-    json_path = str(path_to('input.json'))
+    manyfile = str(path_to('input.many'))
+    settings = str(path_to('input.json'))
     _, output1 = file_data('output1.txt')
     _, output2 = file_data('output2.txt')
 
@@ -93,21 +93,21 @@ def test_cmdline():
             file.seek(0)
             assert file.read() == output
 
-    verify_to_stdout([many_path], output1)
-    verify_to_stdout([many_path, '-j', json_path], output2)
-    verify_to_stdout([many_path, '--json', json_path], output2)
-    verify_to_stdout(['-j', json_path, many_path], output2)
+    verify_to_stdout([manyfile], output1)
+    verify_to_stdout([manyfile, '-s', settings], output2)
+    verify_to_stdout([manyfile, '--settings', settings], output2)
+    verify_to_stdout(['-s', settings, manyfile], output2)
 
-    output_path = str(path_to('test_output'))
+    outfile = str(path_to('test_output'))
 
     def verify_to_file(argv, output):
         cmdline(argv)
-        with open(output_path, encoding='utf-8') as file:
+        with open(outfile, encoding='utf-8') as file:
             assert file.read() == output
-        os.remove(output_path)
+        os.remove(outfile)
 
-    verify_to_file([many_path, '-o', output_path], output1)
-    verify_to_file([many_path, '--output', output_path], output1)
-    verify_to_file([many_path, '-j', json_path, '-o', output_path], output2)
-    verify_to_file([many_path, '-j', json_path, '--output', output_path], output2)
-    verify_to_file(['-o', output_path, '-j', json_path, many_path], output2)
+    verify_to_file([manyfile, '-o', outfile], output1)
+    verify_to_file([manyfile, '--outfile', outfile], output1)
+    verify_to_file([manyfile, '-s', settings, '-o', outfile], output2)
+    verify_to_file([manyfile, '-s', settings, '--outfile', outfile], output2)
+    verify_to_file(['-o', outfile, '-s', settings, manyfile], output2)
