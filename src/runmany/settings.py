@@ -6,7 +6,7 @@ import pathlib
 from typing import Any, Dict, List, Union
 from runmany.util import Json, print_err, set_show_errors
 
-DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
+DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'  # TODO ideally this only in runmany.py
 NAME_KEY, COMMAND_KEY = 'name', 'command'
 
 

@@ -2,6 +2,7 @@
 
 import io
 import sys
+import json
 import pathlib
 import argparse
 from contextlib import redirect_stdout
@@ -9,28 +10,22 @@ from typing import List, Union, Optional, TextIO, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from runmany.util import Json, PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
+from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
 from runmany.runner import run  # noqa # pylint: disable=wrong-import-position
-
-
-def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
-    """Loads a manyfile from a string or file, returning it as a string."""
-    if from_string:
-        return cast(str, manyfile)
-    with open(manyfile, encoding='utf-8') as file:
-        return file.read()
-
-
-# TODO revamp load_settings so it creates a settings obj with `update` bool, of whether settings were given or not
-def load_settings(settings: JsonLike) -> Json:
-    """Loads the settings JSON into a settings object, using default updatable settings if none provided."""
-    return settings
+from runmany.newsettings import NewSettings  # noqa # pylint: disable=wrong-import-position
 
 
 def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
     """Starts the run of a .many file."""
+    if from_string:
+        with open(manyfile, encoding='utf-8') as file:
+            manyfile = file.read()
+
+    with open(pathlib.Path(__file__).with_name('default_settings.json'), encoding='utf-8') as defaults:
+        settings_object = NewSettings(json.load(defaults), settings)
+
     with redirect_stdout(outfile):
-        run(load_manyfile(manyfile, from_string), load_settings(settings))
+        run(cast(str, manyfile), settings_object)
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
