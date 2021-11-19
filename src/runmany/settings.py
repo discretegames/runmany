@@ -2,7 +2,7 @@ import json
 import types
 import pathlib
 from typing import Any, Dict, List, Union
-from runmany.util import JsonLike, print_err, set_show_errors
+from runmany.util import Json, print_err, set_show_errors
 
 DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'
 NAME_KEY, COMMAND_KEY = 'name', 'command'
@@ -90,7 +90,8 @@ def json_err(error: Union[str, Exception]) -> None:
     print_err(f'JSON issue - {error}. Using default settings JSON.')
 
 
-def load_settings(provided_json: JsonLike, hardcoded_json_string: str) -> Settings:
+# TODO moved some of this to runmany.py, so refactor
+def load_settings(provided_json: Json, hardcoded_json_string: str) -> Settings:
     settings_json_string = ''
     if provided_json is None:
         settings_json_string = hardcoded_json_string

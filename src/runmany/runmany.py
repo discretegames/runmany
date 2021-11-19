@@ -9,37 +9,47 @@ from typing import List, DefaultDict, Union, Optional, TextIO, Iterator, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
+from runmany.util import Json, PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
 from runmany.runner import run_iterator, make_footer, Run  # noqa # pylint: disable=wrong-import-position
-from runmany.settings import load_settings  # noqa # pylint: disable=wrong-import-position
+import runmany.settings as rs  # todo ugly # noqa # pylint: disable=wrong-import-position
 
 
-def load_many_file(manyfile: Union[PathLike, str], from_string: bool) -> str:
+# todo move to runner.py?
+def do_run(manyfile: str, settings: Json) -> None:
+    total_runs, successful_runs = 0, 0
+    equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
+    with io.StringIO(manyfile) as file, TemporaryDirectory() as directory:
+        iterator = run_iterator(file)
+        settings = rs.load_settings(settings, cast(str, next(iterator)))
+        iterator.send(settings)
+
+        for run in cast(Iterator[Run], iterator):
+            run_number = total_runs + 1
+            output, stdout, success = run.run(directory, run_number)
+            total_runs += 1
+            successful_runs += success
+            if settings.show_runs:
+                print(output, flush=True)
+            if settings.show_equal:
+                equal_stdouts[stdout].append(run_number)
+        print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)
+
+
+def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
     if from_string:
         return cast(str, manyfile)
     with open(manyfile, encoding='utf-8') as file:
         return file.read()
 
 
-def run_many_file(manyfile: str, settings: JsonLike, outfile: TextIO) -> None:
-    with redirect_stdout(outfile):
-        total_runs, successful_runs = 0, 0
-        equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
-        with io.StringIO(manyfile) as file, TemporaryDirectory() as directory:
-            iterator = run_iterator(file)
-            settings = load_settings(settings, cast(str, next(iterator)))
-            iterator.send(settings)
+# TODO revamp load_settings so it creates a settings obj with `update` bool, of whether settings were given or not
+def load_settings(settings: JsonLike) -> Json:
+    return settings
 
-            for run in cast(Iterator[Run], iterator):
-                run_number = total_runs + 1
-                output, stdout, success = run.run(directory, run_number)
-                total_runs += 1
-                successful_runs += success
-                if settings.show_runs:
-                    print(output, flush=True)
-                if settings.show_equal:
-                    equal_stdouts[stdout].append(run_number)
-            print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)
+
+def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
+    with redirect_stdout(outfile):
+        do_run(load_manyfile(manyfile, from_string), load_settings(settings))
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
@@ -67,7 +77,7 @@ def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
         return open(cast(PathLike, outfile), 'w', encoding='utf-8')
 
     with opener() as output_file:
-        run_many_file(load_many_file(manyfile, from_string), settings, output_file)
+        start_run(manyfile, settings, output_file, from_string)
 
 
 def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, *, from_string: bool = False) -> str:
@@ -84,7 +94,7 @@ def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, *, from_
     Returns: (str) The results of the run that would normally appear on stdout as a string.
     """
     with io.StringIO() as output_file:
-        run_many_file(load_many_file(manyfile, from_string), settings, output_file)
+        start_run(manyfile, settings, output_file, from_string)
         output_file.seek(0)
         return output_file.read()
 
@@ -100,9 +110,10 @@ def cmdline(argv: List[str]) -> None:
 
     description = 'Runs a .many file. Full documentation: https://github.com/discretegames/runmany/blob/main/README.md'
     parser = argparse.ArgumentParser(prog='runmany', description=description)
-    parser.add_argument('manyfile', help='the path to the .many file to run', metavar='<manyfile>')
-    parser.add_argument('-s', '--settings', help='the path to the .json settings file to use', metavar='<settings>')
-    parser.add_argument('-o', '--outfile', help='the path to the file output is redirected to', metavar='<outfile>')
+    parser.add_argument('manyfile', metavar='<manyfile>', help='the path to the .many file to run')
+    parser.add_argument('-s', '--settings', metavar='<settings>',
+                        help='the path to the .json settings file to use which overrides any embedded settings')
+    parser.add_argument('-o', '--outfile', metavar='<outfile>', help='the path to the file output is redirected to')
     args = parser.parse_args(argv)
     runmany(args.manyfile, args.settings, args.outfile)
 
