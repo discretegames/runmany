@@ -34,7 +34,7 @@ def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextI
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
-            outfile: Optional[Union[PathLike, TextIO]] = None, *, from_string: bool = False) -> None:
+            outfile: Optional[Union[PathLike, TextIO]] = None, from_string: bool = False) -> None:
     """Runs `manyfile` with the settings from `settings` JSON, outputting the results to stdout or `outfile`.
 
     Args:
@@ -44,7 +44,7 @@ def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
           When `None`, all default settings are used. Defaults to `None`
         - `outfile` (optional PathLike | TextIO | None): The file path to or the opened file object of the file to send
           output to, or `None` to send output to stdout. Defaults to `None`.
-        - `from_string` (named optional bool): When `True`, `manyfile` is read as a string rather than a file path.
+        - `from_string` (optional bool): When `True`, `manyfile` is read as a string rather than a file path.
           Defaults to `False`.
 
     Returns: `None`
@@ -60,7 +60,7 @@ def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
         start_run(manyfile, settings, output_file, from_string)
 
 
-def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, *, from_string: bool = False) -> str:
+def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, from_string: bool = False) -> str:
     """Runs `manyfile` with the settings from `settings` JSON, returning the results as a string.
 
     Args:
@@ -68,7 +68,7 @@ def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, *, from_
         - `settings` (optional JsonLike): The file path to or the loaded dict of the settings JSON to use.
           Undefined settings default to their values in [default_settings.json](https://git.io/J16Z1).
           When `None`, all default settings are used. Defaults to `None`
-        - `from_string` (named optional bool): When `True`, `manyfile` is read as a string rather than a file path.
+        - `from_string` (optional bool): When `True`, `manyfile` is read as a string rather than a file path.
           Defaults to `False`.
 
     Returns: (str) The results of the run that would normally appear on stdout as a string.
