@@ -1,13 +1,16 @@
+# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
+
 import os
+import io
 import time
 import pathlib
 import subprocess
 from collections import defaultdict
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 
-from runmany.util import print_err
-from runmany.settings import Settings, LanguageData, normalize
+from runmany.util import Json, print_err
+from runmany.settings import load_settings, Settings, LanguageData, normalize
 from runmany.parser import section_iterator, Section, SectionType, Syntax
 
 OUTPUT_FILL_CHAR, OUTPUT_FILL_WIDTH = '-', 60
@@ -204,3 +207,23 @@ def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, Non
                 for argv_section in argvs[language]:
                     for stdin_section in stdins[language]:
                         yield Run(section, argv_section, stdin_section, settings[language])
+
+
+def run(manyfile: str, settings: Json) -> None:
+    total_runs, successful_runs = 0, 0
+    equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
+    with io.StringIO(manyfile) as file, TemporaryDirectory() as directory:
+        iterator = run_iterator(file)
+        settings = load_settings(settings, cast(str, next(iterator)))
+        iterator.send(settings)
+
+        for a_run in cast(Iterator[Run], iterator):
+            run_number = total_runs + 1
+            output, stdout, success = a_run.run(directory, run_number)
+            total_runs += 1
+            successful_runs += success
+            if settings.show_runs:
+                print(output, flush=True)
+            if settings.show_equal:
+                equal_stdouts[stdout].append(run_number)
+        print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)

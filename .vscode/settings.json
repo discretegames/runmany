@@ -9,7 +9,7 @@
 	"python.linting.pylintEnabled": true,
 	"python.linting.pylintArgs": [
 		"--max-line-length=120",
-		"--disable=missing-module-docstring,missing-class-docstring,missing-function-docstring" // TODO do the docstrings
+		// "--disable="
 	],
 	"python.linting.flake8Enabled": true,
 	"python.linting.flake8Args": [
