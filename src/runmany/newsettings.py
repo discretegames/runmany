@@ -1,13 +1,11 @@
 # pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
 
-from runmany.util import JsonLike
+from typing import Any, Dict
 
 
 class SettingsDict:
-    def __init__(self, settings_json: JsonLike) -> None:
-        pass
-
-        # todo do json none, empty string checking here
+    def __init__(self, settings_dict: Dict[str, Any]) -> None:
+        self.settings_dict = settings_dict
 
 
 class Language:
@@ -15,14 +13,14 @@ class Language:
 
 
 class NewSettings:
-    def __init__(self, default_settings: JsonLike, provided_settings: JsonLike) -> None:
-        self.default_settings = SettingsDict(default_settings)
-        self.provided_settings = SettingsDict(provided_settings)
-        self.updatable = provided_settings not in (None, '')
+    def __init__(self, default_settings: SettingsDict, provided_settings: SettingsDict, updatable: bool) -> None:
+        self.default_settings = default_settings
+        self.provided_settings = provided_settings
+        self.updatable = updatable
 
-    def update(self, new_provided_settings: JsonLike) -> None:
+    def update(self, new_provided_settings: SettingsDict) -> None:
         if self.updatable:
-            self.provided_settings = SettingsDict(new_provided_settings)
+            self.provided_settings = new_provided_settings
 
     def language(self, language_name: str) -> Language:
         pass
