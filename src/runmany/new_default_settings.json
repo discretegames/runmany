@@ -1,13 +1,15 @@
 {
-	"extension": "",
 	"timeout": 10.0,
 	"stderr": "nzec",
+	"extension": "",
+	"command": "echo \"command missing\"",
+
+	"replace_tab": null,
+	"replace_newline": null,
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",
 	"strip_code": "smart",
-	"replace_tab": null,
-	"replace_newline": null,
 
 	"ignore_errors": false,
 	"ignore_comments": false,
@@ -41,7 +43,7 @@
 			"name": "BASH",
 			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
 			"extension": ".sh",
-			"change_newline": "\r"
+			"replace_newline": "\r"
 		}
 	],
 	"supplied_languages_linux": [],

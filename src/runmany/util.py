@@ -4,11 +4,12 @@ import sys
 from contextlib import contextmanager
 from typing import Any, Union, TextIO, Iterator
 
-Json = Any  # Union[Dict[str, Any], List[Any], int, str, float, bool, None] # TODO maybe use this?
 PathLike = Union[str, bytes, 'os.PathLike[Any]']
-JsonLike = Union[Json, PathLike, None]
+JsonLike = Union[Any, PathLike, None]
 
 DISPLAY_ERRORS = True  # The only mutating global.
+DEFAULT_SETTINGS_JSON = 'default_settings.json'
+NAME_KEY = 'name'
 
 
 def print_err(message: str) -> None:
