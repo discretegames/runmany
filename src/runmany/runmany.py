@@ -43,7 +43,7 @@ def load_settings(settings: JsonLike) -> NewSettings:
         except Exception as error:  # pylint: disable=broad-except
             print_err(f'JSON issue - {error}. Using default settings JSON.')
             settings_dict = {}
-    return NewSettings(settings_dict, load_default_settings(), settings is None)
+    return NewSettings(load_default_settings(), settings_dict, settings is None)
 
 
 def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
