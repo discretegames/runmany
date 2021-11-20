@@ -1,8 +1,8 @@
 # pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
 
-
+import platform
 from itertools import chain
-from typing import Any, Dict, List
+from typing import Any, Tuple, Dict, List
 from runmany.util import print_err, NAME_KEY
 
 
@@ -64,13 +64,19 @@ class NewSettings:
     def combine_languages(self, custom: Dict[str, Any], supplied: Dict[str, Any]) -> Language:
         return Language({key: custom.get(key, supplied[key]) for key in chain(custom, supplied)}, self)
 
-    #  TODO review everything below
+    def platform_language_dicts(self) -> Tuple[Dict[str, Language], Dict[str, Language]]:
+        key = 'languages'
+        platforms = {'windows': '_windows', 'linux': '_linux', 'darwin': '_mac'}
+        os_key = key + platforms.get(platform.system().lower(), '')
+        return getattr(self, os_key), getattr(self, key)
 
     def __getattr__(self, key: str) -> Any:  # "." is for retrieving base settings
         return self.dict[key]
 
     def __contains__(self, language_name: str) -> bool:  # "in" is for checking Language existence
-        return language_name in self.provided_settings
+        os_languages, languages = self.platform_language_dicts()
+        return language_name in os_languages or language_name in languages
 
     def __getitem__(self, language_name: str) -> Language:  # "[ ]" is for retrieving Languages
-        return self.provided_settings[language_name]
+        os_languages, languages = self.platform_language_dicts()
+        return os_languages.get(language_name, languages[language_name])
