@@ -2,8 +2,8 @@
 
 import platform
 from itertools import chain
-from typing import Any, Tuple, Dict, List
-from runmany.util import print_err, NAME_KEY
+from typing import Any, Tuple, Dict, List, Optional
+from runmany.util import print_err, load_default_settings, NAME_KEY
 
 
 def normalize(language_name: str) -> str:
@@ -33,14 +33,13 @@ class Language:  # pylint: disable=too-few-public-methods
 
 
 class NewSettings:
-    def __init__(self, default_settings: Dict[str, Any], provided_settings: Dict[str, Any], updatable: bool) -> None:
-        self.default_settings = default_settings
+    def __init__(self, provided_settings: Optional[Dict[str, Any]] = None, updatable: bool = True) -> None:
+        self.default_settings = load_default_settings()
         self.updatable = updatable
-        self.update(provided_settings, True)
+        self.update(provided_settings or {}, True)
 
     def update(self, new_provided_settings: Dict[str, Any], force: bool = False) -> None:
         if force or self.updatable:
-            # TODO if new_provided_settings is a string, this is the place to load that from file
             self.dict = self.combine_settings(self.default_settings, new_provided_settings)
 
     def combine_settings(self, default_settings: Dict[str, Any], provided_settings: Dict[str, Any]) -> Dict[str, Any]:

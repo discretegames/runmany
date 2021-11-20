@@ -6,11 +6,11 @@ import json
 import pathlib
 import argparse
 from contextlib import redirect_stdout
-from typing import List, Any, Dict, Union, Optional, TextIO, cast
+from typing import List, Union, Optional, TextIO, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from runmany.util import PathLike, JsonLike, nullcontext, debugging, print_err, DEFAULT_SETTINGS_JSON  # noqa # pylint: disable=wrong-import-position
+from runmany.util import PathLike, JsonLike, nullcontext, debugging, print_err  # noqa # pylint: disable=wrong-import-position
 from runmany.runner import run  # noqa # pylint: disable=wrong-import-position
 from runmany.newsettings import NewSettings  # noqa # pylint: disable=wrong-import-position
 
@@ -22,14 +22,9 @@ def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
     with open(manyfile, encoding='utf-8') as file:
         return file.read()
 
-
-def load_default_settings() -> Dict[str, Any]:
-    """Loads the default settings dict from default_settings.json that is guaranteed to exist."""
-    with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON), encoding='utf-8') as defaults:
-        return cast(Dict[str, Any], json.load(defaults))
-
-
 # TODO maybe move this to place where it can load embedded jsons, either dict or string path, or raw path
+
+
 def load_settings(settings: JsonLike) -> NewSettings:
     """Loads the settings JSON into a settings object, using default updatable settings if none provided."""
     if settings is None:
@@ -43,7 +38,7 @@ def load_settings(settings: JsonLike) -> NewSettings:
         except Exception as error:  # pylint: disable=broad-except
             print_err(f'JSON issue - {error}. Using default settings JSON.')
             settings_dict = {}
-    return NewSettings(load_default_settings(), settings_dict, settings is None)
+    return NewSettings(settings_dict, settings is None)
 
 
 def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
