@@ -17,6 +17,7 @@
 	],
 	"python.pythonPath": ".\\venv\\Scripts\\python.exe",
 	"cSpell.words": [
+		"alsos",
 		"autopep",
 		"cscript",
 		"Errno",

@@ -13,7 +13,7 @@ DISPLAY_ERRORS = True  # The only mutating global.
 
 def print_err(message: str) -> None:
     if DISPLAY_ERRORS:
-        print(f"!!!| RunMany Error: {message} |!!!", file=sys.stderr)
+        print(f"%%% RunMany Error: {message} %%%", file=sys.stderr)
 
 
 def set_show_errors(show_errors: bool) -> None:

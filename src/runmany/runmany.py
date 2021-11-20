@@ -11,6 +11,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so pr
 
 from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
 from runmany.settings import Settings  # noqa # pylint: disable=wrong-import-position
+from runmany.runner import run  # noqa # pylint: disable=wrong-import-position
 
 
 def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
@@ -24,7 +25,7 @@ def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextI
     manyfile_string = load_manyfile(manyfile, from_string)
     settings_object = Settings.from_json(settings)
     with redirect_stdout(outfile):
-        print(manyfile_string, settings_object)
+        run(manyfile_string, settings_object)
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
@@ -99,6 +100,6 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
-        print(f'RUNMANY DEBUGGING "{file}":')
-        runmany(file)
+        debug_file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
+        print(f'RUNMANY DEBUGGING "{debug_file}":')
+        runmany(debug_file)

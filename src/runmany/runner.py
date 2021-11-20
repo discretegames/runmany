@@ -5,8 +5,6 @@
 # import pathlib
 # import subprocess
 # from collections import defaultdict
-# from tempfile import NamedTemporaryFile, TemporaryDirectory
-# from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 
 # from runmany.util import print_err
 # # from runmany.settings import load_settings, Settings, LanguageData, normalize
@@ -18,21 +16,54 @@
 # STDERR_NZEC, STDERR_NEVER = ('nzec', None), ('never', False)
 
 
-# class Placeholders:  # pylint: disable=too-few-public-methods
-#     prefix = '$'
-#     ARGV = 'argv'
-#     # For file .../dir/file.ext the parts are:
-#     RAWDIR = 'rawdir'        # .../dir
-#     DIR = 'dir'              # ".../dir"
-#     RAWFILE = 'rawfile'      # .../dir/file.ext
-#     FILE = 'file'            # ".../dir/file.ext"
-#     RAWBRANCH = 'rawbranch'  # .../dir/file
-#     BRANCH = 'branch'        # ".../dir/file"
-#     NAME = 'name'            # file.ext
-#     STEM = 'stem'            # file
-#     EXT = 'ext'              # .ext
-#     SEP = 'sep'              # /
+# from typing import List, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
+from tempfile import TemporaryDirectory
+from runmany.settings import Settings
+from runmany.newparser import Parser
 
+
+class Placeholders:  # pylint: disable=too-few-public-methods
+    prefix = '$'
+    ARGV = 'argv'
+    # For file .../dir/file.ext the parts are:
+    RAWDIR = 'rawdir'        # .../dir
+    DIR = 'dir'              # ".../dir"
+    RAWFILE = 'rawfile'      # .../dir/file.ext
+    FILE = 'file'            # ".../dir/file.ext"
+    RAWBRANCH = 'rawbranch'  # .../dir/file
+    BRANCH = 'branch'        # ".../dir/file"
+    NAME = 'name'            # file.ext
+    STEM = 'stem'            # file
+    EXT = 'ext'              # .ext
+    SEP = 'sep'              # /
+
+
+def run(manyfile: str, settings: Settings) -> None:
+    parser = Parser(manyfile, settings)
+    with TemporaryDirectory() as directory:
+        print(parser)
+        # for section in parser.get_sections():
+        #     pass
+        # for also in section.get_alsos():
+        #     print(also)
+
+# total_runs, successful_runs = 0, 0
+# equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
+# with io.StringIO(manyfile) as file, TemporaryDirectory() as directory:
+#     iterator = run_iterator(file)
+#     settings = load_settings(settings, cast(str, next(iterator)))
+#     iterator.send(settings)
+
+#     for a_run in cast(Iterator[Run], iterator):
+#         run_number = total_runs + 1
+#         output, stdout, success = a_run.run(directory, run_number)
+#         total_runs += 1
+#         successful_runs += success
+#         if settings.show_runs:
+#             print(output, flush=True)
+#         if settings.show_equal:
+#             equal_stdouts[stdout].append(run_number)
+#     print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)
 
 # class PathParts:
 #     def __init__(self, path: str) -> None:
@@ -65,7 +96,6 @@
 #                 command = self.fill_part(command, part, fill)
 #             command = self.fill_part(command, Placeholders.ARGV, argv)
 #         return command
-
 
 # class Run:
 #     def __init__(self, code_section: Section, argv_section: Optional[Section], stdin_section: Optional[Section],
@@ -140,7 +170,6 @@
 
 #         return '\n'.join(parts) + '\n' * cast(int, self.language_data.spacing)
 
-
 # def make_footer(settings: Settings, total_runs: int, successful_runs: int,
 #                 equal_stdouts: DefaultDict[str, List[int]]) -> str:
 #     parts = [OUTPUT_DIVIDER]
@@ -167,7 +196,6 @@
 #         parts.append(OUTPUT_DIVIDER)
 
 #     return '\n'.join(parts)
-
 
 # def run_iterator(file: TextIO) -> Generator[Union[str, None, Run], Settings, None]:
 #     lead_section: Optional[Section] = None
@@ -207,23 +235,3 @@
 #                 for argv_section in argvs[language]:
 #                     for stdin_section in stdins[language]:
 #                         yield Run(section, argv_section, stdin_section, settings[language])
-
-
-# def run(manyfile: str, settings: NewSettings) -> None:
-#     total_runs, successful_runs = 0, 0
-#     equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
-#     with io.StringIO(manyfile) as file, TemporaryDirectory() as directory:
-#         iterator = run_iterator(file)
-#         settings = load_settings(settings, cast(str, next(iterator)))
-#         iterator.send(settings)
-
-#         for a_run in cast(Iterator[Run], iterator):
-#             run_number = total_runs + 1
-#             output, stdout, success = a_run.run(directory, run_number)
-#             total_runs += 1
-#             successful_runs += success
-#             if settings.show_runs:
-#                 print(output, flush=True)
-#             if settings.show_equal:
-#                 equal_stdouts[stdout].append(run_number)
-#         print(make_footer(settings, total_runs, successful_runs, equal_stdouts), flush=True)

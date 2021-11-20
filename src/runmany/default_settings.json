@@ -3,16 +3,16 @@
 	"stderr": "nzec",
 	"extension": "",
 	"command": "echo \"command missing\"",
+	"output_spacing": 1,
+	"minimalist": false,
+	"ignore_blanks": false,
+	"run_comments": false,
 
 	"replace_tab": null,
 	"replace_newline": null,
 
-	"ignore_comments": false,
-	"ignore_blanks": false,
-
 	"strip_argv": "smart",
 	"strip_stdin": "smart",
-	"strip_code": "smart",
 
 	"show_errors": false,
 	"show_runs": true,
@@ -24,9 +24,6 @@
 	"show_output": true,
 	"show_stats": true,
 	"show_equal": true,
-
-	"output_spacing": 1,
-	"minimalist": false,
 
 	"languages": [],
 	"languages_windows": [],
