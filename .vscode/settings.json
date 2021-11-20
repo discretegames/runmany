@@ -9,7 +9,7 @@
 	"python.linting.pylintEnabled": true,
 	"python.linting.pylintArgs": [
 		"--max-line-length=120",
-		// "--disable="
+		"--disable=missing-function-docstring,missing-class-docstring"
 	],
 	"python.linting.flake8Enabled": true,
 	"python.linting.flake8Args": [
@@ -41,6 +41,7 @@
 		"runpytest",
 		"runtox",
 		"sbcl",
+		"SOLOER",
 		"Stmts",
 		"terpri",
 		"writeln",

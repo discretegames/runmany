@@ -1,8 +1,7 @@
-"""The runmany interface module. Contains exported functions and command line handling."""
+"""RunMany interface module. Contains exported functions and command line handling."""
 
 import io
 import sys
-import json
 import pathlib
 import argparse
 from contextlib import redirect_stdout
@@ -10,43 +9,22 @@ from typing import List, Union, Optional, TextIO, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from runmany.util import PathLike, JsonLike, nullcontext, debugging, print_err  # noqa # pylint: disable=wrong-import-position
-from runmany.runner import run  # noqa # pylint: disable=wrong-import-position
-from runmany.newsettings import NewSettings  # noqa # pylint: disable=wrong-import-position
+from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
+from runmany.settings import Settings  # noqa # pylint: disable=wrong-import-position
 
 
 def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
-    """Loads a manyfile from a string or file, returning it as a string."""
     if from_string:
         return cast(str, manyfile)
     with open(manyfile, encoding='utf-8') as file:
         return file.read()
 
-# TODO maybe move this to place where it can load embedded jsons, either dict or string path, or raw path
-
-
-def load_settings(settings: JsonLike) -> NewSettings:
-    """Loads the settings JSON into a settings object, using default updatable settings if none provided."""
-    if settings is None:
-        settings_dict = {}
-    elif isinstance(settings, dict):
-        settings_dict = settings
-    else:
-        try:
-            with open(settings, encoding='utf-8') as file:
-                settings_dict = json.load(file)
-        except Exception as error:  # pylint: disable=broad-except
-            print_err(f'JSON issue - {error}. Using default settings JSON.')
-            settings_dict = {}
-    return NewSettings(settings_dict, settings is None)
-
 
 def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
-    """Starts the run of a .many file."""
     manyfile_string = load_manyfile(manyfile, from_string)
-    settings_object = load_settings(settings)
+    settings_object = Settings.from_json(settings)
     with redirect_stdout(outfile):
-        run(manyfile_string, settings_object)
+        print(manyfile_string, settings_object)
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
@@ -114,7 +92,6 @@ def cmdline(argv: List[str]) -> None:
 
 
 def main() -> None:
-    """Function that is called when runmany is run from the command line or this file is run directly."""
     cmdline(sys.argv[1:])  # pragma: no cover
 
 
@@ -122,4 +99,6 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        runmany(pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many'))
+        file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
+        print(f'RUNMANY DEBUGGING "{file}":')
+        runmany(file)

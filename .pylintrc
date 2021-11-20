@@ -2,4 +2,4 @@
 
 [MESSAGES CONTROL]
 max-line-length=120
-disable=fixme
+disable=missing-function-docstring,missing-class-docstring

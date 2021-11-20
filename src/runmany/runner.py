@@ -1,5 +1,4 @@
-# # pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
-
+"""delete/redo"""
 # import os
 # import io
 # import time
@@ -10,7 +9,7 @@
 # from typing import List, Dict, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 
 # from runmany.util import print_err
-# # from runmany.settings import load_settings, Settings, LanguageData, normalize # todo delete
+# # from runmany.settings import load_settings, Settings, LanguageData, normalize
 # from runmany.newsettings import NewSettings
 # from runmany.parser import section_iterator, Section, SectionType, Syntax
 

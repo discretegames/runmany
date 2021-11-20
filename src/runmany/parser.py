@@ -1,5 +1,4 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
-
+"""redo/remove this parser"""
 import re
 import enum
 from typing import List, Optional, Tuple, Generator, Union, TextIO, cast

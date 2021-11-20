@@ -1,119 +1,120 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
+"""RunMany settings module. Contains classes and functions for loading and handling the Settings object."""
 
 import json
-import types
 import pathlib
-from typing import Any, Dict, List, Union
-from runmany.util import Json, print_err, set_show_errors
-
-DEFAULT_SETTINGS_JSON_FILE = 'default_settings.json'  # TODO ideally this only in runmany.py
-NAME_KEY, COMMAND_KEY = 'name', 'command'
-
-
-def normalize(language: str) -> str:
-    return language.strip().lower()
+import platform
+from itertools import chain
+from typing import Any, Tuple, Dict, List, Optional
+from runmany.util import JsonLike, print_err
 
 
-def json_to_class(json_string: str) -> Any:
-    return json.loads(json_string, object_hook=lambda d: types.SimpleNamespace(**d))
+def load_json_settings(settings: JsonLike) -> Dict[str, Any]:
+    if settings:
+        if isinstance(settings, dict):
+            return settings
+        try:
+            with open(settings, encoding='utf-8') as file:
+                return load_json_settings(json.load(file))  # Recursively load in case JSON is a string filepath.
+        except Exception as error:  # pylint: disable=broad-except
+            print_err(f'JSON issue - {error}. Using default settings JSON.')
+    return {}
 
 
-class LanguageData:
-    def __init__(self, language_obj: Any, parent: 'Settings') -> None:
-        self.obj = language_obj
-        self.default_obj = None
+def load_default_settings() -> Dict[str, Any]:
+    return load_json_settings(pathlib.Path(__file__).with_name('default_settings.json'))
+
+
+class Language:
+    def __init__(self, language_dict: Dict[str, Any], parent: 'Settings') -> None:
+        self.dict = language_dict
         self.parent = parent
 
-    def update_obj(self, language_obj: Any) -> None:
-        self.obj, self.default_obj = language_obj, self.obj
+    def __getattr__(self, key: str) -> Any:
+        if key in self.dict:
+            return self.dict[key]
+        return getattr(self.parent, key)
 
-    def __getattr__(self, name: str) -> Any:
-        if hasattr(self.obj, name):
-            return getattr(self.obj, name)
-        if hasattr(self.default_obj, name):
-            return getattr(self.default_obj, name)
-        return getattr(self.parent, name)
+    @staticmethod
+    def normalize(language_name: str) -> str:
+        return language_name.strip().lower()
+
+    def __str__(self) -> str:
+        return str(self.dict)
+
+    def __repr__(self) -> str:
+        return repr(self.dict)
 
 
 class Settings:
-    def __init__(self, settings_json_string: str) -> None:
-        self.data = json_to_class(settings_json_string)
-        with open(pathlib.Path(__file__).with_name(DEFAULT_SETTINGS_JSON_FILE), encoding='utf-8') as file:
-            self.default_data = json_to_class(file.read())
-        set_show_errors(self.show_errors)
+    def __init__(self, provided_settings: Optional[Dict[str, Any]] = None, updatable: bool = True) -> None:
+        self.default_settings = load_default_settings()
+        self.updatable = updatable
+        self.update(provided_settings or {}, True)
 
-        self.dict: Dict[str, LanguageData] = {}
-        for language_obj in self.default_languages:
-            if self.language_obj_valid(language_obj, True):
-                language_obj.name = language_obj.name.strip()
-                self[language_obj.name] = LanguageData(language_obj, self)
+    def update(self, new_provided_settings: Dict[str, Any], force: bool = False) -> None:
+        if force or self.updatable:
+            self.dict = self.combine_settings(self.default_settings, new_provided_settings)
 
-        for language_obj in self.languages:
-            if self.language_obj_valid(language_obj, False):
-                language_obj.name = language_obj.name.strip()
-                if language_obj.name in self:
-                    self[language_obj.name].update_obj(language_obj)
-                else:
-                    self[language_obj.name] = LanguageData(language_obj, self)
+    def combine_settings(self, default_settings: Dict[str, Any], provided_settings: Dict[str, Any]) -> Dict[str, Any]:
+        combined = {key: provided_settings.get(key, value) for key, value in default_settings.items()}
+        for op_sys in ('', '_windows', '_linux', '_mac'):
+            custom = 'languages' + op_sys
+            supplied = 'supplied_' + custom
+            combined[custom] = self.combine_lists(combined[custom], combined[supplied])
+            del combined[supplied]
+        return combined
 
-    def language_obj_valid(self, language_obj: Any, is_default: bool) -> bool:
-        end = ". Ignoring language."
+    def combine_lists(self, custom: List[Dict[str, Any]], supplied: List[Dict[str, Any]]) -> Dict[str, Language]:
+        custom_dict = self.make_language_dict(custom)
+        supplied_dict = self.make_language_dict(supplied)
+        combined: Dict[str, Language] = {}
+        for name in chain(custom_dict, supplied_dict):
+            if name not in combined:
+                combined[name] = self.combine_languages(custom_dict.get(name, {}), supplied_dict.get(name, {}))
+        return combined
 
-        if not hasattr(language_obj, NAME_KEY):
-            print_err(f'No "{NAME_KEY}" key found for json list item{end}')
-            return False
+    def combine_languages(self, custom: Dict[str, Any], supplied: Dict[str, Any]) -> Language:
+        return Language({key: custom.get(key, supplied[key]) for key in chain(custom, supplied)}, self)
 
-        default_obj = self[language_obj.name] if not is_default and language_obj.name in self else None
-        if not hasattr(language_obj, COMMAND_KEY) and not hasattr(default_obj, COMMAND_KEY):
-            print_err(f'No "{COMMAND_KEY}" key found for {language_obj.name}{end}')
-            return False
+    def platform_language_dicts(self) -> Tuple[Dict[str, Language], Dict[str, Language]]:
+        key = 'languages'
+        platforms = {'windows': '_windows', 'linux': '_linux', 'darwin': '_mac'}
+        os_key = key + platforms.get(platform.system().lower(), '')
+        return getattr(self, os_key), getattr(self, key)
 
-        return True
+    def __getattr__(self, key: str) -> Any:  # "." is for retrieving base settings
+        return self.dict[key]
 
-    def __getattr__(self, name: str) -> Any:
-        if hasattr(self.data, name):
-            return getattr(self.data, name)
-        return getattr(self.default_data, name)
+    def __contains__(self, language_name: str) -> bool:  # "in" is for checking Language existence
+        os_languages, languages = self.platform_language_dicts()
+        return language_name in os_languages or language_name in languages
 
-    def __getitem__(self, language: str) -> Any:
-        return self.dict[normalize(language)]
+    def __getitem__(self, language_name: str) -> Language:  # "[ ]" is for retrieving Languages
+        os_languages, languages = self.platform_language_dicts()
+        return os_languages.get(language_name, languages[language_name])
 
-    def __setitem__(self, language: str, language_data: LanguageData) -> None:
-        self.dict[normalize(language)] = language_data
+    @staticmethod
+    def make_language_dict(language_list: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+        name_key = 'name'
+        language_dict: Dict[str, Any] = {}
+        for language in language_list:
+            if name_key not in language:
+                print_err(f'No "{name_key}" key found for {language}. Skipping language.')
+                continue
+            language[name_key] = Language.normalize(language[name_key])
+            language_dict[language[name_key]] = language
+        return language_dict
 
-    def __contains__(self, language: str) -> bool:
-        return normalize(language) in self.dict
+    @staticmethod
+    def from_json(settings: JsonLike) -> 'Settings':
+        return Settings(load_json_settings(settings), settings is None)
 
-    def all_languages(self) -> List[str]:
-        return list(self.dict.keys())
+    def update_with_json(self, settings: JsonLike) -> None:
+        if self.updatable:
+            self.update(load_json_settings(settings))
 
+    def __str__(self) -> str:
+        return str((self.updatable, self.dict))
 
-def json_err(error: Union[str, Exception]) -> None:
-    print_err(f'JSON issue - {error}. Using default settings JSON.')
-
-
-def load_settings(provided_json: Json, hardcoded_json_string: str) -> Settings:
-    settings_json_string = ''
-    if provided_json is None:
-        settings_json_string = hardcoded_json_string
-    else:
-        if isinstance(provided_json, dict):
-            try:
-                settings_json_string = json.dumps(provided_json)
-            except (TypeError, ValueError) as err:
-                json_err(err)
-        else:
-            try:
-                with open(provided_json, encoding='utf-8') as file:
-                    settings_json_string = file.read()
-            except IOError as err:
-                json_err(err)
-
-    try:  # Validate settings_json_string.
-        if not isinstance(json.loads(settings_json_string.strip() or str({})), dict):
-            json_err('The JSON must be an object/dict')
-    except json.decoder.JSONDecodeError as err:
-        json_err(err)
-        settings_json_string = str({})
-
-    return Settings(settings_json_string.strip() or str({}))
+    def __repr__(self) -> str:
+        return repr((self.updatable, self.dict))
