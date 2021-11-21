@@ -20,7 +20,7 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     SECTION_DISABLER = 2 * DISABLER
     SOLOER = '@'
     SECTION_SOLOER = 2 * SOLOER
-    HEADER_END = ':'
+    HEADER_ENDER = ':'
     SEPARATOR = ','
     COMMENT = '%'
     INLINE_COMMENT = '%%%'
@@ -31,12 +31,13 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     SPACE_INDENT_LENGTH = 4
     SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
 
-    HEADER_START, HEADER_END = '^(?=\\S)(!!|@@|)?(!|@|)?\\s*', '\\s*:'
-    SETTINGS_HEADER = HEADER_START + '(Settings)' + HEADER_END
-    ARGV_HEADER = HEADER_START + 'Argv(?:\\s+for\\b([^:]*))?' + HEADER_END
-    STDIN_HEADER = HEADER_START + 'Stdin(?:\\s+for\\b([^:]*))?' + HEADER_END
-    CODE_HEADER = HEADER_START + '([^:]*)' + HEADER_END
-    ALSO_HEADER = '^(?=\\S)(!|@|)?\\s*Also' + HEADER_END
+    # todo fstring these
+    HEADER_STARTER, HEADER_ENDER = '^(?=\\S)(!!|@@|)?(!|@|)?\\s*', '\\s*:'
+    SETTINGS_HEADER = HEADER_STARTER + '(Settings)' + HEADER_ENDER
+    ARGV_HEADER = HEADER_STARTER + 'Argv(?:\\s+for\\b([^:]*))?' + HEADER_ENDER
+    STDIN_HEADER = HEADER_STARTER + 'Stdin(?:\\s+for\\b([^:]*))?' + HEADER_ENDER
+    CODE_HEADER = HEADER_STARTER + '([^:]*)' + HEADER_ENDER
+    ALSO_HEADER = '^(?=\\S)(!|@|)?\\s*Also' + HEADER_ENDER
 
 
 class Snippet:
@@ -73,11 +74,14 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
         self.parser = parser
         self.first_line = first_line
         self.last_line = last_line
-        matches = cast(re.Match[str], self.get_header_match(self.parser.lines[first_line])).groups()
-        self.is_disabled = matches[0] == Syntax.SECTION_DISABLER
-        self.is_solo = matches[0] == Syntax.SECTION_SOLOER
-        self.header_arg = matches[2]
-        self.make_snippets(matches[1])  # matches[1] is the first snippet's solo/disabled match
+        groups = cast(re.Match[str], self.get_header_match(self.parser.lines[first_line])).groups()
+        self.is_disabled = groups[0] == Syntax.SECTION_DISABLER
+        self.is_solo = groups[0] == Syntax.SECTION_SOLOER
+        if groups[2] is None:
+            self.language_names: List[str] = []
+        else:
+            self.language_names = [name.strip() for name in groups[2].split(Syntax.SEPARATOR)]
+        self.make_snippets(groups[1])  # matches[1] is the first snippet's solo/disabled match
         self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
 
     def make_snippets(self, first_sd_match: str) -> None:
@@ -119,8 +123,6 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
     def run(self) -> None:
         pass
 
-    # __iter__
-
     def __str__(self) -> str:
         return pformat((self.__class__.__name__, self.first_line, self.last_line, self.snippets))
 
@@ -129,7 +131,6 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
 
 
 class SettingsSection(Section):
-
     @staticmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.SETTINGS_HEADER, line)
