@@ -59,14 +59,16 @@ class Section(ABC):
         # self.set_snippets()
         # todo solos list of indexes
 
-    # def set_snippets(self) -> None:
-    #     self.snippets: List[Snippet] = []
+    def set_snippets(self) -> None:
+        self.snippets: List[Snippet] = []
+        snippet_first_line = self.first_line
+        i = snippet_first_line + 1  # ?
+        while i <= self.last_line:
+            if i == self.last_line:
+                pass
+                # if line is Also: then make snippet from
 
-    #     i = self.first_line + 1
-    #     while i <= self.last_line:
-    #         # if line is Also: then make snippet from
-
-    #     snippet_firsts: List[int] = []
+        snippet_firsts: List[int] = []
 
     # def create_also
     # self.alsos: Also = []
@@ -148,7 +150,7 @@ class Parser:
         self.clean_lines()
         self.set_sections()
         self.has_solo_sections = any(section.is_solo for section in self.sections)
-        # self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections)
+        # self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections) # TODO
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
@@ -173,7 +175,8 @@ class Parser:
 
     def set_sections(self) -> None:
         self.sections: List[Section] = []
-        i, in_section = self.first_line, False
+        section_first_line = self.first_line
+        i, in_section = section_first_line, False
         while i <= self.last_line:
             line = self.lines[i]
             if not in_section:
@@ -182,18 +185,16 @@ class Parser:
                     in_section = True
                     section_first_line = i
                     section_type = tried_section_type
-            else:
-                if i == self.last_line:
-                    self.sections.append(section_type(self, section_first_line, i))
-                else:
-                    if line.rstrip().startswith(Syntax.END) or Section.try_get_section_type(line):
-                        in_section = False
-                        i -= 1
-                        self.sections.append(section_type(self, section_first_line, i))
+            elif line.rstrip().startswith(Syntax.END) or Section.try_get_section_type(line):
+                in_section = False
+                i -= 1
+                self.sections.append(section_type(self, section_first_line, i))
             i += 1
+        if in_section:
+            self.sections.append(section_type(self, section_first_line, self.last_line))
 
     def __iter__(self) -> Iterator[Section]:
-        # if not self.settings.ignore_solos:
+        # if not self.settings.ignore_solos: # TODO
         #     if self.has_solo_sections:
         #         return iter(section for section in self.sections if section.is_solo)
         #     if self.has_solo_snippets:
