@@ -6,6 +6,7 @@ import os
 from typing import Iterator, List, Optional, Type, cast
 from abc import ABC, abstractmethod
 from runmany.settings import Settings
+from runmany.util import print_err
 
 # pylint: disable=too-few-public-methods
 
@@ -37,7 +38,7 @@ class Syntax(ABC):
     ARGV_HEADER = HEADER_START + 'Argv(?:\\s+for\\b([^:]*))?' + HEADER_END
     STDIN_HEADER = HEADER_START + 'Stdin(?:\\s+for\\b([^:]*))?' + HEADER_END
     CODE_HEADER = HEADER_START + '([^:]*)' + HEADER_END
-    ALSO_HEADER = '^(?=\\S)(!|@)?\\s*Also' + HEADER_END
+    ALSO_HEADER = '^(?=\\S)(?:!|@)?\\s*Also' + HEADER_END
 
 
 class Snippet:
@@ -45,6 +46,14 @@ class Snippet:
         self.parser = parser
         self.first_line = first_line
         self.last_line = last_line
+
+    @staticmethod
+    def line_is_also_header(line: str) -> bool:
+        return bool(re.match(Syntax.ALSO_HEADER, line))
+
+    @staticmethod
+    def line_is_content(line: str) -> bool:
+        return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
 
 class Section(ABC):
@@ -56,25 +65,23 @@ class Section(ABC):
         self.is_disabled = matches[0] == Syntax.SECTION_DISABLER
         self.is_solo = matches[0] == Syntax.SECTION_SOLOER
         self.header_arg = matches[2]
-        # self.set_snippets()
+        self.make_snippets()
         # todo solos list of indexes
 
-    def set_snippets(self) -> None:
+    def make_snippets(self) -> None:
         self.snippets: List[Snippet] = []
         snippet_first_line = self.first_line
-        i = snippet_first_line + 1  # ?
+        i = snippet_first_line + 1
         while i <= self.last_line:
-            if i == self.last_line:
-                pass
-                # if line is Also: then make snippet from
-
-        snippet_firsts: List[int] = []
-
-    # def create_also
-    # self.alsos: Also = []
-    # todo ignore unindented non also-lines
-
-    # print(match.groups())
+            line = self.parser.lines[i]
+            if Snippet.line_is_also_header(line):
+                self.snippets.append(Snippet(self.parser, snippet_first_line, i - 1))
+                snippet_first_line = i
+            elif not Snippet.line_is_content(line):
+                self.parser.lines[i] = ''
+                print_err(f'Skipping invalid unindented line {i} "{line}".')
+            i += 1
+        self.snippets.append(Snippet(self.parser, snippet_first_line, self.last_line))
 
     @staticmethod
     def try_get_section_type(line: str) -> Optional[Type['Section']]:
@@ -148,7 +155,7 @@ class Parser:
         self.first_line = self.get_first_line()
         self.last_line = self.get_last_line()
         self.clean_lines()
-        self.set_sections()
+        self.make_sections()
         self.has_solo_sections = any(section.is_solo for section in self.sections)
         # self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections) # TODO
 
@@ -173,10 +180,9 @@ class Parser:
                 if index >= 0:
                     self.lines[i] = line[:index]
 
-    def set_sections(self) -> None:
+    def make_sections(self) -> None:
         self.sections: List[Section] = []
-        section_first_line = self.first_line
-        i, in_section = section_first_line, False
+        i, in_section = self.first_line, False
         while i <= self.last_line:
             line = self.lines[i]
             if not in_section:
