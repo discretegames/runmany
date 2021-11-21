@@ -17,7 +17,7 @@
 
 
 # from typing import List, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
-from tempfile import TemporaryDirectory
+# from tempfile import TemporaryDirectory
 from runmany.settings import Settings
 from runmany.newparser import Parser
 
@@ -40,12 +40,13 @@ class Placeholders:  # pylint: disable=too-few-public-methods
 
 def run(manyfile: str, settings: Settings) -> None:
     parser = Parser(manyfile, settings)
-    with TemporaryDirectory() as directory:
-        print(parser)
-        # for section in parser.get_sections():
-        #     pass
-        # for also in section.get_alsos():
-        #     print(also)
+    # with TemporaryDirectory() as directory:
+    for x in parser.get_sections():
+        print(x)
+    # for section in parser.get_sections():
+    #     pass
+    # for also in section.get_alsos():
+    #     print(also)
 
 # total_runs, successful_runs = 0, 0
 # equal_stdouts: DefaultDict[str, List[int]] = defaultdict(list)
