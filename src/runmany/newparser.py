@@ -81,7 +81,7 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
             self.language_names: List[str] = []
         else:
             self.language_names = [name.strip() for name in groups[2].split(Syntax.SEPARATOR)]
-        self.make_snippets(groups[1])  # matches[1] is the first snippet's solo/disabled match
+        self.make_snippets(groups[1])  # groups[1] is the first snippet's solo/disabled match
         self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
 
     def make_snippets(self, first_sd_match: str) -> None:
@@ -123,6 +123,14 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
     def run(self) -> None:
         pass
 
+    def __iter__(self) -> Iterator[Snippet]:
+        snippets = self.snippets
+        if not self.parser.settings.ignore_disabled:
+            snippets = [snippet for snippet in snippets if not snippet.is_disabled]
+        if not self.parser.settings.ignore_solos and self.has_solo_snippets:
+            snippets = [snippet for snippet in snippets if snippet.is_solo]
+        return iter(snippets)
+
     def __str__(self) -> str:
         return pformat((self.__class__.__name__, self.first_line, self.last_line, self.snippets))
 
@@ -136,7 +144,8 @@ class SettingsSection(Section):
         return re.match(Syntax.SETTINGS_HEADER, line)
 
     def run(self) -> None:
-        pass
+        for snippet in self:
+            print(snippet)
 
 
 class ArgvSection(Section):
@@ -145,7 +154,7 @@ class ArgvSection(Section):
         return re.match(Syntax.ARGV_HEADER, line)
 
     def run(self) -> None:
-        pass
+        print(self)
 
 
 class StdinSection(Section):
@@ -154,7 +163,7 @@ class StdinSection(Section):
         return re.match(Syntax.STDIN_HEADER, line)
 
     def run(self) -> None:
-        pass
+        print(self)
 
 
 class CodeSection(Section):
@@ -163,7 +172,7 @@ class CodeSection(Section):
         return re.match(Syntax.CODE_HEADER, line)
 
     def run(self) -> None:
-        pass
+        print(self)
 
 
 class Parser:
@@ -218,12 +227,15 @@ class Parser:
             self.sections.append(section_type(self, section_first_line, self.last_line))
 
     def __iter__(self) -> Iterator[Section]:
+        sections = self.sections
+        if not self.settings.ignore_disabled:
+            sections = [section for section in sections if not section.is_disabled]
         if not self.settings.ignore_solos:
             if self.has_solo_sections:
-                return iter(section for section in self.sections if section.is_solo)
+                sections = [section for section in sections if section.is_solo]
             if self.has_solo_snippets:
-                return iter(section for section in self.sections if section.has_solo_snippets)
-        return iter(self.sections)
+                sections = [section for section in sections if section.has_solo_snippets]
+        return iter(sections)
 
     def __str__(self) -> str:
         return pformat(self.sections)

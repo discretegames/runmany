@@ -44,7 +44,6 @@ def run(manyfile: str, settings: Settings) -> None:
         section.run()
 
     # with TemporaryDirectory() as directory:
-    print(parser)
     # for section in parser.get_sections():
     #     pass
     # for also in section.get_alsos():
