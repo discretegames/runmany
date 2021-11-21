@@ -5,8 +5,11 @@
 	"command": "echo \"command missing\"",
 	"output_spacing": 1,
 	"minimalist": false,
+
+	"ignore_comments": false,
 	"ignore_blanks": false,
-	"run_comments": false,
+	"ignore_solos": false,
+	"ignore_disabled": false,
 
 	"replace_tab": null,
 	"replace_newline": null,

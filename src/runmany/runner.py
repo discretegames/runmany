@@ -41,7 +41,7 @@ class Placeholders:  # pylint: disable=too-few-public-methods
 def run(manyfile: str, settings: Settings) -> None:
     parser = Parser(manyfile, settings)
     # with TemporaryDirectory() as directory:
-    for x in parser.get_sections():
+    for x in parser:
         print(x)
     # for section in parser.get_sections():
     #     pass

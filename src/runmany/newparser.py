@@ -3,7 +3,7 @@
 
 import re
 import os
-from typing import List, Optional, Type
+from typing import Iterator, List, Optional, Type, cast
 from abc import ABC, abstractmethod
 from runmany.settings import Settings
 
@@ -18,7 +18,9 @@ class Syntax(ABC):
     ALSO = 'Also'
     END = 'End.'
     DISABLER = '!'
+    SECTION_DISABLER = 2 * DISABLER
     SOLOER = '@'
+    SECTION_SOLOER = 2 * SOLOER
     HEADER_END = ':'
     SEPARATOR = ','
     COMMENT = '%'
@@ -31,22 +33,35 @@ class Syntax(ABC):
     SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
 
     HEADER_START, HEADER_END = '^(?=\\S)(!!|@@)?(!|@)?\\s*', '\\s*:\\s*(.*)$'
-    SETTINGS_HEADER = HEADER_START + 'Settings' + HEADER_END
+    SETTINGS_HEADER = HEADER_START + '(Settings)' + HEADER_END
     ARGV_HEADER = HEADER_START + 'Argv(?:\\s+for\\b([^:]*))?' + HEADER_END
     STDIN_HEADER = HEADER_START + 'Stdin(?:\\s+for\\b([^:]*))?' + HEADER_END
     CODE_HEADER = HEADER_START + '([^:]*)' + HEADER_END
     ALSO_HEADER = '^(?=\\S)(!|@)?\\s*Also' + HEADER_END
 
 
-class Also:
+class Snippet:
     pass
+    # def __init__(self
 
 
 class Section(ABC):
-    def __init__(self, lines: List[str], header_line: int, limit_line: int):
+    def __init__(self, lines: List[str], first_line: int, last_line: int):
         self.lines = lines
-        self.header_line = header_line
-        # step through lines until find another header or End. or end of file
+        self.first_line = first_line
+        self.last_line = last_line
+        matches = cast(re.Match[str], self.get_header_match(lines[first_line])).groups()
+        self.is_disabled = matches[0] == Syntax.SECTION_DISABLER
+        self.is_solo = matches[0] == Syntax.SECTION_SOLOER
+        self.header_args = matches[2]
+        self.header_content = matches[3]
+        # todo solos list of indexes
+
+    # def create_also
+    # self.alsos: Also = []
+    # todo ignore unindented non also-lines
+
+    # print(match.groups())
 
     @staticmethod
     def try_get_section_type(line: str) -> Optional[Type['Section']]:
@@ -60,9 +75,6 @@ class Section(ABC):
             return CodeSection
         return None
 
-    # def parse_section(lines: List[str], curr_line: int, last_line: int) -> 'Section':
-    #     return Section()
-
     @staticmethod
     @abstractmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
@@ -72,10 +84,16 @@ class Section(ABC):
     def run(self) -> None:
         pass
 
+    def __str__(self) -> str:
+        return str((self.__class__.__name__, self.first_line, self.last_line))
+
+    def __repr__(self) -> str:
+        return str(self)
+
 
 class SettingsSection(Section):
-    def __init__(self, lines: List[str], header_line: int, limit_line: int):
-        super().__init__(lines, header_line, limit_line)
+    def __init__(self, lines: List[str], first_line: int, last_line: int):
+        super().__init__(lines, first_line, last_line)
 
     @staticmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
@@ -119,6 +137,9 @@ class Parser:
         self.first_line = self.get_first_line()
         self.last_line = self.get_last_line()
         self.clean_lines()
+        self.set_sections()
+        self.has_solo_sections = any(section.is_solo for section in self.sections)
+        self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections)
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
@@ -136,24 +157,12 @@ class Parser:
         for i, line in enumerate(self.lines):
             if i < self.first_line or i > self.last_line or line.startswith(Syntax.COMMENT):
                 self.lines[i] = ''
-            elif not self.settings.run_comments:
+            elif not self.settings.ignore_comments:
                 index = line.find(Syntax.INLINE_COMMENT)
                 if index >= 0:
                     self.lines[i] = line[:index]
 
-    # def get_sections(self) -> List[Section]:
-    #     sections: List[Section] = []
-    #     i = self.first_line
-    #     while i <= self.last_line:
-    #         line = self.lines[i]
-    #         section_type = Section.try_get_section_type(line)
-    #         if section_type:
-    #             sections.append(section_type(self.lines, i, self.last_line))
-    #             i = sections[-1].final_line
-    #         i += 1
-    #     return sections
-
-    def get_sections(self) -> List[Section]:
+    def set_sections(self) -> None:
         section_firsts: List[int] = []
         section_lasts: List[int] = []
         section_types: List[Type[Section]] = []
@@ -175,7 +184,15 @@ class Parser:
                         i -= 1
                         section_lasts.append(i)
             i += 1
-        return [st(self.lines, sf, sl) for sf, sl, st in zip(section_firsts, section_lasts, section_types)]
+        self.sections = [st(self.lines, sf, sl) for sf, sl, st in zip(section_firsts, section_lasts, section_types)]
+
+    def __iter__(self) -> Iterator[Section]:
+        if not self.settings.ignore_solos:
+            if self.has_solo_sections:
+                return iter(section for section in self.sections if section.is_solo)
+            if self.has_solo_snippets:
+                return iter(section for section in self.sections if section.has_solo_snippets)
+        return iter(self.sections)
 
     def __str__(self) -> str:
         return os.linesep.join(self.lines)
