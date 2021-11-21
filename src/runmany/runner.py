@@ -42,6 +42,7 @@ def run(manyfile: str, settings: Settings) -> None:
     parser = Parser(manyfile, settings)
     for section in parser:
         section.run()
+    print(parser)
 
     # with TemporaryDirectory() as directory:
     # for section in parser.get_sections():

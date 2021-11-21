@@ -1,5 +1,5 @@
 
-"""todo"""
+"""docstring"""  # TODO
 
 import re
 from pprint import pformat
@@ -16,28 +16,28 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     FOR = 'for'
     ALSO = 'Also'
     END = 'End.'
-    DISABLER = '!'
-    SECTION_DISABLER = 2 * DISABLER
-    SOLOER = '@'
-    SECTION_SOLOER = 2 * SOLOER
-    HEADER_ENDER = ':'
-    SEPARATOR = ','
-    COMMENT = '%'
-    INLINE_COMMENT = '%%%'
     START = 'START:'
     STOP = 'STOP.'
+    DISABLER = '!'
+    SOLOER = '@'
+    SECTION_DISABLER = '!!'
+    SECTION_SOLOER = '@@'
+    SEPARATOR = ','
+    FINISHER = ':'
+    LEADING_COMMENT = '%'
+    INLINE_COMMENT = '%%%'
     TAB_INDENT = '\t'
     SPACE = ' '
     SPACE_INDENT_LENGTH = 4
-    SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
+    SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH  # todo space_pattern maybe needed
 
-    # todo fstring these
-    HEADER_STARTER, HEADER_ENDER = '^(?=\\S)(!!|@@|)?(!|@|)?\\s*', '\\s*:'
-    SETTINGS_HEADER = HEADER_STARTER + '(Settings)' + HEADER_ENDER
-    ARGV_HEADER = HEADER_STARTER + 'Argv(?:\\s+for\\b([^:]*))?' + HEADER_ENDER
-    STDIN_HEADER = HEADER_STARTER + 'Stdin(?:\\s+for\\b([^:]*))?' + HEADER_ENDER
-    CODE_HEADER = HEADER_STARTER + '([^:]*)' + HEADER_ENDER
-    ALSO_HEADER = '^(?=\\S)(!|@|)?\\s*Also' + HEADER_ENDER
+    HEADER_START = f'^(?=\\S)({SECTION_DISABLER}|{SECTION_SOLOER}|)?({DISABLER}|{SOLOER}|)?\\s*'
+    HEADER_END = '\\s*:'
+    SETTINGS_HEADER = HEADER_START + f'({SETTINGS})' + HEADER_END
+    ARGV_HEADER = HEADER_START + f'{ARGV}(?:\\s+{FOR}\\b([^:]*))?' + HEADER_END
+    STDIN_HEADER = HEADER_START + f'{STDIN}(?:\\s+{FOR}\\b([^:]*))?' + HEADER_END
+    CODE_HEADER = f'{HEADER_START}([^:]*){HEADER_END}'
+    ALSO_HEADER = f'^(?=\\S)({DISABLER}|{SOLOER}|)?\\s*{ALSO}' + HEADER_END
 
 
 class Snippet:
@@ -143,9 +143,18 @@ class SettingsSection(Section):
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.SETTINGS_HEADER, line)
 
+    # TODO abstract to get snippet content, depends on section type
+    # code fills in whitespace
+    # stdin/argv use smart/etc mode provided
+    # settings always trims since json
+    # always unindent all of them first
+
     def run(self) -> None:
         for snippet in self:
             print(snippet)
+            # s = json.loads(self.snippet_content(snippet))
+            # self.parser.settings.update_from_json(s)
+        # print(self.parser.lines)
 
 
 class ArgvSection(Section):
@@ -200,7 +209,7 @@ class Parser:
 
     def clean_lines(self) -> None:
         for i, line in enumerate(self.lines):
-            if i < self.first_line or i > self.last_line or line.startswith(Syntax.COMMENT):
+            if i < self.first_line or i > self.last_line or line.startswith(Syntax.LEADING_COMMENT):
                 self.lines[i] = ''
             elif not self.settings.ignore_comments:
                 index = line.find(Syntax.INLINE_COMMENT)
