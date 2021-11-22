@@ -53,7 +53,7 @@ class Snippet:
         self.is_solo = sd_match == Syntax.SOLOER
 
     def get_text(self, top_line: int, bottom_line: int, unindent: bool, strip: bool, newline: str) -> Optional[str]:
-        lines = self.parser.lines.copy()
+        lines = self.parser.lines.copy()  # TODO this function could be made more efficient
         header = lines[self.first_line]
         lines[self.first_line] = Syntax.TAB_INDENT + header[header.index(Syntax.FINISHER) + 1:].lstrip()
         for i, line in enumerate(lines):
