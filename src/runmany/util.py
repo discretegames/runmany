@@ -35,3 +35,15 @@ def nullcontext(file: TextIO) -> Iterator[TextIO]:
 
 def debugging() -> bool:
     return os.environ.get('DEBUG_RUNMANY') == 'True'  # pragma: no cover
+
+
+class Content:  # pylint: disable=too-few-public-methods
+    def __init__(self, text: str, line_index: int):
+        self.text = text
+        self.line_number = line_index + 1
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str((self.line_number, self.text))
