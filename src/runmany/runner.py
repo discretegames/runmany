@@ -19,7 +19,7 @@
 # from typing import List, DefaultDict, Optional, Union, Tuple, Iterator, Generator, TextIO, cast
 # from tempfile import TemporaryDirectory
 from runmany.settings import Settings
-from runmany.newparser import Parser
+from runmany.parser import Parser
 
 
 class Placeholders:  # pylint: disable=too-few-public-methods
