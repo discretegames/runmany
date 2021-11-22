@@ -1,4 +1,4 @@
-"""RunMany parser module. Handles parsing .many files."""
+"""RunMany parser module. Handles parsing .many files and sending section content to the runner."""
 
 import os
 import re
@@ -6,6 +6,7 @@ from pprint import pformat
 from typing import Iterator, List, Optional, Type, cast
 from abc import ABC, abstractmethod
 from runmany.settings import Settings, Language
+from runmany.newrunner import Runner
 from runmany.util import print_err, convert_smart_yes_no
 
 
@@ -276,8 +277,9 @@ class CodeSection(Section):
 
 
 class Parser:
-    def __init__(self, manyfile: str, settings: Settings) -> None:
+    def __init__(self, manyfile: str, settings: Settings, runner: Runner) -> None:
         self.settings = settings
+        self.runner = runner
         self.lines = manyfile.splitlines()
         self.first_line = self.get_first_line()
         self.last_line = self.get_last_line()

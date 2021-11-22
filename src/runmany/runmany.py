@@ -7,11 +7,13 @@ import argparse
 from contextlib import redirect_stdout
 from typing import List, Union, Optional, TextIO, cast
 
+from runmany.parser import Parser
+
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
 from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
 from runmany.settings import Settings  # noqa # pylint: disable=wrong-import-position
-from runmany.runner import run  # noqa # pylint: disable=wrong-import-position
+from runmany.newrunner import Runner  # noqa # pylint: disable=wrong-import-position
 
 
 def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
@@ -22,10 +24,13 @@ def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
 
 
 def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
-    manyfile_string = load_manyfile(manyfile, from_string)
-    settings_object = Settings.from_json(settings)
+    manyfile = load_manyfile(manyfile, from_string)
+    settings = Settings.from_json(settings)
+    runner = Runner()
+    parser = Parser(manyfile, settings, runner)
     with redirect_stdout(outfile):
-        run(manyfile_string, settings_object)
+        for section in parser:
+            section.run()
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
