@@ -101,6 +101,7 @@ class Settings:
 
     def __contains__(self, language_name: str) -> bool:  # "in" is for checking Language existence
         os_languages, languages = self.platform_language_dicts()
+        language_name = Language.normalize(language_name)
         return language_name in os_languages or language_name in languages
 
     def __getitem__(self, language_name: str) -> Language:  # "[ ]" is for retrieving Languages

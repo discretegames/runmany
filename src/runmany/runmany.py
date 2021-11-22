@@ -7,13 +7,13 @@ import argparse
 from contextlib import redirect_stdout
 from typing import List, Union, Optional, TextIO, cast
 
-from runmany.parser import Parser
-
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
 
-from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa # pylint: disable=wrong-import-position
-from runmany.settings import Settings  # noqa # pylint: disable=wrong-import-position
-from runmany.newrunner import Runner  # noqa # pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position
+from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa
+from runmany.settings import Settings  # noqa
+from runmany.newrunner import Runner  # noqa
+from runmany.parser import Parser  # noqa
 
 
 def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
@@ -26,7 +26,7 @@ def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
 def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
     manyfile = load_manyfile(manyfile, from_string)
     settings = Settings.from_json(settings)
-    runner = Runner()
+    runner = Runner(settings)
     parser = Parser(manyfile, settings, runner)
     with redirect_stdout(outfile):
         for section in parser:
@@ -106,5 +106,5 @@ if __name__ == '__main__':  # pragma: no cover
         main()
     else:
         debug_file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
-        print(f'RUNMANY DEBUGGING "{debug_file}":')
+        print(f'DEBUGGING RUNMANY"{debug_file}":')
         runmany(debug_file)

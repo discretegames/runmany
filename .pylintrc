@@ -1,6 +1,7 @@
 # run pylint with: `pylint src tests`
 
 [MESSAGES CONTROL]
-max-args = 6
+max-args=6
+max-attributes=8
 max-line-length=120
 disable=missing-function-docstring,missing-class-docstring

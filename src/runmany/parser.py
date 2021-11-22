@@ -42,6 +42,7 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     ALSO_HEADER = f'^(?=\\S)({DISABLER}|{SOLOER}|)?\\s*{ALSO}' + HEADER_END
 
 
+# TODO need to pass line number on to runner, maybe make new class Content with str, int
 class Snippet:
     def __init__(self, parser: 'Parser', first_line: int, last_line: int, sd_match: Optional[str]):
         self.parser = parser
@@ -89,7 +90,7 @@ class Snippet:
         return str(self)
 
 
-class Section(ABC):  # pylint: disable=too-many-instance-attributes
+class Section(ABC):
     def __init__(self, parser: 'Parser', first_line: int, last_line: int):
         self.parser = parser
         self.first_line = first_line
@@ -201,10 +202,7 @@ class ArgvSection(Section):
             if content is not None:
                 argvs.append(content)
         for language_name in self.language_names or self.parser.settings.all_language_names:
-            pass  # TODO something like this
-            # language = self.parser.settings[language_name]
-            # self.parser.runner.set_argvs(language, argvs)
-        print(argvs)
+            self.parser.runner.set_argvs(language_name, argvs)
 
 
 class StdinSection(Section):
@@ -238,10 +236,7 @@ class StdinSection(Section):
             if content is not None:
                 stdins.append(content)
         for language_name in self.language_names or self.parser.settings.all_language_names:
-            pass  # TODO something like this
-            # language = self.parser.settings[language_name]
-            # self.parser.runner.set_argvs(language, stdins)
-        print(stdins)
+            self.parser.runner.set_argvs(language_name, stdins)
 
 
 class CodeSection(Section):
@@ -267,13 +262,15 @@ class CodeSection(Section):
 
     def run(self) -> None:
         for language_name in self.language_names:
+            if language_name not in self.parser.settings:
+                # TODO add line number
+                print_err(f'Language "{language_name}" not found in settings JSON. Skipping language.')
+                continue
             language = self.parser.settings[language_name]
             for snippet in self:
                 content = self.get_content(language, snippet)
                 if content is not None:
-                    pass
-                    # self.parser.runner.run(content)
-                    # print(repr(content))  # TODO run content with language given settings
+                    self.parser.runner.run(language_name, content)
 
 
 class Parser:

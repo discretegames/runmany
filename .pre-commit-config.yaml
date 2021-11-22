@@ -23,8 +23,9 @@ repos:
         files: ^src/
         args:
           - --max-args=6
+          - --max-attributes=8
           - --max-line-length=120
-          - --disable=missing-class-docstring,missing-function-docstring
+          - --disable=fixme,missing-class-docstring,missing-function-docstring
 
   - repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
