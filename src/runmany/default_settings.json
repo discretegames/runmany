@@ -18,7 +18,7 @@
 	"strip_stdin": "smart",
 	"strip_code": "smart",
 
-	"show_errors": false,
+	"show_errors": true,
 	"show_runs": true,
 	"show_time": false,
 	"show_command": false,

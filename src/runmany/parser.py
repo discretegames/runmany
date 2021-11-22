@@ -6,7 +6,7 @@ from pprint import pformat
 from typing import Iterator, List, Optional, Type, cast
 from abc import ABC, abstractmethod
 from runmany.settings import Settings
-from runmany.util import print_err
+from runmany.util import print_err, convert_none_false_true
 
 
 class Syntax(ABC):  # pylint: disable=too-few-public-methods
@@ -51,7 +51,7 @@ class Snippet:
         self.is_disabled = sd_match == Syntax.DISABLER
         self.is_solo = sd_match == Syntax.SOLOER
 
-    def content(self, top_line: int, bot_line: int, unindent: bool = True, newline: str = os.linesep) -> Optional[str]:
+    def content(self, top_line: int, bottom_line: int, unindent: bool, strip: bool, newline: str) -> Optional[str]:
         lines = self.parser.lines.copy()
         header = lines[self.first_line]
         lines[self.first_line] = Syntax.TAB_INDENT + header[header.index(Syntax.FINISHER) + 1:].lstrip()
@@ -60,7 +60,10 @@ class Snippet:
                 lines[i] = ''
             elif unindent:
                 lines[i] = re.sub(Syntax.UNINDENT_PATTERN, '', line)
-        result = newline.join(lines[top_line:bot_line + 1])
+        lines = lines[top_line:bottom_line + 1]
+        if strip:
+            lines = [line for line in lines if line.strip()]
+        result = newline.join(lines)
         if self.parser.settings.ignore_blanks and not result.strip():
             return None
         return result
@@ -160,7 +163,7 @@ class SettingsSection(Section):
 
     def run(self) -> None:
         for snippet in self:
-            content = snippet.content(0, snippet.last_line, False)
+            content = snippet.content(0, snippet.last_line, False, False, '\n')
             if content is not None:
                 self.parser.settings.update_with_json(content)
 
@@ -172,7 +175,6 @@ class ArgvSection(Section):
 
     def run(self) -> None:
         pass
-        # print('AAA', self.language_names)
 
 
 class StdinSection(Section):
@@ -191,10 +193,21 @@ class CodeSection(Section):
 
     def run(self) -> None:
         for language_name in self.language_names:
+            language = self.parser.settings[language_name]
             for snippet in self:
+                strip_code = convert_none_false_true(self.parser.settings.strip_code, "smart", "yes", "no")
+                content: Optional[str] = None
+                newline: str = language.replace_newline if language.replace_newline is not None else os.linesep
+                if strip_code is None:
+                    content = snippet.content(0, snippet.last_line, True, False, newline)
+                elif strip_code is False:
+                    content = snippet.content(0, len(self.parser.lines) - 1, False, False, newline)
+                elif strip_code is True:
+                    content = snippet.content(snippet.first_line, snippet.last_line, True, True, newline)
+                if content and language.replace_tab is not None:
+                    content = content.replace('\t', cast(str, language.replace_tab))
 
-                content = snippet.content(0, snippet.last_line, False)
-                self.parser.settings.run_code(language_name, content)
+                print(language, repr(content))
 
 
 class Parser:

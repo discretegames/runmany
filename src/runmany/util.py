@@ -3,7 +3,7 @@
 import os
 import sys
 from contextlib import contextmanager
-from typing import Any, Union, TextIO, Iterator
+from typing import Any, Union, TextIO, Iterator, Optional
 
 PathLike = Union[str, bytes, 'os.PathLike[Any]']
 JsonLike = Union[Any, PathLike, None]
@@ -19,6 +19,12 @@ def print_err(message: str) -> None:
 def set_show_errors(show_errors: bool) -> None:
     global DISPLAY_ERRORS  # pylint: disable=global-statement
     DISPLAY_ERRORS = show_errors
+
+
+def convert_none_false_true(val: Union[None, bool, str], none: str, false: str, true: str) -> Optional[bool]:
+    if not isinstance(val, str):
+        return val
+    return {none: None, false: False, true: True}.get(val.lower())
 
 
 @contextmanager

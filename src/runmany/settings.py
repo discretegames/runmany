@@ -5,7 +5,7 @@ import pathlib
 import platform
 from itertools import chain
 from typing import Any, Tuple, Dict, List, Set, Optional, cast
-from runmany.util import JsonLike, print_err
+from runmany.util import JsonLike, print_err, set_show_errors
 
 
 def load_default_settings() -> Dict[str, Any]:
@@ -66,6 +66,7 @@ class Settings:
     def update(self, new_provided_settings: Dict[str, Any], force: bool = False) -> None:
         if force or self.updatable:
             self.dict = self.combine_settings(self.default_settings, new_provided_settings)
+            set_show_errors(self.show_errors)
 
     def combine_settings(self, default_settings: Dict[str, Any], provided_settings: Dict[str, Any]) -> Dict[str, Any]:
         combined = {key: provided_settings.get(key, value) for key, value in default_settings.items()}
@@ -107,6 +108,7 @@ class Settings:
 
     def __getitem__(self, language_name: str) -> Language:  # "[ ]" is for retrieving Languages
         os_languages, languages = self.platform_language_dicts()
+        language_name = Language.normalize(language_name)
         return os_languages.get(language_name, languages[language_name])
 
     @staticmethod
@@ -117,8 +119,8 @@ class Settings:
             if name_key not in language:
                 print_err(f'No "{name_key}" key found for {language}. Skipping language.')
                 continue
-            language[name_key] = Language.normalize(language[name_key])
-            language_dict[language[name_key]] = language
+            language[name_key] = language[name_key].strip()
+            language_dict[Language.normalize(language[name_key])] = language
         return language_dict
 
     @staticmethod
