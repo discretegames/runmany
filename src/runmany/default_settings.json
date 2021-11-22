@@ -16,6 +16,7 @@
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",
+	"strip_code": "smart",
 
 	"show_errors": false,
 	"show_runs": true,

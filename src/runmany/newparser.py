@@ -1,5 +1,5 @@
 
-"""docstring"""  # TODO
+"""RunMany parser module. Handles parsing .many files."""
 
 import re
 from pprint import pformat
@@ -59,7 +59,7 @@ class Snippet:
         return bool(Snippet.get_also_header_match(line))
 
     @staticmethod
-    def line_is_content(line: str) -> bool:
+    def line_is_indented(line: str) -> bool:
         return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
     def __str__(self) -> str:
@@ -79,7 +79,7 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
         self.is_solo = groups[0] == Syntax.SECTION_SOLOER
         if groups[2] is None:
             self.language_names: List[str] = []
-        else:
+        else:  # All sections except Settings use language_names. It'll be an empty list for Argv/Stdins without "for".
             self.language_names = [name.strip() for name in groups[2].split(Syntax.SEPARATOR)]
         self.make_snippets(groups[1])  # groups[1] is the first snippet's solo/disabled match
         self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
@@ -96,7 +96,7 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
             if Snippet.line_is_also_header(line):
                 add_snippet()
                 snippet_first_line = i
-            elif not Snippet.line_is_content(line):
+            elif not Snippet.line_is_indented(line):
                 self.parser.lines[i] = ''
                 print_err(f'Skipping invalid unindented line {i} "{line}".')
             i += 1
@@ -144,12 +144,16 @@ class SettingsSection(Section):
         return re.match(Syntax.SETTINGS_HEADER, line)
 
     # TODO abstract to get snippet content, depends on section type
+    # always unindent all of them first
     # code fills in whitespace
     # stdin/argv use smart/etc mode provided
     # settings always trims since json
-    # always unindent all of them first
+
+    def snippet_content(self, snippet: Snippet) -> str:
+        pass
 
     def run(self) -> None:
+        return
         for snippet in self:
             print(snippet)
             # s = json.loads(self.snippet_content(snippet))
@@ -163,7 +167,8 @@ class ArgvSection(Section):
         return re.match(Syntax.ARGV_HEADER, line)
 
     def run(self) -> None:
-        print(self)
+        pass
+        # print('AAA', self.language_names)
 
 
 class StdinSection(Section):
@@ -172,6 +177,7 @@ class StdinSection(Section):
         return re.match(Syntax.STDIN_HEADER, line)
 
     def run(self) -> None:
+        return
         print(self)
 
 
@@ -181,6 +187,7 @@ class CodeSection(Section):
         return re.match(Syntax.CODE_HEADER, line)
 
     def run(self) -> None:
+        return
         print(self)
 
 
