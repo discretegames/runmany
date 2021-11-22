@@ -21,10 +21,10 @@ def set_show_errors(show_errors: bool) -> None:
     DISPLAY_ERRORS = show_errors
 
 
-def convert_none_false_true(val: Union[None, bool, str], none: str, false: str, true: str) -> Optional[bool]:
+def convert_smart_yes_no(val: Union[None, bool, str]) -> Optional[bool]:
     if not isinstance(val, str):
         return val
-    return {none: None, false: False, true: True}.get(val.lower())
+    return {'smart': None, 'yes': True, 'no': False}.get(val.lower())
 
 
 @contextmanager

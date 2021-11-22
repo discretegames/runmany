@@ -1,6 +1,6 @@
 {
 	"timeout": 10.0,
-	"stderr": "nzec",
+	"stderr": "smart",
 	"extension": "",
 	"command": "echo \"command missing\"",
 	"output_spacing": 1,

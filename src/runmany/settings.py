@@ -4,7 +4,7 @@ import json
 import pathlib
 import platform
 from itertools import chain
-from typing import Any, Tuple, Dict, List, Set, Optional, cast
+from typing import Any, Tuple, Dict, List, Optional, cast
 from runmany.util import JsonLike, print_err, set_show_errors
 
 
@@ -62,6 +62,7 @@ class Settings:
         self.default_settings = load_default_settings()
         self.updatable = updatable
         self.update(provided_settings or {}, True)
+        self.all_language_names = {*self.languages, *self.languages_windows, *self.languages_linux, *self.languages_mac}
 
     def update(self, new_provided_settings: Dict[str, Any], force: bool = False) -> None:
         if force or self.updatable:
@@ -94,10 +95,6 @@ class Settings:
         platforms = {'windows': '_windows', 'linux': '_linux', 'darwin': '_mac'}
         os_key = key + platforms.get(platform.system().lower(), '')
         return getattr(self, os_key), getattr(self, key)
-
-    def all_language_names(self) -> Set[str]:
-        names: Set[str] = set()
-        return names.union(self.languages, self.languages_windows, self.languages_linux, self.languages_mac)
 
     def __getattr__(self, key: str) -> Any:  # "." is for retrieving base settings
         return self.dict[key]
