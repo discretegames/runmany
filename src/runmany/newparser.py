@@ -1,6 +1,6 @@
-
 """RunMany parser module. Handles parsing .many files."""
 
+import os
 import re
 from pprint import pformat
 from typing import Iterator, List, Optional, Type, cast
@@ -29,8 +29,9 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     TAB_INDENT = '\t'
     SPACE = ' '
     SPACE_INDENT_LENGTH = 4
-    SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH  # todo space_pattern maybe needed
+    SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
 
+    UNINDENT_PATTERN = f'^(?:{TAB_INDENT}|{SPACE}{{1,{SPACE_INDENT_LENGTH}}})'
     HEADER_START = f'^(?=\\S)({SECTION_DISABLER}|{SECTION_SOLOER}|)?({DISABLER}|{SOLOER}|)?\\s*'
     HEADER_END = '\\s*:'
     SETTINGS_HEADER = HEADER_START + f'({SETTINGS})' + HEADER_END
@@ -46,19 +47,30 @@ class Snippet:
         self.first_line = first_line
         self.last_line = last_line
         if sd_match is None:
-            sd_match = cast(re.Match[str], self.get_also_header_match(parser.lines[self.first_line])).group(1)
+            sd_match = cast(re.Match[str], self.get_also_header_match(parser.lines[first_line])).group(1)
         self.is_disabled = sd_match == Syntax.DISABLER
         self.is_solo = sd_match == Syntax.SOLOER
 
-    @staticmethod
+    def content(self, first_line: int, last_line: int, unindent: bool = True, newline: str = os.linesep) -> str:
+        lines = self.parser.lines.copy()
+        header = lines[self.first_line]
+        lines[self.first_line] = Syntax.TAB_INDENT + header[header.index(Syntax.FINISHER) + 1:].lstrip()
+        for i, line in enumerate(lines):
+            if i < self.first_line or i > self.last_line:
+                lines[i] = ''
+            elif unindent:
+                lines[i] = re.sub(Syntax.UNINDENT_PATTERN, '', line)
+        return newline.join(lines[first_line:last_line + 1])
+
+    @ staticmethod
     def get_also_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.ALSO_HEADER, line)
 
-    @staticmethod
+    @ staticmethod
     def line_is_also_header(line: str) -> bool:
         return bool(Snippet.get_also_header_match(line))
 
-    @staticmethod
+    @ staticmethod
     def line_is_indented(line: str) -> bool:
         return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
@@ -77,7 +89,7 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
         groups = cast(re.Match[str], self.get_header_match(self.parser.lines[first_line])).groups()
         self.is_disabled = groups[0] == Syntax.SECTION_DISABLER
         self.is_solo = groups[0] == Syntax.SECTION_SOLOER
-        if groups[2] is None:
+        if cast(Optional[str], groups[2]) is None:
             self.language_names: List[str] = []
         else:  # All sections except Settings use language_names. It'll be an empty list for Argv/Stdins without "for".
             self.language_names = [name.strip() for name in groups[2].split(Syntax.SEPARATOR)]
@@ -102,7 +114,7 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
             i += 1
         add_snippet()
 
-    @staticmethod
+    @ staticmethod
     def try_get_section_type(line: str) -> Optional[Type['Section']]:
         if SettingsSection.get_header_match(line):
             return SettingsSection
@@ -114,12 +126,12 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
             return CodeSection
         return None
 
-    @staticmethod
-    @abstractmethod
+    @ staticmethod
+    @ abstractmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         pass
 
-    @abstractmethod
+    @ abstractmethod
     def run(self) -> None:
         pass
 
@@ -139,30 +151,18 @@ class Section(ABC):  # pylint: disable=too-many-instance-attributes
 
 
 class SettingsSection(Section):
-    @staticmethod
+    @ staticmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.SETTINGS_HEADER, line)
 
-    # TODO abstract to get snippet content, depends on section type
-    # always unindent all of them first
-    # code fills in whitespace
-    # stdin/argv use smart/etc mode provided
-    # settings always trims since json
-
-    def snippet_content(self, snippet: Snippet) -> str:
-        pass
-
     def run(self) -> None:
-        return
         for snippet in self:
-            print(snippet)
-            # s = json.loads(self.snippet_content(snippet))
-            # self.parser.settings.update_from_json(s)
-        # print(self.parser.lines)
+            content = snippet.content(0, snippet.last_line, False)
+            self.parser.settings.update_with_json(content)
 
 
 class ArgvSection(Section):
-    @staticmethod
+    @ staticmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.ARGV_HEADER, line)
 
@@ -172,23 +172,21 @@ class ArgvSection(Section):
 
 
 class StdinSection(Section):
-    @staticmethod
+    @ staticmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.STDIN_HEADER, line)
 
     def run(self) -> None:
         return
-        print(self)
 
 
 class CodeSection(Section):
-    @staticmethod
+    @ staticmethod
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.CODE_HEADER, line)
 
     def run(self) -> None:
         return
-        print(self)
 
 
 class Parser:

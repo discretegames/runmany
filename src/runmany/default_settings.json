@@ -11,8 +11,8 @@
 	"ignore_solos": false,
 	"ignore_disabled": false,
 
-	"replace_tab": null,
 	"replace_newline": null,
+	"replace_tab": null,
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",

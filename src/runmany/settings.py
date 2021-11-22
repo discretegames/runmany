@@ -4,24 +4,36 @@ import json
 import pathlib
 import platform
 from itertools import chain
-from typing import Any, Tuple, Dict, List, Set, Optional
+from typing import Any, Tuple, Dict, List, Set, Optional, cast
 from runmany.util import JsonLike, print_err
 
 
-def load_json_settings(settings: JsonLike) -> Dict[str, Any]:
-    if settings:
-        if isinstance(settings, dict):
-            return settings
-        try:
-            with open(settings, encoding='utf-8') as file:
-                return load_json_settings(json.load(file))  # Recursively load in case JSON is a string filepath.
-        except Exception as error:  # pylint: disable=broad-except
-            print_err(f'JSON issue - {error}. Using default settings JSON.')
-    return {}
-
-
 def load_default_settings() -> Dict[str, Any]:
-    return load_json_settings(pathlib.Path(__file__).with_name('default_settings.json'))
+    with open(pathlib.Path(__file__).with_name('default_settings.json'), encoding='utf-8') as file:
+        return cast(Dict[str, Any], json.load(file))
+
+
+def load_json_settings(settings: JsonLike, from_string: bool = False) -> Dict[str, Any]:
+    if settings in (None, ''):
+        return {}
+    if isinstance(settings, dict):
+        return settings
+    if any(isinstance(settings, t) for t in (list, int, float, bool)):
+        print_err(f'JSON base type must be dict or string, not {type(settings).__name__}. Using default settings JSON.')
+        return {}
+    if from_string:
+        try:
+            # Recursively call load in case JSON is a string filepath.
+            return load_json_settings(json.loads(cast(str, settings)))
+        except Exception as error:  # pylint: disable=broad-except # (JSONDecodeError misses a few things.)
+            print_err(f'Embedded JSON issue "{error}". Using default settings JSON.')
+    else:
+        try:
+            with open(cast(str, settings), encoding='utf-8') as file:
+                return load_json_settings(json.load(file))
+        except Exception as error:  # pylint: disable=broad-except
+            print_err(f'JSON file issue "{error}". Using default settings JSON.')
+    return {}
 
 
 class Language:
@@ -83,7 +95,8 @@ class Settings:
         return getattr(self, os_key), getattr(self, key)
 
     def all_language_names(self) -> Set[str]:
-        return set().union(self.languages, self.languages_windows, self.languages_linux, self.languages_mac)
+        names: Set[str] = set()
+        return names.union(self.languages, self.languages_windows, self.languages_linux, self.languages_mac)
 
     def __getattr__(self, key: str) -> Any:  # "." is for retrieving base settings
         return self.dict[key]
@@ -112,9 +125,9 @@ class Settings:
     def from_json(settings: JsonLike) -> 'Settings':
         return Settings(load_json_settings(settings), settings is None)
 
-    def update_with_json(self, settings: JsonLike) -> None:
+    def update_with_json(self, raw_settings_json: str) -> None:
         if self.updatable:
-            self.update(load_json_settings(settings))
+            self.update(load_json_settings(raw_settings_json, from_string=True))
 
     def __str__(self) -> str:
         return str((self.updatable, self.dict))

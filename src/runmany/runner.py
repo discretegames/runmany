@@ -40,10 +40,10 @@ class Placeholders:  # pylint: disable=too-few-public-methods
 
 def run(manyfile: str, settings: Settings) -> None:
     # print(settings.languages, type(settings.languages))
-    print(settings.all_language_names())
-    # parser = Parser(manyfile, settings)
-    # for section in parser:
-    #     section.run()
+    # print(settings.all_language_names())
+    parser = Parser(manyfile, settings)
+    for section in parser:
+        section.run()
     # print(parser)
 
     # with TemporaryDirectory() as directory:
