@@ -6,7 +6,7 @@ from pprint import pformat
 from typing import Iterator, List, Optional, Type, cast
 from abc import ABC, abstractmethod
 from runmany.settings import Settings, Language
-from runmany.newrunner import Runner
+from runmany.runner import Runner
 from runmany.util import print_err, convert_smart_yes_no, Content
 
 

@@ -2,7 +2,7 @@
 	"timeout": 10.0,
 	"extension": "",
 	"command": "echo \"command missing\"",
-	"run_spacing": 1,
+	"spacing": 1,
 	"minimalist": false,
 	"stderr": "smart",
 	"replace_newline": null,

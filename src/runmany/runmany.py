@@ -13,7 +13,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so pr
 # pylint: disable=wrong-import-position
 from runmany.util import PathLike, JsonLike, nullcontext, debugging  # noqa
 from runmany.settings import Settings  # noqa
-from runmany.newrunner import Runner  # noqa
+from runmany.runner import Runner  # noqa
 from runmany.parser import Parser  # noqa
 
 
@@ -24,7 +24,7 @@ def load_manyfile(manyfile: Union[PathLike, str], from_string: bool) -> str:
         return file.read()
 
 
-def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
+def run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, from_string: bool) -> None:
     manyfile = load_manyfile(manyfile, from_string)
     settings = Settings.from_json(settings)
     runner = Runner(settings)
@@ -32,6 +32,7 @@ def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextI
     with redirect_stdout(outfile), TemporaryDirectory() as directory:
         for section in parser:
             section.run(directory)
+    runner.print_results_footer()
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
@@ -58,7 +59,7 @@ def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
         return open(cast(PathLike, outfile), 'w', encoding='utf-8')
 
     with opener() as output_file:
-        start_run(manyfile, settings, output_file, from_string)
+        run(manyfile, settings, output_file, from_string)
 
 
 def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, from_string: bool = False) -> str:
@@ -75,7 +76,7 @@ def runmanys(manyfile: Union[PathLike, str], settings: JsonLike = None, from_str
     Returns: (str) The results of the run that would normally appear on stdout as a string.
     """
     with io.StringIO() as output_file:
-        start_run(manyfile, settings, output_file, from_string)
+        run(manyfile, settings, output_file, from_string)
         output_file.seek(0)
         return output_file.read()
 
