@@ -100,13 +100,16 @@ class Section(ABC):
         self.parser = parser
         self.first_line = first_line
         self.last_line = last_line
+
         groups = cast(re.Match[str], self.get_header_match(self.parser.lines[first_line])).groups()
         self.is_disabled = groups[0] == Syntax.SECTION_DISABLER
         self.is_solo = groups[0] == Syntax.SECTION_SOLOER
         if cast(Optional[str], groups[2]) is None:
-            self.language_names: List[str] = []
-        else:  # All sections except Settings use language_names. It'll be an empty list for Argv/Stdins without "for".
-            self.language_names = [Language.normalize(name) for name in groups[2].split(Syntax.SEPARATOR)]
+            self.raw_language_names: List[str] = []
+        else:  # All sections except Settings use language names. It'll be an empty list for Argv/Stdins without "for".
+            self.raw_language_names = groups[2].split(Syntax.SEPARATOR)
+        self.language_names = [Language.normalize(name) for name in self.raw_language_names]
+
         self.make_snippets(groups[1])  # groups[1] is the first snippet's solo/disabled match
         self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
 
@@ -250,12 +253,14 @@ class CodeSection(Section):
     @staticmethod
     def get_content(snippet: Snippet, language: Language) -> Optional[Content]:
         content: Optional[Content] = None
-        strip = convert_smart_yes_no(language.strip_stdin)
+        strip = convert_smart_yes_no(language.strip_code)
         newline: str = language.replace_newline if language.replace_newline is not None else os.linesep
         tab: str = language.replace_tab if language.replace_tab is not None else '\t'
 
         if strip is None:
-            content = snippet.get_content(True, False, True, tab, newline)
+            content = snippet.get_content(True, True, True, tab, newline)
+            if content:
+                content.text += newline
         elif strip:
             content = snippet.get_content(False, True, True, tab, newline)
         else:
@@ -263,14 +268,14 @@ class CodeSection(Section):
         return content
 
     def run(self, directory: str) -> None:
-        for language_name in self.language_names:
-            if language_name not in self.parser.settings:
-                print_err(f'Language "{language_name}" on line {self.first_line + 1} '
-                          'not found in settings JSON. Skipping language.')
-                continue
-            language = self.parser.settings[language_name]
+        for raw_language_name in self.raw_language_names:
+            language_name = Language.normalize(raw_language_name)
             for snippet in self:
-                code = self.get_content(snippet, language)
+                if language_name not in self.parser.settings:
+                    print_err(f'Language "{raw_language_name.strip()}" on line {self.first_line + 1} '
+                              'not found in settings JSON. Skipping language.')
+                    continue
+                code = self.get_content(snippet, self.parser.settings[language_name])
                 if code:
                     self.parser.runner.run(language_name, code, directory)
 
