@@ -52,6 +52,7 @@ class Snippet:
         self.is_disabled = sd_match == Syntax.DISABLER
         self.is_solo = sd_match == Syntax.SOLOER
 
+    # TODO  rework this to return Content with .offset involved, this is too generic
     def get_text(self, top_line: int, bottom_line: int, unindent: bool, strip: bool, newline: str) -> Optional[str]:
         lines = self.parser.lines.copy()  # TODO this function could be made more efficient
         header = lines[self.first_line]

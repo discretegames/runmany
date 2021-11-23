@@ -1,27 +1,27 @@
 {
 	"timeout": 10.0,
-	"stderr": "smart",
 	"extension": "",
 	"command": "echo \"command missing\"",
 	"output_spacing": 1,
-	"minimalist": false,
+	"replace_newline": null,
+	"replace_tab": null,
 
 	"ignore_blanks": true,
 	"ignore_comments": false,
 	"ignore_solos": false,
 	"ignore_disabled": false,
 
-	"replace_newline": null,
-	"replace_tab": null,
-
 	"strip_argv": "smart",
 	"strip_stdin": "smart",
 	"strip_code": "smart",
+	"strip_output": "no",
 
 	"show_runs": true,
 	"show_stats": true,
 	"show_equal": true,
 
+	"minimalist": false,
+	"show_stderr": "smart",
 	"show_errors": true,
 	"show_time": false,
 	"show_command": false,
@@ -37,11 +37,11 @@
 
 	"supplied_languages_windows": [
 		{
-			"name": "PRINT",
+			"name": "Print",
 			"command": "type"
 		},
 		{
-			"name": "BASH",
+			"name": "Bash",
 			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
 			"extension": ".sh",
 			"replace_newline": "\r"
@@ -51,21 +51,21 @@
 	"supplied_languages_mac": [],
 	"supplied_languages": [
 		{
-			"name": "PRINT",
+			"name": "Print",
 			"command": "cat"
 		},
 		{
-			"name": "ADA",
+			"name": "Ada",
 			"command": "cd $dir && gcc -c $file && gnatmake $file && $branch $argv",
 			"extension": ".adb"
 		},
 		{
-			"name": "BASH",
+			"name": "Bash",
 			"command": "bash",
 			"extension": ".sh"
 		},
 		{
-			"name": "BATCH",
+			"name": "Batch",
 			"command": "",
 			"extension": ".bat"
 		},
@@ -85,47 +85,47 @@
 			"extension": ".cpp"
 		},
 		{
-			"name": "DART",
+			"name": "Dart",
 			"command": "dart",
 			"extension": ".dart"
 		},
 		{
-			"name": "FORTRAN",
+			"name": "Fortran",
 			"command": "gfortran $file -o $branch && $branch $argv",
 			"extension": ".f90"
 		},
 		{
-			"name": "GO",
+			"name": "Go",
 			"command": "go run",
 			"extension": ".go"
 		},
 		{
-			"name": "GROOVY",
+			"name": "Groovy",
 			"command": "groovy",
 			"extension": ".groovy"
 		},
 		{
-			"name": "HASKELL",
+			"name": "Haskell",
 			"command": "ghc $file -v0 && $branch $argv",
 			"extension": ".hs"
 		},
 		{
-			"name": "JAVA",
+			"name": "Java",
 			"command": "java",
 			"extension": ".java"
 		},
 		{
-			"name": "JAVASCRIPT",
+			"name": "JavaScript",
 			"command": "node",
 			"extension": ".js"
 		},
 		{
-			"name": "JULIA",
+			"name": "Julia",
 			"command": "julia",
 			"extension": ".jl"
 		},
 		{
-			"name": "KOTLIN",
+			"name": "Kotlin",
 			"command": "kotlinc $file -include-runtime -d \"$rawbranch.jar\" && java -jar \"$rawbranch.jar\" $argv",
 			"extension": ".kt"
 		},
@@ -135,7 +135,7 @@
 			"extension": ".lisp"
 		},
 		{
-			"name": "LUA",
+			"name": "Lua",
 			"command": "lua",
 			"extension": ".lua"
 		},
@@ -145,12 +145,12 @@
 			"extension": ".asm"
 		},
 		{
-			"name": "PASCAL",
+			"name": "Pascal",
 			"command": "fpc $file -v0 -l- && $branch $argv",
 			"extension": ".pas"
 		},
 		{
-			"name": "PERL",
+			"name": "Perl",
 			"command": "perl",
 			"extension": ".pl"
 		},
@@ -160,17 +160,17 @@
 			"extension": ".php"
 		},
 		{
-			"name": "POWERSHELL",
+			"name": "Power Shell",
 			"command": "Powershell -Command",
 			"extension": ".ps1"
 		},
 		{
-			"name": "PYTHON",
+			"name": "Python",
 			"command": "python",
 			"extension": ".py"
 		},
 		{
-			"name": "PYTHON 2",
+			"name": "Python 2",
 			"command": "py -2.7",
 			"extension": ".py"
 		},
@@ -180,37 +180,37 @@
 			"extension": ".r"
 		},
 		{
-			"name": "RACKET",
+			"name": "Racket",
 			"command": "racket",
 			"extension": ".rkt"
 		},
 		{
-			"name": "RUBY",
+			"name": "Ruby",
 			"command": "ruby",
 			"extension": ".rb"
 		},
 		{
-			"name": "RUST",
+			"name": "Rust",
 			"command": "rustc $file --out-dir $dir && $branch $argv",
 			"extension": ".rs"
 		},
 		{
-			"name": "SCALA",
+			"name": "Scala",
 			"command": "cd $dir && scala \"$name\" $argv",
 			"extension": ".scala"
 		},
 		{
-			"name": "TYPESCRIPT",
+			"name": "TypeScript",
 			"command": "deno run",
 			"extension": ".ts"
 		},
 		{
-			"name": "VBSCRIPT",
+			"name": "VBScript",
 			"command": "cscript //nologo",
 			"extension": ".vbs"
 		},
 		{
-			"name": "VISUAL BASIC",
+			"name": "Visual Basic",
 			"command": "vbc /nologo /out:$branch $file && $branch $argv",
 			"extension": ".vb"
 		}

@@ -11,6 +11,8 @@ from tempfile import NamedTemporaryFile
 from runmany.settings import Settings, Language
 from runmany.util import Content, convert_smart_yes_no
 
+DIVIDER_CHAR, SUBDIVIDER_CHAR, DIVIDER_WIDTH = '*', '-', 60
+
 
 class Placeholders:  # pylint: disable=too-few-public-methods
     prefix = '$'
@@ -64,7 +66,8 @@ class PathParts:
 
 
 class Runnable:
-    def __init__(self, language: Language, code: Content, filename: str):
+    def __init__(self, settings: Settings, language: Language, code: Content, filename: str):
+        self.settings = settings
         self.language = language
         self.code = code
         self.filename = filename
@@ -73,16 +76,19 @@ class Runnable:
         return PathParts(self.filename).fill_command(self.language.command, argv.text if argv else '', self.code.text)
 
     def get_stderr(self) -> int:
-        stderr = convert_smart_yes_no(self.language.stderr)
-        if stderr is None:
+        show_stderr = convert_smart_yes_no(self.language.show_stderr)
+        if show_stderr is None:
             return subprocess.PIPE
-        if stderr:
+        if show_stderr:
             return subprocess.STDOUT
         return subprocess.DEVNULL
 
-    def run(self, run_number: int, argv: Optional[Content], stdin: Optional[Content]) -> Tuple[str, str, bool]:
+    def run(self, run_number: int, argv: Optional[Content], stdin: Optional[Content]) -> Tuple[str, bool]:
         command = self.get_command(argv)
         stderr = self.get_stderr()
+        if self.language.show_runs:
+            self.start_printing_headline(run_number)
+
         start_time = time.perf_counter()
         try:
             result = subprocess.run(command,
@@ -96,17 +102,54 @@ class Runnable:
             time_taken = time.perf_counter() - start_time
         except subprocess.TimeoutExpired:
             time_taken = time.perf_counter() - start_time
-            stdout = f'TIMED OUT OF {self.language.timeout:g}s LIMIT'
+            output = f'TIMED OUT OF {self.language.timeout:g}s LIMIT'
             exit_code: Union[int, str] = 'T'
         else:
-            stdout = result.stdout
+            output = result.stdout
             exit_code = result.returncode
             if exit_code != 0 and stderr == subprocess.PIPE:
-                stdout += result.stderr
+                output += result.stderr
 
-        print(run_number, time_taken)
-        # output = self.make_output(run_number, time_taken, exit_code, command, stdout) # TODO
-        return 'out', stdout, exit_code == 0
+        if self.language.show_runs:
+            self.finish_printing_headline(time_taken, exit_code, command)
+            self.print_results(argv, stdin, output)
+        return output, exit_code == 0
+
+    def start_printing_headline(self, run_number: int) -> None:
+        if not self.settings.minimalist:
+            print(DIVIDER_CHAR * DIVIDER_WIDTH)
+        print(f'{run_number}. {self.language.name}', flush=True, end='')
+
+    def finish_printing_headline(self, time_taken: float, exit_code: Union[str, int], command: str) -> None:
+        headline = []
+        if self.language.show_time:
+            headline.append(f' ({time_taken:.3f}s)')
+        if exit_code != 0:
+            headline.append(f' [exit code {exit_code}]')
+        if self.language.show_command:
+            headline.append(f' > {command}')
+        print(''.join(headline))
+
+    def print_results(self, argv: Optional[Content], stdin: Optional[Content], output: str) -> None:
+        # parts: List[str] = []
+        pass
+        # if not self.minimalist:
+
+        # TODO strip output
+
+        # TODO do "1. Python" part first on flush print
+        # 1. Python (3.1s) [exit code 1] > "python myfile.py"
+
+    #     if self.language_data.show_code:
+    #         parts.append(self.make_output_part('code at', self.code_section))
+    #     if self.argv_section and self.argv_section.content and self.language_data.show_argv:
+    #         parts.append(self.make_output_part('argv at', self.argv_section))
+    #     if self.stdin_section and self.stdin_section.content and self.language_data.show_stdin:
+    #         parts.append(self.make_output_part('stdin at', self.stdin_section))
+    #     if self.language_data.show_output:
+    #         parts.append(self.make_output_part('output from', self.code_section, stdout))
+
+    #     return '\n'.join(parts) + '\n' * cast(int, self.language_data.spacing)
 
 
 class Runner:
@@ -128,15 +171,13 @@ class Runner:
         language = self.settings[language_name]
         with NamedTemporaryFile(mode='w', suffix=language.extension, dir=directory, delete=False) as file:
             file.write(code.text)
-            runnable = Runnable(language, code, file.name)
+            runnable = Runnable(self.settings, language, code, file.name)
 
         for argv in self.argvs[language_name] or [cast(Content, None)]:  # Weird cast here since mypy was being a jerk.
             for stdin in self.stdins[language_name] or [cast(Content, None)]:
                 self.total_runs += 1
-                output, stdout, success = runnable.run(self.total_runs, argv, stdin)
+                stdout, success = runnable.run(self.total_runs, argv, stdin)
                 self.successful_runs += success
-                if self.settings.show_runs:
-                    print(output, flush=True)
                 if self.settings.show_equal:
                     self.equal_stdouts[stdout].append(self.total_runs)
         # TODO make footer based on self.equal_stdouts, etc
