@@ -76,10 +76,10 @@ class Runnable:
         return PathParts(self.filename).fill_command(self.language.command, argv.text if argv else '', self.code.text)
 
     def get_stderr(self) -> int:
-        show_stderr = convert_smart_yes_no(self.language.show_stderr)
-        if show_stderr is None:
+        stderr = convert_smart_yes_no(self.language.stderr)
+        if stderr is None:
             return subprocess.PIPE
-        if show_stderr:
+        if stderr:
             return subprocess.STDOUT
         return subprocess.DEVNULL
 
@@ -131,7 +131,7 @@ class Runnable:
         print(''.join(headline))
 
     def print_results(self, argv: Optional[Content], stdin: Optional[Content], output: str) -> None:
-        # parts: List[str] = []
+        parts: List[str] = []
         pass
         # if not self.minimalist:
 

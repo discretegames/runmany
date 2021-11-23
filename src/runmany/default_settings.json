@@ -3,6 +3,8 @@
 	"extension": "",
 	"command": "echo \"command missing\"",
 	"output_spacing": 1,
+	"minimalist": false,
+	"stderr": "smart",
 	"replace_newline": null,
 	"replace_tab": null,
 
@@ -20,8 +22,6 @@
 	"show_stats": true,
 	"show_equal": true,
 
-	"minimalist": false,
-	"show_stderr": "smart",
 	"show_errors": true,
 	"show_time": false,
 	"show_command": false,
