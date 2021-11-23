@@ -15,6 +15,7 @@ repos:
       - id: mypy
         args:
           - --strict
+          - "--cache-dir=nul"
 
   - repo: https://github.com/PyCQA/pylint
     rev: v2.11.1
