@@ -22,7 +22,7 @@ repos:
       - id: pylint
         files: ^src/
         args:
-          - --max-args=6
+          - --max-args=7
           - --max-attributes=8
           - --max-line-length=120
           - --disable=fixme,missing-class-docstring,missing-function-docstring

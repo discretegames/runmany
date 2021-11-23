@@ -37,10 +37,16 @@ def debugging() -> bool:
     return os.environ.get('DEBUG_RUNMANY') == 'True'  # pragma: no cover
 
 
-class Content:  # pylint: disable=too-few-public-methods
-    def __init__(self, text: str, line_index: int):
+class Content:
+    def __init__(self, text: str, line_index: int, prefix_lines: int, newline: str):
         self.text = text
         self.line_number = line_index + 1
+        self.prefix_lines = prefix_lines
+        self.newline = newline
+
+    @property
+    def prefixed_text(self) -> str:
+        return self.newline * self.prefix_lines + self.text
 
     def __str__(self) -> str:
         return self.text

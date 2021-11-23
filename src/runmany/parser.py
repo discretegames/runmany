@@ -52,23 +52,29 @@ class Snippet:
         self.is_disabled = sd_match == Syntax.DISABLER
         self.is_solo = sd_match == Syntax.SOLOER
 
-    # TODO  rework this to return Content with .offset involved, this is too generic
-    def get_text(self, top_line: int, bottom_line: int, unindent: bool, strip: bool, newline: str) -> Optional[str]:
-        lines = self.parser.lines.copy()  # TODO this function could be made more efficient
-        header = lines[self.first_line]
-        lines[self.first_line] = Syntax.TAB_INDENT + header[header.index(Syntax.FINISHER) + 1:].lstrip()
-        for i, line in enumerate(lines):
-            if i < self.first_line or i > self.last_line:
-                lines[i] = ''
-            elif unindent:
-                lines[i] = re.sub(Syntax.UNINDENT_PATTERN, '', line)
-        lines = lines[top_line:bottom_line + 1]
+    def get_content(self, from_top: bool, strip: bool, unindent: bool, tab: str, newline: str) -> Optional[Content]:
+        lines = self.parser.lines[self.first_line: self.last_line + 1]
+        lines[0] = Syntax.TAB_INDENT + lines[0][lines[0].index(Syntax.FINISHER) + 1:].lstrip()
+        if unindent:
+            lines = [re.sub(Syntax.UNINDENT_PATTERN, '', line) for line in lines]
+        prefix_extras = 0
         if strip:
-            lines = [line for line in lines if line.strip()]
-        text = newline.join(lines)
+            first, last = 0, len(lines) - 1
+            for line in lines:
+                if line.strip():
+                    break
+                first += 1
+            for line in reversed(lines):
+                if line.strip():
+                    break
+                last -= 1
+            lines = lines[first:last + 1]
+            prefix_extras = first
+        text = newline.join(lines).replace('\t', tab)
         if self.parser.settings.ignore_blanks and not text.strip():
             return None
-        return text
+        prefix_lines = prefix_extras + self.first_line if from_top else 0
+        return Content(text, self.first_line, prefix_lines, newline)
 
     @staticmethod
     def get_also_header_match(line: str) -> Optional[re.Match[str]]:
@@ -165,9 +171,9 @@ class SettingsSection(Section):
 
     def run(self, _: str) -> None:
         for snippet in self:
-            text = snippet.get_text(0, snippet.last_line, False, False, '\n')
-            if text is not None:
-                self.parser.settings.update_with_json(text)
+            content = snippet.get_content(True, False, False, '\t', '\n')
+            if content is not None:
+                self.parser.settings.update_with_json(content.prefixed_text)
 
 
 class ArgvSection(Section):
