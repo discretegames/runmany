@@ -181,31 +181,31 @@ class ArgvSection(Section):
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.ARGV_HEADER, line)
 
-    def get_text(self, snippet: Snippet) -> Optional[str]:
-        text: Optional[str] = None
-        strip_argv = convert_smart_yes_no(self.parser.settings.strip_argv)
-        newline: str = self.parser.settings.replace_newline if \
-            self.parser.settings.replace_newline is not None else os.linesep
+    def get_content(self, snippet: Snippet) -> Optional[Content]:
+        settings = self.parser.settings
+        content: Optional[Content] = None
+        strip = convert_smart_yes_no(settings.strip_argv)
+        newline: str = settings.replace_newline if settings.replace_newline is not None else os.linesep
+        tab: str = settings.replace_tab if settings.replace_tab is not None else '\t'
 
-        if strip_argv is None:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, True, newline)
-        elif strip_argv:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, False, newline)
+        if strip is None:
+            content = snippet.get_content(False, True, True, tab, newline)
+            if content:
+                content.text = ' '.join(line.strip() for line in content.text.split(newline))
+        elif strip:
+            content = snippet.get_content(False, True, True, tab, newline)
+            if content:
+                content.text = content.text.strip()
         else:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, True, newline)
-            if text is not None:
-                text = text.strip()
-
-        if text and self.parser.settings.replace_tab is not None:
-            text = text.replace('\t', cast(str, self.parser.settings.replace_tab))
-        return text
+            content = snippet.get_content(False, False, True, tab, newline)
+        return content
 
     def run(self, _: str) -> None:
         argvs: List[Content] = []
         for snippet in self:
-            argv = self.get_text(snippet)
-            if argv is not None:
-                argvs.append(Content(argv, snippet.first_line))
+            argv = self.get_content(snippet)
+            if argv:
+                argvs.append(argv)
         for language_name in self.language_names or self.parser.settings.all_language_names:
             self.parser.runner.set_argvs(language_name, argvs)
 
@@ -215,31 +215,29 @@ class StdinSection(Section):
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.STDIN_HEADER, line)
 
-    def get_text(self, snippet: Snippet) -> Optional[str]:
-        text: Optional[str] = None
-        strip_stdin = convert_smart_yes_no(self.parser.settings.strip_stdin)
-        newline: str = self.parser.settings.replace_newline if \
-            self.parser.settings.replace_newline is not None else os.linesep
+    def get_content(self, snippet: Snippet) -> Optional[Content]:
+        settings = self.parser.settings
+        content: Optional[Content] = None
+        strip = convert_smart_yes_no(settings.strip_stdin)
+        newline: str = settings.replace_newline if settings.replace_newline is not None else os.linesep
+        tab: str = settings.replace_tab if settings.replace_tab is not None else '\t'
 
-        if strip_stdin is None:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, True, newline)
-            if text is not None:
-                text += newline
-        elif strip_stdin:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, False, newline)
+        if strip is None:
+            content = snippet.get_content(False, True, True, tab, newline)
+            if content:
+                content.text += newline
+        elif strip:
+            content = snippet.get_content(False, True, True, tab, newline)
         else:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, False, newline)
-
-        if text and self.parser.settings.replace_tab is not None:
-            text = text.replace('\t', cast(str, self.parser.settings.replace_tab))
-        return text
+            content = snippet.get_content(False, False, True, tab, newline)
+        return content
 
     def run(self, _: str) -> None:
         stdins: List[Content] = []
         for snippet in self:
-            stdin = self.get_text(snippet)
-            if stdin is not None:
-                stdins.append(Content(stdin, snippet.first_line))
+            stdin = self.get_content(snippet)
+            if stdin:
+                stdins.append(stdin)
         for language_name in self.language_names or self.parser.settings.all_language_names:
             self.parser.runner.set_argvs(language_name, stdins)
 
@@ -249,21 +247,20 @@ class CodeSection(Section):
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.CODE_HEADER, line)
 
-    def get_text(self, language: Language, snippet: Snippet) -> Optional[str]:
-        text: Optional[str] = None
-        strip_code = convert_smart_yes_no(language.strip_code)
+    @staticmethod
+    def get_content(snippet: Snippet, language: Language) -> Optional[Content]:
+        content: Optional[Content] = None
+        strip = convert_smart_yes_no(language.strip_stdin)
         newline: str = language.replace_newline if language.replace_newline is not None else os.linesep
+        tab: str = language.replace_tab if language.replace_tab is not None else '\t'
 
-        if strip_code is None:
-            text = snippet.get_text(0, snippet.last_line, True, False, newline)
-        elif strip_code:
-            text = snippet.get_text(snippet.first_line, snippet.last_line, True, True, newline)
+        if strip is None:
+            content = snippet.get_content(True, False, True, tab, newline)
+        elif strip:
+            content = snippet.get_content(False, True, True, tab, newline)
         else:
-            text = snippet.get_text(0, len(self.parser.lines) - 1, False, False, newline)
-
-        if text and language.replace_tab is not None:
-            text = text.replace('\t', cast(str, language.replace_tab))
-        return text
+            content = snippet.get_content(True, False, False, tab, newline)
+        return content
 
     def run(self, directory: str) -> None:
         for language_name in self.language_names:
@@ -273,9 +270,9 @@ class CodeSection(Section):
                 continue
             language = self.parser.settings[language_name]
             for snippet in self:
-                code = self.get_text(language, snippet)
-                if code is not None:
-                    self.parser.runner.run(language_name, Content(code, snippet.first_line), directory)
+                code = self.get_content(snippet, language)
+                if code:
+                    self.parser.runner.run(language_name, code, directory)
 
 
 class Parser:
