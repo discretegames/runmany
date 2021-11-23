@@ -99,7 +99,7 @@ class Section(ABC):
         if cast(Optional[str], groups[2]) is None:
             self.language_names: List[str] = []
         else:  # All sections except Settings use language_names. It'll be an empty list for Argv/Stdins without "for".
-            self.language_names = [name.strip() for name in groups[2].split(Syntax.SEPARATOR)]
+            self.language_names = [Language.normalize(name) for name in groups[2].split(Syntax.SEPARATOR)]
         self.make_snippets(groups[1])  # groups[1] is the first snippet's solo/disabled match
         self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
 
@@ -139,7 +139,7 @@ class Section(ABC):
         pass
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self, directory: str) -> None:
         pass
 
     def __iter__(self) -> Iterator[Snippet]:
@@ -162,7 +162,7 @@ class SettingsSection(Section):
     def get_header_match(line: str) -> Optional[re.Match[str]]:
         return re.match(Syntax.SETTINGS_HEADER, line)
 
-    def run(self) -> None:
+    def run(self, _: str) -> None:
         for snippet in self:
             text = snippet.get_text(0, snippet.last_line, False, False, '\n')
             if text is not None:
@@ -193,7 +193,7 @@ class ArgvSection(Section):
             text = text.replace('\t', cast(str, self.parser.settings.replace_tab))
         return text
 
-    def run(self) -> None:
+    def run(self, _: str) -> None:
         argvs: List[Content] = []
         for snippet in self:
             argv = self.get_text(snippet)
@@ -227,7 +227,7 @@ class StdinSection(Section):
             text = text.replace('\t', cast(str, self.parser.settings.replace_tab))
         return text
 
-    def run(self) -> None:
+    def run(self, _: str) -> None:
         stdins: List[Content] = []
         for snippet in self:
             stdin = self.get_text(snippet)
@@ -258,7 +258,7 @@ class CodeSection(Section):
             text = text.replace('\t', cast(str, language.replace_tab))
         return text
 
-    def run(self) -> None:
+    def run(self, directory: str) -> None:
         for language_name in self.language_names:
             if language_name not in self.parser.settings:
                 print_err(f'Language "{language_name}" on line {self.first_line + 1} '
@@ -268,7 +268,7 @@ class CodeSection(Section):
             for snippet in self:
                 code = self.get_text(language, snippet)
                 if code is not None:
-                    self.parser.runner.run(language_name, Content(code, snippet.first_line))
+                    self.parser.runner.run(language_name, Content(code, snippet.first_line), directory)
 
 
 class Parser:

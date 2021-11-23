@@ -5,6 +5,7 @@ import sys
 import pathlib
 import argparse
 from contextlib import redirect_stdout
+from tempfile import TemporaryDirectory
 from typing import List, Union, Optional, TextIO, cast
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))  # Dumb hack so project can be tested locally.
@@ -28,9 +29,9 @@ def start_run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextI
     settings = Settings.from_json(settings)
     runner = Runner(settings)
     parser = Parser(manyfile, settings, runner)
-    with redirect_stdout(outfile):
+    with redirect_stdout(outfile), TemporaryDirectory() as directory:
         for section in parser:
-            section.run()
+            section.run(directory)
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
