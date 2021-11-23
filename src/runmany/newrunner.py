@@ -117,8 +117,8 @@ class Runnable:
 
     def start_printing_headline(self, run_number: int) -> None:
         if not self.settings.minimalist:
-            print(DIVIDER_CHAR * DIVIDER_WIDTH)
-        print(f'{run_number}. {self.language.name}', flush=True, end='')
+            print(DIVIDER_CHAR * DIVIDER_WIDTH, flush=True)
+        print(f'{run_number}. {self.language.name}', end='', flush=True)
 
     def finish_printing_headline(self, time_taken: float, exit_code: Union[str, int], command: str) -> None:
         headline = []
@@ -128,28 +128,27 @@ class Runnable:
             headline.append(f' [exit code {exit_code}]')
         if self.language.show_command:
             headline.append(f' > {command}')
-        print(''.join(headline))
+        print(''.join(headline), flush=True)
+
+    def print_result_part(self, title: str, text: str, line_number: int, strip: bool) -> None:
+        if not self.settings.minimalist:
+            print(f'{f" {title} line {line_number} ":{SUBDIVIDER_CHAR}^{DIVIDER_WIDTH}}', flush=True)
+        print(text.strip('\r\n') if strip else text, flush=True)
 
     def print_results(self, argv: Optional[Content], stdin: Optional[Content], output: str) -> None:
-        parts: List[str] = []
-        pass
-        # if not self.minimalist:
-
-        # TODO strip output
-
-        # TODO do "1. Python" part first on flush print
-        # 1. Python (3.1s) [exit code 1] > "python myfile.py"
-
-    #     if self.language_data.show_code:
-    #         parts.append(self.make_output_part('code at', self.code_section))
-    #     if self.argv_section and self.argv_section.content and self.language_data.show_argv:
-    #         parts.append(self.make_output_part('argv at', self.argv_section))
-    #     if self.stdin_section and self.stdin_section.content and self.language_data.show_stdin:
-    #         parts.append(self.make_output_part('stdin at', self.stdin_section))
-    #     if self.language_data.show_output:
-    #         parts.append(self.make_output_part('output from', self.code_section, stdout))
-
-    #     return '\n'.join(parts) + '\n' * cast(int, self.language_data.spacing)
+        if not self.settings.minimalist:
+            if self.language.show_code:
+                self.print_result_part('code at', self.code.text, self.code.line_number, True)
+            if self.language.show_argv and argv:
+                self.print_result_part('argv at', argv.text, argv.line_number, True)
+            if self.language.show_stdin and stdin:
+                self.print_result_part('stdin at', stdin.text, stdin.line_number, True)
+        if self.language.show_output:
+            strip = convert_smart_yes_no(self.language.strip_output)
+            if strip:
+                output = output.strip()
+            self.print_result_part('output from', output, self.code.line_number, strip is None)
+        print(self.settings.run_spacing * os.linesep, end='', flush=True)
 
 
 class Runner:
@@ -170,7 +169,7 @@ class Runner:
     def run(self, language_name: str, code: Content, directory: str) -> None:
         language = self.settings[language_name]
         with NamedTemporaryFile(mode='w', suffix=language.extension, dir=directory, delete=False) as file:
-            file.write(code.text)
+            file.write(code.prefixed_text)
             runnable = Runnable(self.settings, language, code, file.name)
 
         for argv in self.argvs[language_name] or [cast(Content, None)]:  # Weird cast here since mypy was being a jerk.
