@@ -151,7 +151,8 @@ class Runnable:
                 self.print_result_part('stdin at', stdin.text, stdin.line_number, True)
         if self.language.show_output:
             self.print_result_part('output from', output, self.code.line_number, False)
-        print(self.settings.spacing * os.linesep, end='', flush=True)
+        for _ in range(self.settings.spacing):
+            print(flush=True)  # print annoyingly does not use os.linesep, so just repeat blank prints for consistency.
 
 
 class Runner:

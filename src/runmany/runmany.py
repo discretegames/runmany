@@ -32,7 +32,7 @@ def run(manyfile: Union[PathLike, str], settings: JsonLike, outfile: TextIO, fro
     with redirect_stdout(outfile), TemporaryDirectory() as directory:
         for section in parser:
             section.run(directory)
-    runner.print_results_footer()
+        runner.print_results_footer()
 
 
 def runmany(manyfile: Union[PathLike, str], settings: JsonLike = None,
@@ -107,11 +107,10 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        TESTING = False
+        TESTING = 0
         if TESTING:
-            import pytest
             try:
-                pytest.main(["-vv"])
+                __import__('pytest').main(['-vv'])  # Using import dunder so pylint doesn't complain.
             except Exception:  # pylint: disable=broad-except
                 pass
             finally:

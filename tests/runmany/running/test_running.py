@@ -67,18 +67,22 @@ def test_runmany(many_file, settings_json, from_string, expected):
 
 
 @parametrize()
+def test_runmany_outfile(many_file, settings_json, from_string, expected):
+    from runmany import runmany  # pylint: disable=import-outside-toplevel
+    string_io = io.StringIO()
+    close = string_io.close
+    string_io.close = lambda: None  # Trick to prevent closing string IO before it's ready
+    with string_io as file:
+        runmany(many_file, settings_json, file, from_string=from_string)
+        file.seek(0)
+        assert file.read() == expected
+        string_io.close = close
+
+
+@parametrize()
 def test_runmanys(many_file, settings_json, from_string, expected):
     from runmany import runmanys  # pylint: disable=import-outside-toplevel
     assert runmanys(many_file, settings_json, from_string=from_string) == expected
-
-# TODO redo test
-# @parametrize()
-# def test_runmany_to_f(many_file, settings_json, from_string, expected):
-#     from runmany import runmany_to_f  # pylint: disable=import-outside-toplevel
-#     with io.StringIO() as file:
-#         runmany_to_f(file, many_file, settings_json, from_string=from_string)
-#         file.seek(0)
-#         assert file.read() == expected
 
 
 def test_cmdline():

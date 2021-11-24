@@ -1,2 +1,2 @@
-	{ "show_equal": false }
+Settings:{ "show_equal": false }
 Python:print('simple')
