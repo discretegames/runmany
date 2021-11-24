@@ -73,33 +73,24 @@ def test_lines_outside_section() -> None:
     assert stderr_of_run('C:\nEnd.\n%End.', {}) == ''
 
 
-# def test_json_type_error() -> None:
-#     bad_type_json = {"spacing": 2+3j}
-#     expected1 = "!!!| RunMany Error: JSON issue - "\
-#         "Object of type 'complex' is not JSON serializable. Using default settings JSON. |!!!\n"
-#     expected2 = expected1.replace("'", '')  # Python 3.6 doesn't put quotes around 'complex'.
-#     assert stderr_of_run('', bad_type_json) in (expected1, expected2)
+def test_json_file_not_exist() -> None:
+    expected = "%%% RunMany Error: JSON file issue " \
+        "\"[Errno 2] No such file or directory: 'does_not_exist.json'\". Using default settings JSON. %%%\n"
+    assert stderr_of_run('', 'does_not_exist.json') == expected
+    assert stderr_of_run('Settings:"does_not_exist.json"') == expected
 
 
-# def test_json_value_error() -> None:
-#     circular_json: Dict[str, Any] = {}
-#     circular_json["spacing"] = circular_json
-#     expected = '!!!| RunMany Error: JSON issue - Circular reference detected. Using default settings JSON. |!!!\n'
-#     assert stderr_of_run('', circular_json) == expected
+def test_json_base_type() -> None:
+    expected = '%%% RunMany Error: JSON base type must be dict or string, not int. Using default settings JSON. %%%\n'
+    assert stderr_of_run('', pathlib.Path(__file__).with_name('not_dict.json')) == expected
+    assert stderr_of_run('Settings:[]') == expected.replace('int', 'list')
 
 
-# def test_json_io_error() -> None:
-#     expected = "!!!| RunMany Error: JSON issue - "\
-#         "[Errno 2] No such file or directory: 'does_not_exist.json'. Using default settings JSON. |!!!\n"
-#     assert stderr_of_run('', 'does_not_exist.json') == expected
-
-
-# def test_json_not_dict() -> None:
-#     expected = '!!!| RunMany Error: JSON issue - The JSON must be an object/dict. Using default settings JSON. |!!!\n'
-#     assert stderr_of_run('', pathlib.Path(__file__).with_name('not_dict.json')) == expected
-
-
-# def test_json_decode_error() -> None:
-#     expected = '!!!| RunMany Error: JSON issue - '\
-#         'Expecting value: line 1 column 1 (char 0). Using default settings JSON. |!!!\n'
-#     assert stderr_of_run(pathlib.Path(__file__).with_name('decode_error.many'), None, False) == expected
+def test_json_decode_error() -> None:
+    expected = '%%% RunMany Error: JSON file issue ' \
+        '"Expecting value: line 2 column 1 (char 1)". Using default settings JSON. %%%\n'
+    assert stderr_of_run('',  pathlib.Path(__file__).with_name('bad_json.json')) == expected
+    expected = '%%% RunMany Error: Embedded JSON issue ' \
+        '"Expecting value: line 3 column 2 (char 4)". Using default settings JSON. %%%\n'
+    assert stderr_of_run(pathlib.Path(__file__).with_name('bad_settings.many'), None, False) == expected
+    assert stderr_of_run("START:\nSettings:\n\t}") == expected

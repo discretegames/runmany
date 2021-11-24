@@ -4,4 +4,4 @@
 max-args=7
 max-attributes=10
 max-line-length=120
-disable=missing-function-docstring,missing-class-docstring
+disable=missing-function-docstring,missing-class-docstring,fixme
