@@ -186,9 +186,9 @@ class Runner:
 
     def print_results_stats(self) -> bool:
         if self.settings.show_stats:
-            time_taken = time.perf_counter() - self.start_time
-            plural = "" if self.total_runs == 1 else "s"
-            start = f'{self.successful_runs}/{self.total_runs} program{plural} successfully run in {time_taken:.3f}s'
+            timer = f' in {time.perf_counter() - self.start_time:.3f}s' if self.settings.show_time else ''
+            plural = '' if self.total_runs == 1 else 's'
+            start = f'{self.successful_runs}/{self.total_runs} program{plural} successfully run{timer}'
             end = '!'
             if self.successful_runs < self.total_runs:
                 end = f'. {self.total_runs - self.successful_runs} failed due to non-zero exit code or timeout.'

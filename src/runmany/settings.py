@@ -88,7 +88,7 @@ class Settings:
         return combined
 
     def combine_languages(self, custom: Dict[str, Any], supplied: Dict[str, Any]) -> Language:
-        return Language({key: custom.get(key, supplied[key]) for key in chain(custom, supplied)}, self)
+        return Language({key: custom.get(key, supplied.get(key)) for key in chain(custom, supplied)}, self)
 
     def platform_language_dicts(self) -> Tuple[Dict[str, Language], Dict[str, Language]]:
         key = 'languages'

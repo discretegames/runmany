@@ -3,7 +3,7 @@
 import io
 import pathlib
 from typing import Dict, Any, Union
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from runmany import runmany
 from runmany.util import PathLike, JsonLike
 
@@ -43,29 +43,34 @@ def test_no_name() -> None:
     assert stderr_of_run('', no_name_json) == ''
 
 
-# def test_no_command() -> None:
-#     expected = '!!!| RunMany Error: No "command" key found for Name. Ignoring language. |!!!\n'
-#     no_command_json = {"languages": [{"name": "Name"}]}
-#     assert stderr_of_run('', no_command_json) == expected
-#     no_command_json = {"default_languages": [{"name": "Name"}]}
-#     assert stderr_of_run('', no_command_json) == expected
+def test_no_command() -> None:
+    with io.StringIO() as file, redirect_stdout(file):
+        runmany('MyLang: x', {"minimalist": True, "languages": [{"name": "MyLang"}]}, from_string=True)
+        file.seek(0)
+        string = file.read()
+    assert string.startswith('1. MyLang\nMISSINGCOMMAND')
 
 
-# def test_unknown_language() -> None:
-#     many_file = "C+, Python,\t:"
-#     expected = '''\
-# !!!| RunMany Error: Language "C+" on line 1 not found in settings JSON. Skipping language. |!!!
-# !!!| RunMany Error: Language "" on line 1 not found in settings JSON. Skipping language. |!!!\n'''
-#     assert stderr_of_run(many_file, {}) == expected
+def test_unknown_language() -> None:
+    many_file = "\nC+, Python,\t:"
+    expected = '''\
+%%% RunMany Error: Language "C+" on line 2 not found in settings JSON. Skipping language. %%%
+%%% RunMany Error: Language "" on line 2 not found in settings JSON. Skipping language. %%%\n'''
+    assert stderr_of_run(many_file, {}) == expected
 
 
-# def test_no_lead_section() -> None:
-#     expected = '!!!| RunMany Error: No lead section for Also on line 1. Skipping section. |!!!\n'
-#     assert stderr_of_run('Also:', {}) == expected
-#     assert stderr_of_run('Also \t:', {}) == expected
-#     assert stderr_of_run('\nAlso :: stuff', {}) == expected.replace('1', '2')
-#     assert stderr_of_run('!Also:', {}) == ''
-#     assert stderr_of_run('!Also  :', {}) == ''
+def test_lines_outside_section() -> None:
+    def expected(line_number: int, line: str) -> str:
+        return f'%%% RunMany Error: Line {line_number} "{line}" is not part of a section. Skipping line. %%%\n'
+    assert stderr_of_run('Also:', {}) == expected(1, 'Also:')
+    assert stderr_of_run('C', {}) == expected(1, 'C')
+    assert stderr_of_run('!Also:', {}) == expected(1, '!Also:')
+    assert stderr_of_run('START:\nAlso \t:', {}) == expected(2, 'Also \t:')
+    assert stderr_of_run('\nSTART:\nstuff', {}) == expected(3, 'stuff')
+    assert stderr_of_run('C: foo\nEnd.\nAlso: bar', {}) == expected(3, 'Also: bar')
+    assert stderr_of_run('End.', {}) == expected(1, 'End.')
+    assert stderr_of_run('C:\nEnd.\nEnd.', {}) == expected(3, 'End.')
+    assert stderr_of_run('C:\nEnd.\n%End.', {}) == ''
 
 
 # def test_json_type_error() -> None:

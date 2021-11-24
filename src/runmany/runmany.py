@@ -107,6 +107,16 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        debug_file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
-        print(f'DEBUGGING RUNMANY"{debug_file}":')
-        runmany(debug_file)
+        TESTING = False
+        if TESTING:
+            import pytest
+            try:
+                pytest.main(["-vv"])
+            except Exception:  # pylint: disable=broad-except
+                pass
+            finally:
+                sys.exit()
+        else:
+            debug_file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
+            print(f'DEBUGGING RUNMANY"{debug_file}":')
+            runmany(debug_file)

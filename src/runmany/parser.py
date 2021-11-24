@@ -324,10 +324,13 @@ class Parser:
                     in_section = True
                     section_first_line = i
                     section_type = tried_section_type
+                elif line.strip():
+                    print_err(f'Line {i+1} "{line}" is not part of a section. Skipping line.')
             elif line.rstrip().startswith(Syntax.END) or Section.try_get_section_type(line):
                 in_section = False
-                i -= 1
-                self.sections.append(section_type(self, section_first_line, i))
+                self.sections.append(section_type(self, section_first_line, i - 1))
+                if not line.rstrip().startswith(Syntax.END):
+                    i -= 1
             i += 1
         if in_section:
             self.sections.append(section_type(self, section_first_line, self.last_line))
