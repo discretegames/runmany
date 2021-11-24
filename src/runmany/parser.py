@@ -188,8 +188,8 @@ class ArgvSection(Section):
         settings = self.parser.settings
         content: Optional[Content] = None
         strip = convert_smart_yes_no(settings.strip_argv)
-        newline: str = settings.replace_newline if settings.replace_newline is not None else os.linesep
-        tab: str = settings.replace_tab if settings.replace_tab is not None else '\t'
+        newline: str = settings.newline if settings.newline is not None else os.linesep
+        tab: str = settings.tab if settings.tab is not None else '\t'
 
         if strip is None:
             content = snippet.get_content(False, True, True, tab, newline)
@@ -222,8 +222,8 @@ class StdinSection(Section):
         settings = self.parser.settings
         content: Optional[Content] = None
         strip = convert_smart_yes_no(settings.strip_stdin)
-        newline: str = settings.replace_newline if settings.replace_newline is not None else os.linesep
-        tab: str = settings.replace_tab if settings.replace_tab is not None else '\t'
+        newline: str = settings.newline if settings.newline is not None else os.linesep
+        tab: str = settings.tab if settings.tab is not None else '\t'
 
         if strip is None:
             content = snippet.get_content(False, True, True, tab, newline)
@@ -242,7 +242,7 @@ class StdinSection(Section):
             if stdin:
                 stdins.append(stdin)
         for language_name in self.language_names or self.parser.settings.all_language_names:
-            self.parser.runner.set_argvs(language_name, stdins)
+            self.parser.runner.set_stdins(language_name, stdins)
 
 
 class CodeSection(Section):
@@ -254,8 +254,8 @@ class CodeSection(Section):
     def get_content(snippet: Snippet, language: Language) -> Optional[Content]:
         content: Optional[Content] = None
         strip = convert_smart_yes_no(language.strip_code)
-        newline: str = language.replace_newline if language.replace_newline is not None else os.linesep
-        tab: str = language.replace_tab if language.replace_tab is not None else '\t'
+        newline: str = language.newline if language.newline is not None else os.linesep
+        tab: str = language.tab if language.tab is not None else '\t'
 
         if strip is None:
             content = snippet.get_content(True, True, True, tab, newline)

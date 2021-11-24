@@ -1,5 +1,6 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
 # type: ignore
+"""Tests various ways of running RunMany."""
+
 import io
 import os
 import json

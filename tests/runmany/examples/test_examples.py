@@ -1,4 +1,6 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
+# type: ignore
+"""Tests the .many files in the root examples folder."""
+
 import pathlib
 from typing import List
 import pytest

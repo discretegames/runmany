@@ -104,7 +104,7 @@ Perl: print "Hello, World!\n";
 
 PHP:
     <?php
-    echo "Hello, World!";
+    echo "Hello, World!\n";
     ?>
 
 Python: print('Hello, World!')

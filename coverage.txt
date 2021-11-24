@@ -1,10 +1,10 @@
 Name                      Stmts   Miss Branch BrPart  Cover
 -----------------------------------------------------------
 src\runmany\__init__.py       4      0      0      0   100%
-src\runmany\parser.py       297     45    140     14    81%
+src\runmany\parser.py       297     20    140     12    90%
 src\runmany\runmany.py       49      0      8      0   100%
-src\runmany\runner.py       182     19     62     13    85%
+src\runmany\runner.py       182     15     62     10    88%
 src\runmany\settings.py     108      4     29      1    96%
 src\runmany\util.py          33      3      4      2    86%
 -----------------------------------------------------------
-TOTAL                       673     71    243     30    86%
+TOTAL                       673     42    243     25    91%

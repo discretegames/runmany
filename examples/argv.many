@@ -98,7 +98,7 @@ Perl: print $ARGV[0] . "\n";
 
 PHP:
     <?php
-    echo $argv[1];
+    echo $argv[1] . "\n";
     ?>
 
 Python:

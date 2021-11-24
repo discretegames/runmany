@@ -5,8 +5,8 @@
 	"spacing": 1,
 	"minimalist": false,
 	"stderr": "smart",
-	"replace_newline": null,
-	"replace_tab": null,
+	"newline": "\n",
+	"tab": "\t",
 
 	"ignore_blanks": true,
 	"ignore_comments": false,
@@ -130,7 +130,7 @@
 			"extension": ".kt"
 		},
 		{
-			"name": "LISP",
+			"name": "Lisp",
 			"command": "sbcl --script",
 			"extension": ".lisp"
 		},
@@ -157,7 +157,8 @@
 		{
 			"name": "PHP",
 			"command": "php",
-			"extension": ".php"
+			"extension": ".php",
+			"strip_code": "yes"
 		},
 		{
 			"name": "Power Shell",
