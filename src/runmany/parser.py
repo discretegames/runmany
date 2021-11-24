@@ -48,7 +48,7 @@ class Snippet:
         self.first_line = first_line
         self.last_line = last_line
         if sd_match is None:
-            sd_match = cast(re.Match[str], self.get_also_header_match(parser.lines[first_line])).group(1)
+            sd_match = cast('re.Match[str]', self.get_also_header_match(parser.lines[first_line])).group(1)
         self.is_disabled = sd_match == Syntax.DISABLER
         self.is_solo = sd_match == Syntax.SOLOER
 
@@ -77,7 +77,7 @@ class Snippet:
         return Content(text, self.first_line, prefix_lines, newline)
 
     @staticmethod
-    def get_also_header_match(line: str) -> Optional[re.Match[str]]:
+    def get_also_header_match(line: str) -> Optional['re.Match[str]']:
         return re.match(Syntax.ALSO_HEADER, line)
 
     @staticmethod
@@ -101,7 +101,7 @@ class Section(ABC):
         self.first_line = first_line
         self.last_line = last_line
 
-        groups = cast(re.Match[str], self.get_header_match(self.parser.lines[first_line])).groups()
+        groups = cast('re.Match[str]', self.get_header_match(self.parser.lines[first_line])).groups()
         self.is_disabled = groups[0] == Syntax.SECTION_DISABLER
         self.is_solo = groups[0] == Syntax.SECTION_SOLOER
         if cast(Optional[str], groups[2]) is None:
@@ -145,7 +145,7 @@ class Section(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_header_match(line: str) -> Optional[re.Match[str]]:
+    def get_header_match(line: str) -> Optional['re.Match[str]']:
         pass
 
     @abstractmethod
@@ -169,7 +169,7 @@ class Section(ABC):
 
 class SettingsSection(Section):
     @staticmethod
-    def get_header_match(line: str) -> Optional[re.Match[str]]:
+    def get_header_match(line: str) -> Optional['re.Match[str]']:
         return re.match(Syntax.SETTINGS_HEADER, line)
 
     def run(self, _: str) -> None:
@@ -181,7 +181,7 @@ class SettingsSection(Section):
 
 class ArgvSection(Section):
     @staticmethod
-    def get_header_match(line: str) -> Optional[re.Match[str]]:
+    def get_header_match(line: str) -> Optional['re.Match[str]']:
         return re.match(Syntax.ARGV_HEADER, line)
 
     def get_content(self, snippet: Snippet) -> Optional[Content]:
@@ -215,7 +215,7 @@ class ArgvSection(Section):
 
 class StdinSection(Section):
     @staticmethod
-    def get_header_match(line: str) -> Optional[re.Match[str]]:
+    def get_header_match(line: str) -> Optional['re.Match[str]']:
         return re.match(Syntax.STDIN_HEADER, line)
 
     def get_content(self, snippet: Snippet) -> Optional[Content]:
@@ -247,7 +247,7 @@ class StdinSection(Section):
 
 class CodeSection(Section):
     @staticmethod
-    def get_header_match(line: str) -> Optional[re.Match[str]]:
+    def get_header_match(line: str) -> Optional['re.Match[str]']:
         return re.match(Syntax.CODE_HEADER, line)
 
     @staticmethod

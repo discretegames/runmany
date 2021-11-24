@@ -54,7 +54,7 @@
 		"**/__pycache__/": true,
 		"**/*.egg-info/": true,
 		"**/.eggs/": true,
-		".tox/": true,
+		".tox/**": true,
 		"htmlcov/": true
 	},
 }

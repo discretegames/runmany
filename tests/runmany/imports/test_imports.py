@@ -1,7 +1,7 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
-import pytest
+"""Tests that only the appropriate RunMany functions can be imported."""
 
 # pylint: disable=import-outside-toplevel,possibly-unused-variable,no-name-in-module,unused-import
+import pytest
 
 
 def test_imports() -> None:
@@ -10,7 +10,7 @@ def test_imports() -> None:
     assert hasattr(runmany, 'runmany')
     assert hasattr(runmany, 'cmdline')
     assert not hasattr(runmany, 'main')
-    assert not hasattr(runmany, 'run_iterator')
+    assert not hasattr(runmany, 'run')
 
 
 def test_from_imports() -> None:
@@ -24,4 +24,4 @@ def test_from_imports() -> None:
         from runmany import main  # type: ignore # noqa
 
     with pytest.raises(ImportError):
-        from runmany import run_iterator  # type: ignore # noqa
+        from runmany import run  # type: ignore # noqa
