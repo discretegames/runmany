@@ -110,7 +110,8 @@ if __name__ == '__main__':  # pragma: no cover
         TESTING = 0
         if TESTING:
             try:
-                __import__('pytest').main(['-vv'])  # Using import dunder so pylint doesn't complain.
+                # Using import dunder so pylint doesn't complain.
+                __import__('pytest').main(['-vv'])
             except Exception:  # pylint: disable=broad-except
                 pass
             finally:

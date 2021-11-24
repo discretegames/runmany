@@ -7,21 +7,41 @@ from contextlib import redirect_stderr
 from runmany import runmanys
 
 BASE_SETTINGS_JSON = {
-    "languages": [],
     "timeout": 10.0,
-    "stderr": True,
-    "ext": "",
+    "extension": "",
+    "command": "echo MISSINGCOMMAND",
     "spacing": 1,
+    "minimalist": False,
+    "stderr": "smart",
+    "newline": "\n",
+    "tab": "\t",
+
+    "ignore_blanks": True,
+    "ignore_comments": False,
+    "ignore_solos": False,
+    "ignore_disabled": False,
+
+    "strip_argv": "smart",
+    "strip_stdin": "smart",
+    "strip_code": "smart",
+    "strip_output": "no",
+
     "show_runs": False,
+    "show_stats": False,
+    "show_equal": False,
+
+    "show_errors": False,
     "show_time": False,
     "show_command": False,
     "show_code": False,
     "show_argv": False,
     "show_stdin": False,
     "show_output": False,
-    "show_errors": False,
-    "show_stats": False,
-    "show_equal": False
+
+    "languages": [],
+    "languages_windows": [],
+    "languages_linux": [],
+    "languages_mac": [],
 }
 
 DEFAULT_MANY_FILE = '''\
@@ -31,14 +51,9 @@ Python: print("the output")
 '''
 
 # TODO
-# minimalist
-# newline
-# tab
 # 4x ignore
 # 4x strip
-# os language
 # overwriting supplied?
-# show time in footer
 
 
 def path_to(filename: str) -> pathlib.Path:
@@ -71,6 +86,37 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     asserter(provided_json_result, expected)
 
 
+def test_minimalist() -> None:
+    many_file = '''\
+Python: print("hi")
+JavaScript: console.log("hi")
+'''
+    settings_json = {"minimalist": True, "show_runs": True, "show_output": True, "show_stats": True}
+    verify(settings_json, 'minimalist.txt', many_file)
+
+
+def test_newline() -> None:
+    many_file = '''\
+Python: print("a
+    b
+    c
+    d")
+'''
+    settings_json = {"show_runs": True, "show_output": True, "newline": "+", "strip_code": "yes"}
+    verify(settings_json, 'newline.txt', many_file)
+
+
+def test_tab() -> None:
+    many_file = '''\
+Python:
+    for i in range(1, 4):
+        print(i)
+    \tprint(2 * i)
+'''
+    settings_json = {"show_runs": True, "show_output": True, "tab": "    "}
+    verify(settings_json, 'tab.txt', many_file)
+
+
 def test_languages() -> None:
     many_file = '''\
 Python: print(3)
@@ -84,6 +130,21 @@ Python 2: print 2
     settings_json = {"show_runs": True, "show_output": True,
                      "languages": [{"name": "\tCUSTOM  language ", "command": "echo custom$thing"}]}
     verify(settings_json, 'languages3.txt', 'Custom Language:1\nCustom  Language:2')
+
+
+def test_os_languages() -> None:
+    many_file = '''Python: print('python')'''
+    settings: Dict[str, Any] = {"show_runs": True, "show_output": True}
+    verify(settings, 'os_languages1.txt', many_file)
+
+    os_languages = [{"name": "Python", "command": "echo $os"}]
+    settings["languages"] = [{"name": "Python", "command": "echo $default"}]
+    verify(settings, 'os_languages2.txt', many_file)
+
+    settings["languages_windows"] = os_languages
+    settings["languages_linux"] = os_languages
+    settings["languages_mac"] = os_languages
+    verify(settings, 'os_languages3.txt', many_file)
 
 
 def test_timeout() -> None:
@@ -134,8 +195,9 @@ Python,Python,Python:print("\\
 
 def test_show_time() -> None:
     def asserter(actual: str, _: str) -> None:
-        assert actual.splitlines()[1].startswith("1. Python (0.")
-    settings_json = {"show_runs": True, "show_time": True}
+        assert actual.splitlines()[1].startswith("1. Python (0.0")
+        assert actual.splitlines()[4].startswith("1/1 program successfully run in 0.0")
+    settings_json = {"show_runs": True, "show_time": True, "show_stats": True}
     verify(settings_json, None, DEFAULT_MANY_FILE, asserter)
 
 
