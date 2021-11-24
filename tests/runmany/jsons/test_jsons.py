@@ -30,6 +30,16 @@ Stdin for Python: the stdin
 Python: print("the output")
 '''
 
+# TODO
+# minimalist
+# newline
+# tab
+# 4x ignore
+# 4x strip
+# os language
+# overwriting supplied?
+# show time in footer
+
 
 def path_to(filename: str) -> pathlib.Path:
     return pathlib.Path(__file__).with_name(filename)
@@ -54,7 +64,7 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     settings_json = combine_with_base(settings_json)
     settings_json_string = json.dumps(settings_json)
 
-    hardcoded_json_result = runmanys(f'\t{settings_json_string}\n{many_file}', from_string=True)
+    hardcoded_json_result = runmanys(f'Settings: {settings_json_string}\n{many_file}', from_string=True)
     asserter(hardcoded_json_result, expected)
 
     provided_json_result = runmanys(f'\n{many_file}', settings_json, from_string=True)
@@ -73,7 +83,7 @@ Python 2: print 2
     verify(settings_json, 'languages2.txt', many_file)
     settings_json = {"show_runs": True, "show_output": True,
                      "languages": [{"name": "\tCUSTOM  language ", "command": "echo custom$thing"}]}
-    verify(settings_json, 'languages3.txt', 'Custom Language:\nCustom  Language:')
+    verify(settings_json, 'languages3.txt', 'Custom Language:1\nCustom  Language:2')
 
 
 def test_timeout() -> None:
@@ -96,7 +106,7 @@ Python:
     print("to stdout")
     sys.exit(1)
 '''
-    for name, alt in ('always', True), ('nzec', None), ('never', False):
+    for name, alt in ('yes', True), ('smart', None), ('no', False):
         for value in (name, alt):
             settings_json = {"show_runs": True, "show_output": True, "stderr": value}
             verify(settings_json, f'stderr_{name}.txt', many_file)
@@ -153,15 +163,15 @@ def test_show_output() -> None:
 
 
 def test_show_errors() -> None:
-    many_file = 'Also:'
-    with io.StringIO() as file, redirect_stderr(file):
-        runmanys(many_file, combine_with_base({"show_errors": True}), from_string=True)
-        file.seek(0)
-        assert file.read()
-    with io.StringIO() as file, redirect_stderr(file):
-        runmanys(many_file, combine_with_base({"show_errors": False}), from_string=True)
-        file.seek(0)
-        assert not file.read()
+    for many_file in 'Also:', 'Python', 'End.', '    End':
+        with io.StringIO() as file, redirect_stderr(file):
+            runmanys(many_file, combine_with_base({"show_errors": True}), from_string=True)
+            file.seek(0)
+            assert file.read()
+        with io.StringIO() as file, redirect_stderr(file):
+            runmanys(many_file, combine_with_base({"show_errors": False}), from_string=True)
+            file.seek(0)
+            assert not file.read()
 
 
 def test_show_stats() -> None:

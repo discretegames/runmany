@@ -26,7 +26,6 @@ def load_json_settings(settings: JsonLike, from_string: bool = False) -> Dict[st
             # Recursively call load in case JSON is a string filepath.
             return load_json_settings(json.loads(cast(str, settings)))
         except Exception as error:  # pylint: disable=broad-except # (JSONDecodeError misses a few things.)
-            print(repr(settings))
             print_err(f'Embedded JSON issue "{error}". Using default settings JSON.')
     else:
         try:

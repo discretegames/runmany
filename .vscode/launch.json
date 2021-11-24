@@ -5,11 +5,22 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Python: Test File",
+			"type": "python",
+			"request": "launch",
+			"program": "scratch/test.py",
+			// "console": "integratedTerminal",
+			"console": "internalConsole",
+			"internalConsoleOptions": "openOnSessionStart",
+		},
+		{
 			"name": "Debug RunMany",
 			"type": "python",
 			"request": "launch",
 			"program": "src/runmany/runmany.py",
-			"console": "integratedTerminal",
+			// "console": "integratedTerminal",
+			"console": "internalConsole",
+			"internalConsoleOptions": "openOnSessionStart",
 			"env": {
 				"DEBUG_RUNMANY": "True"
 			}

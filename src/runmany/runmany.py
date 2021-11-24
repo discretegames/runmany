@@ -116,6 +116,6 @@ if __name__ == '__main__':  # pragma: no cover
             finally:
                 sys.exit()
         else:
-            debug_file = pathlib.Path(__file__).parent.parent.parent.joinpath('examples/syntax.many')
+            debug_file = pathlib.Path(__file__).parent.parent.parent.joinpath('scratch/scratch.many')
             print(f'DEBUGGING RUNMANY "{debug_file}":')
             runmany(debug_file)

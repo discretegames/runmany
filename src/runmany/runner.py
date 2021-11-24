@@ -152,7 +152,8 @@ class Runnable:
         if self.language.show_output:
             self.print_result_part('output from', output, self.code.line_number, False)
         for _ in range(self.settings.spacing):
-            print(flush=True)  # print annoyingly does not use os.linesep, so just repeat blank prints for consistency.
+            # print annoyingly does not use os.linesep, so just repeat blank prints for consistency.
+            print(flush=True)
 
 
 class Runner:
