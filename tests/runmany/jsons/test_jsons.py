@@ -147,6 +147,13 @@ def test_os_languages() -> None:
     verify(settings, 'os_languages3.txt', many_file)
 
 
+def test_supplied_languages() -> None:  # Should only pass on Windows.
+    many_file = '''Python: print('python')'''
+    settings: Dict[str, Any] = {"show_runs": True, "show_output": True, "minimalist": True}
+    settings["languages_windows"] = [{"name": "Python", "command": "echo $1"}]
+    verify(settings, 'supplied1.txt', many_file)
+
+
 def test_timeout() -> None:
     many_file = '''\
 Python:
