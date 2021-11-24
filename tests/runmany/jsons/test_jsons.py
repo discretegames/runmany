@@ -2,11 +2,12 @@
 import io
 import json
 import pathlib
+from itertools import chain
 from typing import Dict, Any, Optional, Callable
 from contextlib import redirect_stderr
 from runmany import runmanys
 
-BASE_SETTINGS_JSON = {
+BASE_SETTINGS = {
     "timeout": 10.0,
     "extension": "",
     "command": "echo MISSINGCOMMAND",
@@ -53,7 +54,6 @@ Python: print("the output")
 # TODO
 # 4x ignore
 # 4x strip
-# overwriting supplied?
 
 
 def path_to(filename: str) -> pathlib.Path:
@@ -61,7 +61,7 @@ def path_to(filename: str) -> pathlib.Path:
 
 
 def combine_with_base(settings_json: Dict[str, Any]) -> Dict[str, Any]:
-    return {key: settings_json.get(key, val) for key, val in BASE_SETTINGS_JSON.items()}
+    return {key: settings_json.get(key, BASE_SETTINGS.get(key)) for key in chain(BASE_SETTINGS, settings_json)}
 
 
 def default_asserter(actual: str, expected: str) -> None:
@@ -101,6 +101,7 @@ Python: print("a
     b
     c
     d")
+End.
 '''
     settings_json = {"show_runs": True, "show_output": True, "newline": "+", "strip_code": "yes"}
     verify(settings_json, 'newline.txt', many_file)
@@ -150,8 +151,15 @@ def test_os_languages() -> None:
 def test_supplied_languages() -> None:  # Should only pass on Windows.
     many_file = '''Python: print('python')'''
     settings: Dict[str, Any] = {"show_runs": True, "show_output": True, "minimalist": True}
-    settings["languages_windows"] = [{"name": "Python", "command": "echo $1"}]
+    settings["supplied_languages"] = [{"name": "Python", "command": "echo $1"}]
     verify(settings, 'supplied1.txt', many_file)
+    settings["supplied_languages_windows"] = [{"name": "Python", "command": "echo $2"}]
+    verify(settings, 'supplied2.txt', many_file)
+    settings["languages"] = [{"name": "Python", "command": "echo $unseen"}]
+    # Still supplied2.txt below because languages is not combined with supplied_languages_windows.
+    verify(settings, 'supplied2.txt', many_file)
+    settings["languages_windows"] = [{"name": "Python", "command": "echo $3"}]
+    verify(settings, 'supplied3.txt', many_file)
 
 
 def test_timeout() -> None:
