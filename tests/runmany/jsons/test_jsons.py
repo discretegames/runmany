@@ -84,7 +84,25 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     provided_json_result = runmanys(f'\n{many_file}', settings_json, from_string=True)
     asserter(provided_json_result, expected)
 
-# TODO  4x strip
+
+def test_run_blanks() -> None:
+    many_file = '''Python:'''
+    settings_json = {"show_runs": True, "show_output": True}
+    verify(settings_json, "run_blanks1.txt", many_file)
+    settings_json["run_blanks"] = True
+    verify(settings_json, "run_blanks2.txt", many_file)
+
+
+def test_run_comments() -> None:
+    many_file = '''
+Python: print("""foo%%%bar
+    """.strip())
+    print("""goo%%%far
+    """.strip())'''
+    settings_json = {"show_runs": True, "show_output": True, "show_code": True}
+    verify(settings_json, "run_comments1.txt", many_file)
+    settings_json["run_comments"] = True
+    verify(settings_json, "run_comments2.txt", many_file)
 
 
 def test_strip_argv() -> None:
@@ -108,24 +126,32 @@ Python: import sys
         verify(settings_json, 'strip_argv_no.txt', many_file)
 
 
-def test_run_blanks() -> None:
-    many_file = '''Python:'''
-    settings_json = {"show_runs": True, "show_output": True}
-    verify(settings_json, "run_blanks1.txt", many_file)
-    settings_json["run_blanks"] = True
-    verify(settings_json, "run_blanks2.txt", many_file)
+def test_strip_stdin() -> None:
+    many_file = '''\
+Stdin:
+    AA
+    BB
 
 
-def test_run_comments() -> None:
-    many_file = '''
-Python: print("""foo%%%bar
-    """.strip())
-    print("""goo%%%far
-    """.strip())'''
-    settings_json = {"show_runs": True, "show_output": True, "show_code": True}
-    verify(settings_json, "run_comments1.txt", many_file)
-    settings_json["run_comments"] = True
-    verify(settings_json, "run_comments2.txt", many_file)
+
+End.
+Python: import sys
+    with sys.stdin as f:
+        print(repr(f.read()))
+'''
+    settings_json: Dict[str, Any] = {"show_runs": True, "show_output": True, "minimalist": True}
+    for val in SMARTS:
+        settings_json["strip_stdin"] = val
+        verify(settings_json, 'strip_stdin_smart.txt', many_file)
+    for val in YESES:
+        settings_json["strip_stdin"] = val
+        verify(settings_json, 'strip_stdin_yes.txt', many_file)
+    for val in NOS:
+        settings_json["strip_stdin"] = val
+        verify(settings_json, 'strip_stdin_no.txt', many_file)
+
+
+# TODO test strip_code, strip_output
 
 
 def test_minimalist() -> None:
