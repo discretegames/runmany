@@ -178,7 +178,18 @@ Python:
         verify(settings_json, 'strip_stdin_no.txt', many_file, make_asserter(5))
 
 
-# TODO test strip_output
+def test_strip_output() -> None:
+    many_file = '''Python: print('\\n\\n foo \\t\\n\\n')'''
+    settings_json: Dict[str, Any] = {"show_runs": True, "show_output": True, "minimalist": True}
+    for val in SMARTS:
+        settings_json["strip_output"] = val
+        verify(settings_json, 'strip_output_smart.txt', many_file)
+    for val in YESES:
+        settings_json["strip_output"] = val
+        verify(settings_json, 'strip_output_yes.txt', many_file)
+    for val in NOS:
+        settings_json["strip_output"] = val
+        verify(settings_json, 'strip_output_no.txt', many_file)
 
 
 def test_minimalist() -> None:
