@@ -4,7 +4,7 @@ import io
 import json
 import pathlib
 from itertools import chain
-from typing import Dict, Any, Optional, Callable, Tuple
+from typing import Dict, Any, Optional, Callable, List
 from contextlib import redirect_stderr
 from runmany import runmanys
 
@@ -50,9 +50,9 @@ Stdin for Python: the stdin
 Python: print("the output")
 '''
 
-SMARTS: Tuple[Any, ...] = 'smart', None, ' Smart ', '', 'foo'
-YESES: Tuple[Any, ...] = 'yes', True, ' Yes '
-NOS: Tuple[Any, ...] = 'no', False, ' No '
+SMARTS: List[Any] = ['smart', None, ' Smart ', '', 'foo']
+YESES: List[Any] = ['yes', True, ' Yes ']
+NOS: List[Any] = ['no', False, ' No ']
 
 
 def path_to(filename: str) -> pathlib.Path:
@@ -151,7 +151,34 @@ Python: import sys
         verify(settings_json, 'strip_stdin_no.txt', many_file)
 
 
-# TODO test strip_code, strip_output
+def test_strip_code() -> None:
+    many_file = '''\
+!Python:
+End.
+Python:
+    pass
+    pass
+    raise Exception
+'''
+
+    def make_asserter(line: int) -> Callable[[str, str], None]:
+        def asserter(actual: str, _: str) -> None:
+            assert f'line {line}' in actual
+        return asserter
+
+    settings_json: Dict[str, Any] = {"show_code": True, "show_runs": True, "show_output": True, "minimalist": True}
+    for val in SMARTS:
+        settings_json["strip_code"] = val
+        verify(settings_json, None, many_file, make_asserter(7))
+    for val in YESES:
+        settings_json["strip_code"] = val
+        verify(settings_json, None, many_file, make_asserter(3))
+    for val in NOS:
+        settings_json["strip_code"] = val
+        verify(settings_json, 'strip_stdin_no.txt', many_file, make_asserter(5))
+
+
+# TODO test strip_output
 
 
 def test_minimalist() -> None:
