@@ -4,7 +4,7 @@ import io
 import json
 import pathlib
 from itertools import chain
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable, Tuple
 from contextlib import redirect_stderr
 from runmany import runmanys
 
@@ -50,6 +50,10 @@ Stdin for Python: the stdin
 Python: print("the output")
 '''
 
+SMARTS: Tuple[Any, ...] = 'smart', None, ' Smart ', '', 'foo'
+YESES: Tuple[Any, ...] = 'yes', True, ' Yes '
+NOS: Tuple[Any, ...] = 'no', False, ' No '
+
 
 def path_to(filename: str) -> pathlib.Path:
     return pathlib.Path(__file__).with_name(filename)
@@ -81,6 +85,27 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     asserter(provided_json_result, expected)
 
 # TODO  4x strip
+
+
+def test_strip_argv() -> None:
+    many_file = '''\
+Argv:
+    a b		c
+    d
+End.
+Python: import sys
+    print(sys.argv[1:])
+'''
+    settings_json: Dict[str, Any] = {"show_runs": True, "show_output": True, "minimalist": True}
+    for val in SMARTS:
+        settings_json["strip_argv"] = val
+        verify(settings_json, 'strip_argv_smart.txt', many_file)
+    for val in YESES:
+        settings_json["strip_argv"] = val
+        verify(settings_json, 'strip_argv_yes.txt', many_file)
+    for val in NOS:
+        settings_json["strip_argv"] = val
+        verify(settings_json, 'strip_argv_no.txt', many_file)
 
 
 def test_run_blanks() -> None:

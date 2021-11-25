@@ -24,7 +24,7 @@ def set_show_errors(show_errors: bool) -> None:
 def convert_smart_yes_no(val: Union[None, bool, str]) -> Optional[bool]:
     if not isinstance(val, str):
         return val
-    return {'smart': None, 'yes': True, 'no': False}.get(val.lower())
+    return {'smart': None, 'yes': True, 'no': False}.get(val.lower().strip())
 
 
 @contextmanager

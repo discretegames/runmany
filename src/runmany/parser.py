@@ -335,6 +335,8 @@ class Parser:
         for section in enabled_sections:
             if section.is_solo:
                 solos_found[type(section)] = True
+            if all(solos_found.values()):
+                break
         for section in enabled_sections:
             if not solos_found[type(section)] or section.is_solo:
                 yield section
