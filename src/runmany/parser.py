@@ -355,3 +355,7 @@ class Parser:
 
     def __repr__(self) -> str:
         return str(self)
+
+
+# TODO remove ignore_solo and ignore_disable all together, remove their tests
+# TODO change ignore_blank to run_blanks, change ignore_comments to run_comments

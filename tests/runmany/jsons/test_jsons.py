@@ -122,6 +122,25 @@ Python: print("""foo%%%bar
 #     verify(settings_json, "ignore_solo1.txt", many_file)
 
 
+# def test_ignore_disable() -> None:
+#     many_file = '''\
+# !!Python: print(1)
+# Also: print(2)
+# Python: print(3)
+# !Also: print(4)
+# Also: print(5)
+# !Python: print(6)
+# Also: print(7)
+# Python: print(8)
+# '''
+#     settings_json = {"show_runs": True, "show_output": True, "minimalist": True}
+#     verify(settings_json, "ignore_disable1.txt", many_file)
+#     settings_json["ignore_disable"] = True
+#     verify(settings_json, "ignore_disable2.txt", many_file)
+
+
+# TODO change keys
+
 def test_minimalist() -> None:
     many_file = '''\
 Python: print("hi")
