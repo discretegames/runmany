@@ -1,4 +1,5 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
+"""Tests all the RunMany syntax."""
+
 import pathlib
 from runmany import runmanys
 # flake8: noqa

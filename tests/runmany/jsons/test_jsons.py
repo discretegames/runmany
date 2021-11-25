@@ -1,4 +1,5 @@
-# pylint: disable=missing-module-docstring,missing-class-docstring,missing-function-docstring # TODO
+"""Tests all the JSON settings."""
+
 import io
 import json
 import pathlib
@@ -49,8 +50,7 @@ Stdin for Python: the stdin
 Python: print("the output")
 '''
 
-# TODO
-# 4x strip
+# TODO  4x strip
 
 
 def path_to(filename: str) -> pathlib.Path:

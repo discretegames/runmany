@@ -114,10 +114,7 @@ class Section(ABC):
         else:  # All sections except Settings use language names. It'll be an empty list for Argv/Stdins without "for".
             self.raw_language_names = groups[2].split(Syntax.SEPARATOR)
         self.language_names = [Language.normalize(name) for name in self.raw_language_names]
-
         self.make_snippets(groups[1])  # groups[1] is the first snippet's (not section) solo/disabled match
-        # TODO probably remove has_solo_snippets and work into iter dunder
-        self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
 
     def make_snippets(self, first_sd_match: str) -> None:
         def add_snippet() -> None:
@@ -159,10 +156,9 @@ class Section(ABC):
         pass
 
     def __iter__(self) -> Iterator[Snippet]:
-        snippets = [snippet for snippet in self.snippets if not snippet.is_disabled]
-        if self.has_solo_snippets:  # TODO may need refactor?
-            snippets = [snippet for snippet in snippets if snippet.is_solo]
-        return iter(snippets)
+        enabled_snippets = [snippet for snippet in self.snippets if not snippet.is_disabled]
+        solo_snippets = [snippet for snippet in enabled_snippets if snippet.is_solo]
+        return iter(solo_snippets or enabled_snippets)
 
     def __str__(self) -> str:
         return pformat((self.__class__.__name__, self.first_line, self.last_line, self.snippets))
@@ -293,8 +289,6 @@ class Parser:
         self.last_line = self.get_last_line()
         self.clean_lines()
         self.make_sections()
-        self.has_solo_sections = any(section.is_solo for section in self.sections)  # TODO probably remove
-        self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections)  # TODO probably remove?
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
@@ -336,14 +330,14 @@ class Parser:
             self.sections.append(section_type(self, section_first_line, self.last_line))
 
     def __iter__(self) -> Iterator[Section]:
-        sections = [section for section in self.sections if not section.is_disabled]
+        enabled_sections = [section for section in self.sections if not section.is_disabled]
         # TODO do this differently, group each section type into 8 lists, solos and not solos
         # then return the ordered versions of each, using solos if there are any, else non-solos
-        if self.has_solo_sections:
-            sections = [section for section in sections if section.is_solo]
-        if self.has_solo_snippets:
-            sections = [section for section in sections if section.has_solo_snippets]
-        return iter(sections)
+        # if self.has_solo_sections:
+        #     sections = [section for section in sections if section.is_solo]
+        # if self.has_solo_snippets:
+        #     sections = [section for section in sections if section.has_solo_snippets]
+        return iter(enabled_sections)
 
     def __str__(self) -> str:
         return pformat(self.sections)
