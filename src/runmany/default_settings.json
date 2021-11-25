@@ -10,8 +10,6 @@
 
 	"ignore_blank": true,
 	"ignore_comment": false,
-	"ignore_solo": false,
-	"ignore_disable": false,
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",

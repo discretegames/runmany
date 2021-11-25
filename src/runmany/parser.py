@@ -159,10 +159,8 @@ class Section(ABC):
         pass
 
     def __iter__(self) -> Iterator[Snippet]:
-        snippets = self.snippets
-        if not self.parser.settings.ignore_disable:
-            snippets = [snippet for snippet in snippets if not snippet.is_disabled]
-        if not self.parser.settings.ignore_solo and self.has_solo_snippets:
+        snippets = [snippet for snippet in self.snippets if not snippet.is_disabled]
+        if self.has_solo_snippets:  # TODO may need refactor?
             snippets = [snippet for snippet in snippets if snippet.is_solo]
         return iter(snippets)
 
@@ -338,16 +336,13 @@ class Parser:
             self.sections.append(section_type(self, section_first_line, self.last_line))
 
     def __iter__(self) -> Iterator[Section]:
-        sections = self.sections
-        if not self.settings.ignore_disable:
-            sections = [section for section in sections if not section.is_disabled]
-        if not self.settings.ignore_solo:
-            # TODO do this differently, group each section type into 8 lists, solos and not solos
-            # then return the ordered versions of each, using solos if there are any, else non-solos
-            if self.has_solo_sections:
-                sections = [section for section in sections if section.is_solo]
-            if self.has_solo_snippets:
-                sections = [section for section in sections if section.has_solo_snippets]
+        sections = [section for section in self.sections if not section.is_disabled]
+        # TODO do this differently, group each section type into 8 lists, solos and not solos
+        # then return the ordered versions of each, using solos if there are any, else non-solos
+        if self.has_solo_sections:
+            sections = [section for section in sections if section.is_solo]
+        if self.has_solo_snippets:
+            sections = [section for section in sections if section.has_solo_snippets]
         return iter(sections)
 
     def __str__(self) -> str:
@@ -357,5 +352,4 @@ class Parser:
         return str(self)
 
 
-# TODO remove ignore_solo and ignore_disable all together, remove their tests
 # TODO change ignore_blank to run_blanks, change ignore_comments to run_comments
