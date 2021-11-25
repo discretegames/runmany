@@ -17,10 +17,10 @@ BASE_SETTINGS = {
     "newline": "\n",
     "tab": "\t",
 
-    "ignore_blanks": True,
-    "ignore_comments": False,
-    "ignore_solos": False,
-    "ignore_disabled": False,
+    "ignore_blank": True,
+    "ignore_comment": False,
+    "ignore_solo": False,
+    "ignore_disable": False,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",
@@ -86,13 +86,35 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     asserter(provided_json_result, expected)
 
 
+def test_ignore_blank() -> None:
+    many_file = '''Python:'''
+    settings_json = {"show_runs": True, "show_output": True}
+    verify(settings_json, "ignore_blank1.txt", many_file)
+    settings_json["ignore_blank"] = False
+    verify(settings_json, "ignore_blank2.txt", many_file)
+
+
+def test_ignore_comment() -> None:
+    many_file = '''
+Python: print("""foo%%%bar
+    """.strip())
+    print("""goo%%%far
+    """.strip())'''
+    settings_json = {"show_runs": True, "show_output": True, "show_code": True, "ignore_comment": False}
+    verify(settings_json, "ignore_comment1.txt", many_file)
+    settings_json["ignore_comment"] = True
+    verify(settings_json, "ignore_comment2.txt", many_file)
+
+
 def test_minimalist() -> None:
     many_file = '''\
 Python: print("hi")
 JavaScript: console.log("hi")
 '''
     settings_json = {"minimalist": True, "show_runs": True, "show_output": True, "show_stats": True}
-    verify(settings_json, 'minimalist.txt', many_file)
+    verify(settings_json, 'minimalist1.txt', many_file)
+    settings_json["show_stats"] = False
+    verify(settings_json, 'minimalist2.txt', '')
 
 
 def test_newline() -> None:

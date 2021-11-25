@@ -55,6 +55,11 @@ class Snippet:
     def get_content(self, from_top: bool, strip: bool, unindent: bool, tab: str, newline: str) -> Optional[Content]:
         lines = self.parser.lines[self.first_line: self.last_line + 1]
         lines[0] = Syntax.TAB_INDENT + lines[0][lines[0].index(Syntax.FINISHER) + 1:].lstrip()
+        if not self.parser.settings.ignore_comment:
+            for i, line in enumerate(lines):
+                index = line.find(Syntax.INLINE_COMMENT)
+                if index >= 0:
+                    lines[i] = line[:index]
         if unindent:
             lines = [re.sub(Syntax.UNINDENT_PATTERN, '', line) for line in lines]
         prefix_extras = 0
@@ -71,7 +76,7 @@ class Snippet:
             lines = lines[first:last + 1]
             prefix_extras = first
         text = newline.join(lines).replace('\t', tab)
-        if self.parser.settings.ignore_blanks and not text.strip():
+        if self.parser.settings.ignore_blank and not text.strip():
             return None
         prefix_lines = prefix_extras + self.first_line if from_top else 0
         return Content(text, self.first_line, prefix_lines, newline)
@@ -154,9 +159,9 @@ class Section(ABC):
 
     def __iter__(self) -> Iterator[Snippet]:
         snippets = self.snippets
-        if not self.parser.settings.ignore_disabled:
+        if not self.parser.settings.ignore_disable:
             snippets = [snippet for snippet in snippets if not snippet.is_disabled]
-        if not self.parser.settings.ignore_solos and self.has_solo_snippets:
+        if not self.parser.settings.ignore_solo and self.has_solo_snippets:
             snippets = [snippet for snippet in snippets if snippet.is_solo]
         return iter(snippets)
 
@@ -308,10 +313,6 @@ class Parser:
         for i, line in enumerate(self.lines):
             if i < self.first_line or i > self.last_line or line.startswith(Syntax.LEADING_COMMENT):
                 self.lines[i] = ''
-            elif not self.settings.ignore_comments:
-                index = line.find(Syntax.INLINE_COMMENT)
-                if index >= 0:
-                    self.lines[i] = line[:index]
 
     def make_sections(self) -> None:
         self.sections: List[Section] = []
@@ -337,9 +338,9 @@ class Parser:
 
     def __iter__(self) -> Iterator[Section]:
         sections = self.sections
-        if not self.settings.ignore_disabled:
+        if not self.settings.ignore_disable:
             sections = [section for section in sections if not section.is_disabled]
-        if not self.settings.ignore_solos:
+        if not self.settings.ignore_solo:
             if self.has_solo_sections:
                 sections = [section for section in sections if section.is_solo]
             if self.has_solo_snippets:

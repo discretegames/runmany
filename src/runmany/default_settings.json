@@ -8,10 +8,10 @@
 	"newline": "\n",
 	"tab": "\t",
 
-	"ignore_blanks": true,
-	"ignore_comments": false,
-	"ignore_solos": false,
-	"ignore_disabled": false,
+	"ignore_blank": true,
+	"ignore_comment": false,
+	"ignore_solo": false,
+	"ignore_disable": false,
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",

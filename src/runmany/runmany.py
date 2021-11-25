@@ -107,7 +107,7 @@ if __name__ == '__main__':  # pragma: no cover
     if not debugging():
         main()
     else:
-        TESTING = 1
+        TESTING = 0
         if TESTING:
             try:
                 # Using import dunder so pylint doesn't complain.
