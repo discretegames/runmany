@@ -331,13 +331,13 @@ class Parser:
 
     def __iter__(self) -> Iterator[Section]:
         enabled_sections = [section for section in self.sections if not section.is_disabled]
-        # TODO do this differently, group each section type into 8 lists, solos and not solos
-        # then return the ordered versions of each, using solos if there are any, else non-solos
-        # if self.has_solo_sections:
-        #     sections = [section for section in sections if section.is_solo]
-        # if self.has_solo_snippets:
-        #     sections = [section for section in sections if section.has_solo_snippets]
-        return iter(enabled_sections)
+        solos_found = {SettingsSection: False, ArgvSection: False, StdinSection: False, CodeSection: False}
+        for section in enabled_sections:
+            if section.is_solo:
+                solos_found[type(section)] = True
+        for section in enabled_sections:
+            if not solos_found[type(section)] or section.is_solo:
+                yield section
 
     def __str__(self) -> str:
         return pformat(self.sections)

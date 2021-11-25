@@ -50,8 +50,6 @@ Stdin for Python: the stdin
 Python: print("the output")
 '''
 
-# TODO  4x strip
-
 
 def path_to(filename: str) -> pathlib.Path:
     return pathlib.Path(__file__).with_name(filename)
@@ -81,6 +79,8 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
 
     provided_json_result = runmanys(f'\n{many_file}', settings_json, from_string=True)
     asserter(provided_json_result, expected)
+
+# TODO  4x strip
 
 
 def test_run_blanks() -> None:
