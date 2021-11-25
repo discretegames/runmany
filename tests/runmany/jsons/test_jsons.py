@@ -17,7 +17,7 @@ BASE_SETTINGS = {
     "newline": "\n",
     "tab": "\t",
 
-    "ignore_blank": True,
+    "run_blanks": False,
     "ignore_comment": False,
 
     "strip_argv": "smart",
@@ -83,12 +83,12 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     asserter(provided_json_result, expected)
 
 
-def test_ignore_blank() -> None:
+def test_run_blanks() -> None:
     many_file = '''Python:'''
     settings_json = {"show_runs": True, "show_output": True}
-    verify(settings_json, "ignore_blank1.txt", many_file)
-    settings_json["ignore_blank"] = False
-    verify(settings_json, "ignore_blank2.txt", many_file)
+    verify(settings_json, "run_blanks1.txt", many_file)
+    settings_json["run_blanks"] = True
+    verify(settings_json, "run_blanks2.txt", many_file)
 
 
 def test_ignore_comment() -> None:

@@ -76,7 +76,7 @@ class Snippet:
             lines = lines[first:last + 1]
             prefix_extras = first
         text = newline.join(lines).replace('\t', tab)
-        if self.parser.settings.ignore_blank and not text.strip():
+        if not self.parser.settings.run_blanks and not text.strip():
             return None
         prefix_lines = prefix_extras + self.first_line if from_top else 0
         return Content(text, self.first_line, prefix_lines, newline)
@@ -352,4 +352,4 @@ class Parser:
         return str(self)
 
 
-# TODO change ignore_blank to run_blanks, change ignore_comments to run_comments
+# TODO change ignore_comments to run_comments

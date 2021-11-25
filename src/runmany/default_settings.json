@@ -8,7 +8,7 @@
 	"newline": "\n",
 	"tab": "\t",
 
-	"ignore_blank": true,
+	"run_blanks": false,
 	"ignore_comment": false,
 
 	"strip_argv": "smart",
