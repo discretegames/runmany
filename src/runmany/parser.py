@@ -55,7 +55,7 @@ class Snippet:
     def get_content(self, from_top: bool, strip: bool, unindent: bool, tab: str, newline: str) -> Optional[Content]:
         lines = self.parser.lines[self.first_line: self.last_line + 1]
         lines[0] = Syntax.TAB_INDENT + lines[0][lines[0].index(Syntax.FINISHER) + 1:].lstrip()
-        if not self.parser.settings.ignore_comment:
+        if not self.parser.settings.run_comments:
             for i, line in enumerate(lines):
                 index = line.find(Syntax.INLINE_COMMENT)
                 if index >= 0:
@@ -350,6 +350,3 @@ class Parser:
 
     def __repr__(self) -> str:
         return str(self)
-
-
-# TODO change ignore_comments to run_comments

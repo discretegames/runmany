@@ -18,7 +18,7 @@ BASE_SETTINGS = {
     "tab": "\t",
 
     "run_blanks": False,
-    "ignore_comment": False,
+    "run_comments": False,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",
@@ -91,16 +91,16 @@ def test_run_blanks() -> None:
     verify(settings_json, "run_blanks2.txt", many_file)
 
 
-def test_ignore_comment() -> None:
+def test_run_comments() -> None:
     many_file = '''
 Python: print("""foo%%%bar
     """.strip())
     print("""goo%%%far
     """.strip())'''
     settings_json = {"show_runs": True, "show_output": True, "show_code": True}
-    verify(settings_json, "ignore_comment1.txt", many_file)
-    settings_json["ignore_comment"] = True
-    verify(settings_json, "ignore_comment2.txt", many_file)
+    verify(settings_json, "run_comments1.txt", many_file)
+    settings_json["run_comments"] = True
+    verify(settings_json, "run_comments2.txt", many_file)
 
 
 def test_minimalist() -> None:

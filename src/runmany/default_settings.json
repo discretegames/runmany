@@ -9,7 +9,7 @@
 	"tab": "\t",
 
 	"run_blanks": false,
-	"ignore_comment": false,
+	"run_comments": false,
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",
