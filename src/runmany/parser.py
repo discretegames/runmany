@@ -115,7 +115,8 @@ class Section(ABC):
             self.raw_language_names = groups[2].split(Syntax.SEPARATOR)
         self.language_names = [Language.normalize(name) for name in self.raw_language_names]
 
-        self.make_snippets(groups[1])  # groups[1] is the first snippet's solo/disabled match
+        self.make_snippets(groups[1])  # groups[1] is the first snippet's (not section) solo/disabled match
+        # TODO probably remove has_solo_snippets and work into iter dunder
         self.has_solo_snippets = any(snippet.is_solo for snippet in self.snippets)
 
     def make_snippets(self, first_sd_match: str) -> None:
@@ -294,8 +295,8 @@ class Parser:
         self.last_line = self.get_last_line()
         self.clean_lines()
         self.make_sections()
-        self.has_solo_sections = any(section.is_solo for section in self.sections)
-        self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections)
+        self.has_solo_sections = any(section.is_solo for section in self.sections)  # TODO probably remove
+        self.has_solo_snippets = any(section.has_solo_snippets for section in self.sections)  # TODO probably remove?
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
@@ -341,6 +342,8 @@ class Parser:
         if not self.settings.ignore_disable:
             sections = [section for section in sections if not section.is_disabled]
         if not self.settings.ignore_solo:
+            # TODO do this differently, group each section type into 8 lists, solos and not solos
+            # then return the ordered versions of each, using solos if there are any, else non-solos
             if self.has_solo_sections:
                 sections = [section for section in sections if section.is_solo]
             if self.has_solo_snippets:

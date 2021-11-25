@@ -100,10 +100,26 @@ Python: print("""foo%%%bar
     """.strip())
     print("""goo%%%far
     """.strip())'''
-    settings_json = {"show_runs": True, "show_output": True, "show_code": True, "ignore_comment": False}
+    settings_json = {"show_runs": True, "show_output": True, "show_code": True}
     verify(settings_json, "ignore_comment1.txt", many_file)
     settings_json["ignore_comment"] = True
     verify(settings_json, "ignore_comment2.txt", many_file)
+
+
+# def test_ignore_solo() -> None:
+#     many_file = '''\
+# Python: print(0)
+# @@Python: print(1)
+# Also: print(2)
+# @@@Python: print(3)
+# Also: print(4)
+# @@Python: print(5)
+# @Also: print(6)
+# @Python: print(7)
+# Also: print(8)
+# '''
+#     settings_json = {"show_runs": True, "show_output": True, "minimalist": True}
+#     verify(settings_json, "ignore_solo1.txt", many_file)
 
 
 def test_minimalist() -> None:
