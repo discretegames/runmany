@@ -1,0 +1,11 @@
+1. Python
+['A']
+'a'
+
+
+2. Python
+seen
+
+
+2/2 programs successfully run!
+1/2 had the exact same stdout. Equal runs grouped: [1] [2]

@@ -7,9 +7,6 @@ from runmany import runmanys
 # flake8: noqa
 # pylint: skip-file
 
-# TODO test these:
-# - ! !! more
-# - @ @@ soloed
 
 # Some testing code duplicated from test_jsons.py but ehh.
 BASE_SETTINGS = {
@@ -296,6 +293,79 @@ Python: print(9)
 !Also: print(10)
 '''
     verify('disabled2.txt', many_file)
+
+
+def test_solo1() -> None:
+    many_file = '''\
+@@@Print: 1
+Also: 2
+
+@@Print: 3
+Also: 4
+@Also: 5
+
+@Print: 6
+@Also: 7
+Also: 8
+
+@@ Print: 9
+Also: 10
+'''
+    verify('solo1.txt', many_file)
+
+
+def test_solo2() -> None:
+    many_file = '''\
+@Print: 1
+Also: 2
+Print: 3
+@Also: 4
+'''
+    verify('solo2.txt', many_file)
+
+
+def test_solo3() -> None:
+    many_file = '''\
+
+@@Settings: {"minimalist": true}
+Settings: {"newline": "unseen"}
+
+@@Argv: A
+Argv: B
+@@Stdin: a
+Stdin: b
+
+Python: print('unseen')
+@Python: print('unseen')
+
+@@@Python: import sys
+	print(sys.argv[1:])
+	print(repr(input()))
+Also:
+	print('unseen')
+@Also:
+	print('seen')
+'''
+    verify('solo3.txt', many_file, True)
+
+
+def test_disable_solo() -> None:
+    many_file = '''\
+Settings: {"languages": [
+		{"name": "!python", "command": "python"},
+		{"name": "@also", "command": "python"}
+	]}
+
+!@Python: print(1)
+@!Python: print(2)
+!@@Python: print(3)
+
+!Python: print(4)
+!@Also: print(5)
+Also: print(6)
+'''
+    verify('disable_solo.txt', many_file, True)
+    verify('empty.txt', many_file, False)
 
 
 def test_leading_comments() -> None:
