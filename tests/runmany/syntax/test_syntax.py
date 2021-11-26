@@ -20,7 +20,7 @@ BASE_SETTINGS = {
     "tab": "\t",
 
     "run_blanks": False,
-    "run_comments": False,
+    "keep_comments": False,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",

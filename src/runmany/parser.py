@@ -63,7 +63,7 @@ class Snippet:
     def get_content(self, from_top: bool, strip: bool, unindent: bool, tab: str, newline: str) -> Optional[Content]:
         lines = self.parser.lines[self.first_line: self.last_line + 1]
         lines[0] = Syntax.TAB_INDENT + lines[0][lines[0].index(Syntax.FINISHER) + 1:].lstrip()
-        if not self.parser.settings.run_comments:
+        if not self.parser.settings.keep_comments:
             lines = [Syntax.remove_inline_comment(line) for line in lines]
         if unindent:
             lines = [re.sub(Syntax.UNINDENT_PATTERN, '', line) for line in lines]

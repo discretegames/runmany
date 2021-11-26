@@ -2,7 +2,7 @@
 
 % a percent sign "%" at the start of a line makes a comment
 
-	%%% three percent signs makes a comment anywhere else (unless "run_comments"=true in settings)
+	%%% three percent signs makes a comment anywhere else (unless "keep_comments"=true in settings)
 
 
 % a .many file consists of sections that run in order, each section contains one or more snippets
