@@ -41,6 +41,14 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     CODE_HEADER = f'{HEADER_START}([^:]*){HEADER_END}'
     ALSO_HEADER = f'^(?=\\S)({DISABLER}|{SOLOER}|)?\\s*{ALSO}' + HEADER_END
 
+    @staticmethod
+    def remove_inline_comment(line: str) -> str:
+        return line.split(Syntax.INLINE_COMMENT, 1)[0]
+
+    @staticmethod
+    def string_starts_line(string: str, line: str) -> bool:
+        return string == Syntax.remove_inline_comment(line).rstrip()
+
 
 class Snippet:
     def __init__(self, parser: 'Parser', first_line: int, last_line: int, sd_match: Optional[str]):
@@ -56,10 +64,7 @@ class Snippet:
         lines = self.parser.lines[self.first_line: self.last_line + 1]
         lines[0] = Syntax.TAB_INDENT + lines[0][lines[0].index(Syntax.FINISHER) + 1:].lstrip()
         if not self.parser.settings.run_comments:
-            for i, line in enumerate(lines):
-                index = line.find(Syntax.INLINE_COMMENT)
-                if index >= 0:
-                    lines[i] = line[:index]
+            lines = [Syntax.remove_inline_comment(line) for line in lines]
         if unindent:
             lines = [re.sub(Syntax.UNINDENT_PATTERN, '', line) for line in lines]
         prefix_extras = 0
@@ -268,9 +273,9 @@ class CodeSection(Section):
         return content
 
     def run(self, directory: str) -> None:
-        for raw_language_name in self.raw_language_names:
-            language_name = Language.normalize(raw_language_name)
-            for snippet in self:
+        for snippet in self:
+            for raw_language_name in self.raw_language_names:
+                language_name = Language.normalize(raw_language_name)
                 if language_name not in self.parser.settings:
                     print_err(f'Language "{raw_language_name.strip()}" on line {self.first_line + 1} '
                               'not found in settings JSON. Skipping language.')
@@ -292,13 +297,13 @@ class Parser:
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
-            if self.lines[i].rstrip().startswith(Syntax.START):
+            if Syntax.string_starts_line(Syntax.START, self.lines[i]):
                 return i + 1
         return 0
 
     def get_last_line(self) -> int:
         for i, line in enumerate(self.lines):
-            if line.rstrip().startswith(Syntax.STOP):
+            if Syntax.string_starts_line(Syntax.STOP, line):
                 return i - 1
         return len(self.lines) - 1
 
@@ -318,12 +323,12 @@ class Parser:
                     in_section = True
                     section_first_line = i
                     section_type = tried_section_type
-                elif line.strip():
+                elif Syntax.remove_inline_comment(line).strip():
                     print_err(f'Line {i+1} "{line}" is not part of a section. Skipping line.')
-            elif line.rstrip().startswith(Syntax.END) or Section.try_get_section_type(line):
+            elif Syntax.string_starts_line(Syntax.END, line) or Section.try_get_section_type(line):
                 in_section = False
                 self.sections.append(section_type(self, section_first_line, i - 1))
-                if not line.rstrip().startswith(Syntax.END):
+                if not Syntax.string_starts_line(Syntax.END, line):
                     i -= 1
             i += 1
         if in_section:

@@ -4,23 +4,52 @@ import pathlib
 from runmany import runmanys
 # flake8: noqa
 
+# TODO test these:
+# - ! !! more
+# - @ @@ soloed
+# - End.
+# - things outside of sections, including End. and at the start
+# - START:
+# - multiple settings
+# - settings is path
+# - %%% comments, especially after start/stop/sections, etc
+# - line numbers for errors and such?
+
 # Some testing code duplicated from test_jsons.py but ehh.
-BASE_SETTINGS_JSON = {
-    "languages": [],
-    "timeout": 11.0,
-    "stderr": True,
-    "ext": "",
+BASE_SETTINGS = {
+    "timeout": 9.0,
+    "extension": "",
+    "command": "echo MISSINGCOMMAND",
     "spacing": 1,
+    "minimalist": False,
+    "stderr": "yes",
+    "newline": "\n",
+    "tab": "\t",
+
+    "run_blanks": False,
+    "run_comments": False,
+
+    "strip_argv": "smart",
+    "strip_stdin": "smart",
+    "strip_code": "smart",
+    "strip_output": "no",
+
     "show_runs": True,
+    "show_stats": False,
+    "show_equal": False,
+
+    "show_errors": False,
     "show_time": False,
     "show_command": False,
     "show_code": False,
     "show_argv": True,
     "show_stdin": True,
     "show_output": True,
-    "show_errors": False,
-    "show_stats": False,
-    "show_equal": False
+
+    "languages": [],
+    "languages_windows": [],
+    "languages_linux": [],
+    "languages_mac": [],
 }
 
 
@@ -31,7 +60,7 @@ def path_to(filename: str) -> pathlib.Path:
 def verify(output_file: str, many_file: str) -> None:
     with open(path_to(output_file), encoding='utf-8') as file:
         expected = file.read()
-        actual = runmanys(many_file, BASE_SETTINGS_JSON, from_string=True)
+        actual = runmanys(many_file, BASE_SETTINGS, from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
@@ -95,7 +124,7 @@ Also: N
 
 def test_header_syntax() -> None:
     many_file = '''\
-Argv    :  
+Argv    :
      A
 Also\t: B
 
@@ -127,7 +156,7 @@ Also:
 def test_argv() -> None:
     many_file = '''\
 Argv: \t\t A X
-Also:\t  
+Also:\t
     B Y
 Also:
     C Z
@@ -173,7 +202,7 @@ def test_disabled_sections() -> None:
     many_file = '''\
 Stdin for Python:
     A
-!Stdin for Python:
+!!Stdin for Python:
     B
 Python:
     print(1, input())
@@ -181,7 +210,7 @@ Python:
 Also:
     print(3, input())
 !\t Also: print(4, input())
-!JavaScript:
+!!JavaScript:
     console.log('unseen 1')
 Also:
     console.log('unseen 2')
@@ -190,7 +219,7 @@ Also:
     verify('disabled_sections.txt', many_file)
 
 
-def test_inline_comments() -> None:
+def test_leading_comments() -> None:
     many_file = '''\
 % comment
 Stdin: % 1
@@ -202,28 +231,30 @@ Stdin: % 1
 Python:
 %Python:
 %% comment
-%Exit.
+%STOP.
     print(input())
+    input()
 %
     print(input())
+    input()
 % % %
     x = 5%1; print(input())
 '''
-    verify('inline_comments.txt', many_file)
+    verify('leading_comments.txt', many_file)
 
 
-def test_exit() -> None:
+def test_stop() -> None:
     many_file = '''\
 Python:
     print(1)
-%Exit.
-Exit..
- Exit.
+%STOP.
+STOP..
+ STOP.
 Python:print(2)
-Exit. 
+STOP.
 Python:print(3)
 '''
-    verify('exit.txt', many_file)
+    verify('stop.txt', many_file)
 
 
 def test_similar() -> None:
@@ -243,7 +274,7 @@ Python:
 
 def test_hardcoded_json() -> None:
     many_file = '''\
-    { "show_stats": false, "show_equal": false }
+Settings: { "show_stats": false, "show_equal": false }
 Python: print('x')
 '''
     with open(path_to('hardcoded1.txt'), encoding='utf-8') as file:
