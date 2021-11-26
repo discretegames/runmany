@@ -10,9 +10,6 @@ from runmany import runmanys
 # TODO test these:
 # - ! !! more
 # - @ @@ soloed
-# - multiple settings
-# - settings is path
-# - line numbers for errors and such?
 
 # Some testing code duplicated from test_jsons.py but ehh.
 BASE_SETTINGS = {
@@ -56,15 +53,49 @@ def path_to(filename: str) -> pathlib.Path:
     return pathlib.Path(__file__).with_name(filename)
 
 
-def verify(output_file: str, many_file: str) -> None:
+def verify(output_file: str, many_file: str, no_base_settings: bool = False) -> None:
     with open(path_to(output_file), encoding='utf-8') as file:
         expected = file.read()
-        actual = runmanys(many_file, BASE_SETTINGS, from_string=True)
+        base_settings = None if no_base_settings else BASE_SETTINGS
+        actual = runmanys(many_file, base_settings, from_string=True)
         assert actual.strip('\r\n') == expected.strip('\r\n')
 
 
 def test_empty() -> None:
     verify('empty.txt', '')
+
+
+def test_settings() -> None:
+    many_file = '''\
+Settings: {"languages_windows": [{"name": "Print", "newline": "N"}]}
+Print: 1
+	2
+
+Settings:
+Print: 3
+	4
+
+Settings: {"show_equal": false}
+Print: 5
+	6
+'''
+    verify('settings1.txt', many_file, True)
+
+
+def test_settings_path() -> None:
+    many_file = '''\
+Settings: ".\\\\tests\\\\runmany\\\\jsons\\\\settings_path.json"
+Print: A
+	B
+	C
+Settings: {
+		"newline": "bar"
+	}
+Print: A
+	B
+	C
+'''
+    verify('settings2.txt', many_file, True)
 
 
 def test_end() -> None:
