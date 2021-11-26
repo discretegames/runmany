@@ -80,6 +80,7 @@ Print: 5
 	6
 '''
     verify('settings1.txt', many_file, True)
+    verify('settings1b.txt', many_file, False)
 
 
 def test_settings_path() -> None:
@@ -257,7 +258,7 @@ Python: print('stdin reset')
     verify('stdin.txt', many_file)
 
 
-def test_disabled_sections() -> None:
+def test_disabled1() -> None:
     many_file = '''\
 Stdin for Python:
     A
@@ -275,7 +276,26 @@ Also:
     console.log('unseen 2')
 ! Python: print('unseen 3')
 '''
-    verify('disabled_sections.txt', many_file)
+    verify('disabled1.txt', many_file)
+
+
+def test_disabled2() -> None:
+    many_file = '''\
+!Python: print(1)
+Also: print(2)
+!Also: print(3)
+Also: print(4)
+
+!!Python: print(5)
+Also: print(6)
+
+!!@Python: print(7)
+Also: print(8)
+
+Python: print(9)
+!Also: print(10)
+'''
+    verify('disabled2.txt', many_file)
 
 
 def test_leading_comments() -> None:
