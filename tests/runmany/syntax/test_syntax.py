@@ -500,3 +500,21 @@ Python: print('x')
     with open(path_to('hardcoded2.txt'), encoding='utf-8') as file:
         actual = runmanys(many_file, {}, from_string=True)
         assert actual.strip('\r\n') == file.read().strip('\r\n')
+
+
+def test_code() -> None:
+    many_file = '''
+Settings: {"languages": [{"name": "Code", "command": "echo $code"}]}
+Code: foo
+Code:
+	first line
+
+	more lines1
+	more lines2
+Also:
+
+	123
+	456
+
+'''
+    verify('code.txt', many_file, True)
