@@ -1,40 +1,99 @@
 ************************************************************
 1. Python
-------------------- output from line 12 --------------------
-Hello, World!
-How are you?
+--------------------- code at line 37 ----------------------
+print('not disabled')
+------------------- output from line 37 --------------------
+not disabled
 
 
 ************************************************************
 2. Python
-------------------- output from line 25 --------------------
-Hello, Alice.
+--------------------- code at line 62 ----------------------
+import sys
+print('Argv was', sys.argv[1])
+print('Stdin was', input())
+--------------------- argv at line 51 ----------------------
+foo
+--------------------- stdin at line 58 ---------------------
+123
+------------------- output from line 62 --------------------
+Argv was foo
+Stdin was 123
 
 
 ************************************************************
 3. Python
-------------------- output from line 25 --------------------
-Hello, Bob.
+--------------------- code at line 62 ----------------------
+import sys
+print('Argv was', sys.argv[1])
+print('Stdin was', input())
+--------------------- argv at line 51 ----------------------
+foo
+--------------------- stdin at line 59 ---------------------
+456
+------------------- output from line 62 --------------------
+Argv was foo
+Stdin was 456
 
 
 ************************************************************
-4. Python
-------------------- output from line 25 --------------------
-Hello, Cairo.
+4. JavaScript
+--------------------- argv at line 53 ----------------------
+bar
+------------------- output from line 67 --------------------
+Argv was bar
 
 
 ************************************************************
 5. JavaScript
-------------------- output from line 33 --------------------
-The arg was '--flag1'
+--------------------- argv at line 54 ----------------------
+baz
+------------------- output from line 67 --------------------
+Argv was baz
 
 
 ************************************************************
-6. JavaScript
-------------------- output from line 33 --------------------
-The arg was '--flag3'
+6. Python
+--------------------- code at line 72 ----------------------
+1//1; console = {'log': print}
+console['log']('This program runs in both Python and JS!')
+--------------------- argv at line 51 ----------------------
+foo
+--------------------- stdin at line 58 ---------------------
+123
+------------------- output from line 72 --------------------
+This program runs in both Python and JS!
 
 
 ************************************************************
-6/6 programs successfully run!
+7. Python
+--------------------- code at line 72 ----------------------
+1//1; console = {'log': print}
+console['log']('This program runs in both Python and JS!')
+--------------------- argv at line 51 ----------------------
+foo
+--------------------- stdin at line 59 ---------------------
+456
+------------------- output from line 72 --------------------
+This program runs in both Python and JS!
+
+
+************************************************************
+8. JavaScript
+--------------------- argv at line 53 ----------------------
+bar
+------------------- output from line 72 --------------------
+This program runs in both Python and JS!
+
+
+************************************************************
+9. JavaScript
+--------------------- argv at line 54 ----------------------
+baz
+------------------- output from line 72 --------------------
+This program runs in both Python and JS!
+
+
+************************************************************
+9/9 programs successfully run!
 ************************************************************
