@@ -1,6 +1,8 @@
 """Tests all the RunMany syntax."""
 
+import io
 import pathlib
+from contextlib import redirect_stderr
 from runmany import runmanys
 # flake8: noqa
 # pylint: skip-file
@@ -8,12 +10,8 @@ from runmany import runmanys
 # TODO test these:
 # - ! !! more
 # - @ @@ soloed
-# - End.
-# - things outside of sections, including End. and at the start
-# - START:
 # - multiple settings
 # - settings is path
-# - %%% comments, especially after start/stop/sections, etc
 # - line numbers for errors and such?
 
 # Some testing code duplicated from test_jsons.py but ehh.
@@ -39,7 +37,7 @@ BASE_SETTINGS = {
     "show_stats": False,
     "show_equal": False,
 
-    "show_errors": False,
+    "show_errors": True,
     "show_time": False,
     "show_command": False,
     "show_code": False,
@@ -67,6 +65,35 @@ def verify(output_file: str, many_file: str) -> None:
 
 def test_empty() -> None:
     verify('empty.txt', '')
+
+
+def test_end() -> None:
+    many_file = '''\
+Argv: End.
+    End.
+End.
+    End.
+Stdin: End.
+    End.
+End.
+    End.
+Python:
+    import sys
+	print(sys.argv[1:])
+    print(repr(input()))
+End.
+    print(123)
+Python: 
+    print(456)
+End.
+'''
+
+    with io.StringIO() as stderr, redirect_stderr(stderr):
+        verify('end.txt', many_file)
+        stderr.seek(0)
+        errors = stderr.read()
+        assert '"    End." is not part of a section.' in errors
+        assert '"    print(123)" is not part of a section' in errors
 
 
 def test_indents() -> None:
@@ -244,11 +271,36 @@ Python:
     verify('leading_comments.txt', many_file)
 
 
+def test_inline_comments() -> None:
+    many_file = '''\
+Python: print('unseen2')
+START: %%% ok1
+	%%% ok2
+Stdin: a %%% b
+Argv: c %%% d
+Python: import sys %%% i()
+	print(sys.argv[1:]) %%% }
+%%% j()
+    %%% k()
+	print(input()) %%% ]
+End. %%% ok3
+%%% ok4
+	%%% ok5
+STOP. %%% ok6
+Python: print('unseen2')
+'''
+    with io.StringIO() as stderr, redirect_stderr(stderr):
+        verify('inline_comments.txt', many_file)
+        stderr.seek(0)
+        assert stderr.read() == ''
+
+
 def test_stop() -> None:
     many_file = '''\
 Python:
     print(1)
 %STOP.
+stop:
 STOP..
  STOP.
 Python:print(2)
@@ -256,6 +308,48 @@ STOP.
 Python:print(3)
 '''
     verify('stop.txt', many_file)
+
+
+def test_start() -> None:
+    many_file = '''\
+start:
+Python: print(1)
+Start:
+Python: print(2)
+% START:
+Python: print(3)
+START::
+Python: print(4)
+START: Python: print(5)
+ START:
+Python: print(6)
+START :
+Python: print(7)
+START:
+Python: print(8)
+'''
+    verify('start.txt', many_file)
+
+
+def test_start_stop() -> None:
+    many_file = '''\
+Print: 1
+START:
+Print: 2
+STOP.
+Print: 3
+'''
+    verify('start_stop.txt', many_file)
+
+    many_file = '''\
+Print: 1
+STOP.
+Print: 2
+START:
+Print: 3
+
+'''
+    verify('empty.txt', many_file)
 
 
 def test_similar() -> None:

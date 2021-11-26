@@ -36,7 +36,8 @@
 	"supplied_languages_windows": [
 		{
 			"name": "Print",
-			"command": "type"
+			"command": "type",
+			"strip_code": "yes"
 		},
 		{
 			"name": "Bash",
@@ -50,7 +51,8 @@
 	"supplied_languages": [
 		{
 			"name": "Print",
-			"command": "cat"
+			"command": "cat",
+			"strip_code": "yes"
 		},
 		{
 			"name": "Ada",
