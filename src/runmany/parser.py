@@ -99,10 +99,10 @@ class Snippet:
         return line.startswith(Syntax.TAB_INDENT) or line.startswith(Syntax.SPACE_INDENT) or not line.rstrip()
 
     def __str__(self) -> str:
-        return pformat(self.parser.lines[self.first_line:self.last_line + 1])
+        return pformat(self.parser.lines[self.first_line:self.last_line + 1])  # pragma: no cover
 
     def __repr__(self) -> str:
-        return str(self)
+        return str(self)  # pragma: no cover
 
 
 class Section(ABC):
@@ -154,11 +154,11 @@ class Section(ABC):
     @staticmethod
     @abstractmethod
     def get_header_match(line: str) -> Optional['re.Match[str]']:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def run(self, directory: str) -> None:
-        pass
+        pass  # pragma: no cover
 
     def __iter__(self) -> Iterator[Snippet]:
         enabled_snippets = [snippet for snippet in self.snippets if not snippet.is_disabled]
@@ -166,10 +166,10 @@ class Section(ABC):
         return iter(solo_snippets or enabled_snippets)
 
     def __str__(self) -> str:
-        return pformat((self.__class__.__name__, self.first_line, self.last_line, self.snippets))
+        return pformat((self.__class__.__name__, self.first_line, self.last_line, self.snippets))  # pragma: no cover
 
     def __repr__(self) -> str:
-        return str(self)
+        return str(self)  # pragma: no cover
 
 
 class SettingsSection(Section):
@@ -347,7 +347,7 @@ class Parser:
                 yield section
 
     def __str__(self) -> str:
-        return pformat(self.sections)
+        return pformat(self.sections)  # pragma: no cover
 
     def __repr__(self) -> str:
-        return str(self)
+        return str(self)  # pragma: no cover

@@ -219,7 +219,7 @@ class Runner:
             print(DIVIDER_CHAR * DIVIDER_WIDTH, flush=True)
 
     def __str__(self) -> str:
-        return pformat((self.total_runs, self.successful_runs, self.argvs, self.stdins))
+        return pformat((self.total_runs, self.successful_runs, self.argvs, self.stdins))  # pragma: no cover
 
     def __repr__(self) -> str:
-        return str(self)
+        return str(self)  # pragma: no cover

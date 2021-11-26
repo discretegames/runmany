@@ -3,6 +3,7 @@
 import pathlib
 from runmany import runmanys
 # flake8: noqa
+# pylint: skip-file
 
 # TODO test these:
 # - ! !! more

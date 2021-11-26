@@ -92,6 +92,18 @@ def test_run_blanks() -> None:
     settings_json["run_blanks"] = True
     verify(settings_json, "run_blanks2.txt", many_file)
 
+    many_file = '''\
+Argv:
+Stdin:
+Python: import sys
+    print(sys.argv[1:])
+    print(repr(sys.stdin.read()))
+'''
+    settings_json = {"show_runs": True, "show_output": True, "strip_argv": True, "show_argv": True, "show_stdin": True}
+    verify(settings_json, "run_blanks3.txt", many_file)
+    settings_json["run_blanks"] = True
+    verify(settings_json, "run_blanks4.txt", many_file)
+
 
 def test_run_comments() -> None:
     many_file = '''

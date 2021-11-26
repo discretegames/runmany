@@ -49,7 +49,7 @@ class Content:
         return self.newline * self.prefix_lines + self.text
 
     def __str__(self) -> str:
-        return self.text
+        return self.text  # pragma: no cover
 
     def __repr__(self) -> str:
-        return str((self.line_number, self.text))
+        return str((self.line_number, self.text))  # pragma: no cover

@@ -51,23 +51,22 @@ class Language:
         return language_name.strip().lower()
 
     def __str__(self) -> str:
-        return str(self.dict)
+        return str(self.dict)  # pragma: no cover
 
     def __repr__(self) -> str:
-        return repr(self.dict)
+        return repr(self.dict)  # pragma: no cover
 
 
 class Settings:
     def __init__(self, provided_settings: Optional[Dict[str, Any]] = None, updatable: bool = True) -> None:
         self.default_settings = load_default_settings()
         self.updatable = updatable
-        self.update(provided_settings or {}, True)
+        self.update(provided_settings or {})
         self.all_language_names = {*self.languages, *self.languages_windows, *self.languages_linux, *self.languages_mac}
 
-    def update(self, new_provided_settings: Dict[str, Any], force: bool = False) -> None:
-        if force or self.updatable:
-            self.dict = self.combine_settings(self.default_settings, new_provided_settings)
-            set_show_errors(self.show_errors)
+    def update(self, new_provided_settings: Dict[str, Any]) -> None:
+        self.dict = self.combine_settings(self.default_settings, new_provided_settings)
+        set_show_errors(self.show_errors)
 
     def combine_settings(self, default_settings: Dict[str, Any], provided_settings: Dict[str, Any]) -> Dict[str, Any]:
         combined = {key: provided_settings.get(key, value) for key, value in default_settings.items()}
@@ -130,7 +129,7 @@ class Settings:
             self.update(load_json_settings(raw_settings_json, from_string=True))
 
     def __str__(self) -> str:
-        return str((self.updatable, self.dict))
+        return str((self.updatable, self.dict))  # pragma: no cover
 
     def __repr__(self) -> str:
-        return repr((self.updatable, self.dict))
+        return repr((self.updatable, self.dict))  # pragma: no cover
