@@ -13,7 +13,7 @@
 Normally to practice multiple programming languages at once you need multiple files or multiple projects, perhaps multiple IDE's.
 RunMany is a tool that lets you write multiple programs in _the same_ file using any programming languages you want, and then run them all at once.
 
-RunMany uses ".many" as its file extension, so, for example, if a file called [simple.many](https://github.com/discretegames/runmany/blob/main/examples/simple.many) has the following contents:
+RunMany uses ".many" as its file extension, so for example, if a file called [simple.many](https://github.com/discretegames/runmany/blob/main/examples/simple.many) has the following contents:
 
 ```text
 Python:
@@ -22,20 +22,23 @@ Python:
 JavaScript:
     console.log("Hi")
 
-Rust:
-    fn main() {
-        println!("Hi");
+C:
+    #include <stdio.h>
+    int main() {
+        printf("Hi\n");
+        return 0;
     }
 ```
 
 Then doing `runmany simple.many` in terminal will produce [this organized
-output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) of running the Python, JavaScript, and Rust programs within:
+output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) of running the Python, JavaScript, and C programs within:
 
 ```text
 ************************************************************
 1. Python
 -------------------- output from line 1 --------------------
 Hi
+
 
 ************************************************************
 2. JavaScript
@@ -44,7 +47,7 @@ Hi
 
 
 ************************************************************
-3. Rust
+3. C
 -------------------- output from line 7 --------------------
 Hi
 
@@ -55,7 +58,7 @@ Hi
 ************************************************************
 ```
 
-Argv and stdin can also be specified in the .many file on a per-language basis, and there is a plethora of
+Argv and stdin can also be specified in the .many file on a per-language basis, and there are many
 [settings](https://github.com/discretegames/runmany#settings)
 that can customize how languages are run and displayed in the output.
 
@@ -70,19 +73,35 @@ In general, RunMany can be used for:
 - Polyglots - Making esoteric code that can be executed in multiple languages at once.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
-Overall RunMany is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
+Overall RunMany is hopefully a useful tool for anyone who wants to play with multiple programming languages at once.
 
 # Installation
+
+Make sure you have [Python](https://www.python.org/downloads/) version 3.6 or above installed then run
 
 ```text
 pip install runmany
 ```
 
-If that doesn't work try `pip3 install runmany` or `python -m pip install runmany` or `python3 -m pip install runmany`.
+in terminal to install the latest [RunMany Python package from PyPI](https://pypi.org/project/runmany/).
+Then `runmany <filename>` should work to run .many files and `runmany --help` should show the command line options.
 
-[PyPI Package Page](https://pypi.org/project/runmany/) 
+If `pip install runmany` didn't work try `pip3 install runmany` or `python -m pip install runmany` or `python3 -m pip install runmany`.
+On Windows, if nothing works, you may need to [make sure the Python installation and Scripts directories are in your
+Path environment variable](https://datatofish.com/add-python-to-windows-path/), then restart your terminal and try again.
 
-## VSCode Extension
+RunMany was made in Python 3.9 on Windows and has been
+[thoroughly tested](https://github.com/discretegames/runmany/blob/main/coverage.txt)
+on Python versions 3.6 through 3.10 on Windows.
+It should also work fine on Linux and macOS but has been less extensively tested on those operating systems,
+especially when it comes to the
+[built-in commands](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json#L51)
+to run programming languages (which can all be customized anyway).
+
+RunMany is now in version 2 with improved .many file syntax and more settings,
+though the old 1.0.3 version is [still available on PyPI](https://pypi.org/project/runmany/1.0.3/).
+
+# VSCode Extension
 
 The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
 adds syntax highlighting to RunMany files and makes them runnable with one button.
@@ -92,7 +111,7 @@ With and without syntax highlighting:
 
 ![syntax highlighting example](https://raw.githubusercontent.com/discretegames/runmany/main/syntax_highlighting.png)
 
-[Get VSCode here](https://code.visualstudio.com/) and [get the RunMany extension here](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany), or install it directly once you have VSCode with:
+[Get VSCode here](https://code.visualstudio.com/) and [get the RunMany extension here](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany), or install it directly once you have VSCode by running this in terminal:
 
 ```text
 code --install-extension discretegames.runmany
