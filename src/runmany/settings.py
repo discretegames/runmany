@@ -106,7 +106,7 @@ class Settings:
     def __getitem__(self, language_name: str) -> Language:  # "[ ]" is for retrieving Languages
         os_languages, languages = self.platform_language_dicts()
         language_name = Language.normalize(language_name)
-        return os_languages.get(language_name, languages[language_name])
+        return os_languages.get(language_name, cast(Language, languages.get(language_name)))
 
     @staticmethod
     def make_language_dict(language_list: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:

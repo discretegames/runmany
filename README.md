@@ -126,8 +126,8 @@ there's a good chance it will work in RunMany automatically.
 (`Print` is a special built-in language that simply prints the code content to stdout.)
 
 There are ways to add custom languages and change the behavior of built-in languages, and even make them different on
-different operating systems. For more info see the `"languages"` and `"languages_<os>"` JSON keys in
-[Settings](https://github.com/discretegames/runmany#settings).
+different operating systems. For more info see
+[Customizing Languages](https://github.com/discretegames/runmany#customizing-languages).
 
 ## Troubleshooting
 
@@ -221,8 +221,9 @@ is also present as an alternative to using the command line directly.
 The .many file format is what RunMany expects when given a file to run.
 
 Principally, a .many file consists of sections that each contain one or more snippets. A section starts with an
-unindented header line such as `Python:` or `Stdin for Python:`, then the content of its first snippet is the
-indented lines below. Additional snippets may be added to the section with an
+unindented header line such as `Python:` or `Stdin for Python:`,
+then the content of the first snippet is what appears after the colon and on indented lines below.
+Additional snippets may be added to the section with an unindented
 `Also:` header, and a section ends when a new one starts or an unindented `End.` or the end of the file is encountered.
 
 A .many file runs from top to bottom, executing sections and snippets in the order they are encountered. Notably,
@@ -256,7 +257,7 @@ which has examples of all the syntax as well.
 
 ### Comments
 
-`%` at the very start of a line always makes a comment until the end of the line.  
+`%` at the very start of a line makes a comment until the end of the line.  
 `%%%` anywhere within a line makes a comment until the end of the line unless the `"keep_comments"` setting is true.
 
 ```text
@@ -271,7 +272,7 @@ There are no block comments.
 ### Sections & Snippets
 
 As mentioned, a .many file consists of sections that start with a header and contain snippets.
-There are four types of section:
+There are four types of sections:
 
 - [Code sections](https://github.com/discretegames/runmany#code-section)
 with the header `<language>:` or `<language1>, <language2>, ...:`
@@ -279,14 +280,13 @@ with the header `<language>:` or `<language1>, <language2>, ...:`
 with the header `Argv:` or `Argv for <language1>, <language2>, ...:`
 - [Stdin sections](https://github.com/discretegames/runmany#stdin-section)
 with the header `Stdin:` or `Stdin for <language1>, <language2>, ...:`
-- [Settings](https://github.com/discretegames/runmany#settings-section)
-sections with the header `Settings:`
+- [Settings sections](https://github.com/discretegames/runmany#settings-section) with the header `Settings:`
 
-All but the settings section can have a comma separated list of the languages it applies to in its header.
+All but the settings section can have a comma separated list of the languages it applies to in the header.
 These languages, once stripped of whitespace, must match the `"name"` keys of the languages in the
 [settings JSON](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json),
 but are not case sensitive. (Keywords like "Argv" and "Stdin" *are* case sensitive. Custom languages should not use
-RunMany keywords as names nor contain the characters `,:%`.)
+RunMany keywords as names nor contain the characters `,:%!@`.)
 
 The header `Also:` is used to add snippets to a section and `End.` can optionally be used to end a section.
 
@@ -315,8 +315,6 @@ print('pie')
 print('cake')
 ```
 
-(Though the `"strip_code"` setting can change this.)
-
 Blank lines above or below sections are only for readability and not required.
 Uncommented code outside of sections is invalid.
 
@@ -325,7 +323,7 @@ Uncommented code outside of sections is invalid.
 ### Code Section
 
 A code section starts right out with a comma separated list of languages
-and its content is the program to be run in those languages.
+and its snippet contents are the programs to run in those languages.
 
 One language in the comma separated list is almost always sufficient unless you are writing
 [polyglots](<https://en.wikipedia.org/wiki/Polyglot_(computing)>),
@@ -375,12 +373,12 @@ must be placed properly into the command of the language.
 
 ### Stdin Section
 
-Almost exactly like an argv section but for the standard input stream.
+Almost exactly like an argv section but for the standard input stream users normally type text into.
 
 An stdin section can either start `Stdin:` to apply to all languages, or `Stdin for <language1>, <language2>, ...:` to
 apply to the languages in the comma separated list. Either way overwrites any previous stdin set for those languages.
 
-Each snippet in an stdin section is a separate stdin that will be sent in turn to the programs of the languages
+Each snippet in a stdin section is a separate stdin that will be sent in turn to the programs of the languages
 the section applies to. This makes it easy to test many stdins at once.
 
 ```text
@@ -402,9 +400,9 @@ This .many code will run the Python program three times with stdin `A` then `B` 
 
 A settings section starts with `Settings:` and allows embedding a
 [settings](https://github.com/discretegames/runmany#settings)
-JSON in a .many file which is used until another settings section is encountered.
+JSON in a .many file, which is used until another settings section is encountered.
 
-Embedded settings are only used when settings were not specifically provided when runmany was called.
+These embedded settings are only used when settings were not specifically provided when runmany was called.
 Any missing settings default to their values in
 [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json).
 
@@ -415,8 +413,10 @@ Python:
     print('this Python code will now be shown as part of the output')
 ```
 
+A JSON string of the path to a settings file to load can also be used, like `Settings: "path/to/mysettings.json"`.
+
 `Also:` snippet headers in settings sections are shorthand for repeating the section header.
-So they don't serve much purpose since the settings are immediately overwritten.
+So they don't serve much purpose since they immediately overwrite the previous settings.
 
 ---
 
@@ -442,10 +442,10 @@ Also:
 
 ### Solo Sections and Snippets
 
-If any section headers start with `@@` then only those sections are run, similar to a "solo" check mark in
+If any section headers start with `@@` then only those sections are run, similar to a "solo" checkbox in
 audio/video editing software.
 
-If any snippet headers within a section start with `@` then only those snippets are run.
+If any snippet headers within a section start with `@` then only those snippets are run when the section runs.
 
 ```text
 Python:
@@ -463,7 +463,7 @@ Also:
 
 ---
 
-### START and STOP
+### Start and Stop
 
 Everything before the last `START:` at the start of a line by itself in a .many file is ignored.
 
@@ -485,30 +485,56 @@ There should only be up to one `START:` and one `STOP.` in a .many file.
 
 # Settings
 
-The settings JSON defines what languages RunMany can run and how it will run them. It also defines how the RunMany output will be formatted.
+RunMany's setting are defined by a [JSON](https://www.json.org/) file that can be
+[provided when runmany is called](https://github.com/discretegames/runmany#usage)
+or [directly embedded in a .many file](https://github.com/discretegames/runmany#settings-section).
 
-As mentioned, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
-holds the default values for all settings which are automatically used if not otherwise present in a provided or hardcoded JSON.
+The settings JSON defines what languages RunMany can run and how it will run them.
+It also defines how the RunMany output will be formatted.
 
-Most settings are simple flags or values that can be set in the base settings JSON object. See [List of Settings](https://github.com/discretegames/runmany#list-of-settings) below.
+The file [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
+holds the default values for all settings.
+These defaults are automatically used if not present in a provided or embedded settings JSON.
 
-The setting to add a custom language is the `"languages"` key which maps to an array of JSON objects we'll call language objects. Each language object must have a `"name"`
-string to identify it and a `"command"` string to run it (see [command format](https://github.com/discretegames/runmany#command-format)).
-However, objects in `"languages"` with a matching `"name"` in the `"default_languages"` array will automatically inherit its other values, such as `"command"` and `"ext"`.
-Most settings that can be set in the base settings JSON object are also inherited by the language objects and can be overridden.
+## Customizing Languages
 
-For example, a settings JSON of
+Most settings are simple flags or values that can be set in the base settings JSON object
+(see [List of Settings](https://github.com/discretegames/runmany#list-of-settings))
+but four special keys in the JSON are used to customize the languages RunMany can run or add more languages.
+These are `"languages"`, `"languages_windows"`, `"languages_linux"` and `"languages_mac"`
+(`"languages_<os>"` will be used to refer to the last three).
+They are lists of single-level JSON objects that specify the settings for the language that
+matches the `"name"` key of the object.
+
+(The `"supplied_languages..."` lists in
+[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
+are combined with their `"languages..."` counterparts before RunMany ever starts running programs.
+So all the supplied names and language settings are present, but any new ones take precedence.)
+
+When RunMany goes to run a language, it first looks for the language name in the `"languages_<os>"` list that
+best matches the system OS, and if it doesn't find the name then looks in the `"languages"` list.
+In this way you can have OS-specific settings and commands per language, or use `"languages"`
+as a default that applies to all OSes.
+
+For example, the following settings JSON sets the `"show_code"` setting (which is false by default)
+to true for all languages except for Python and Python 2. It also creates a new language
+"Python 3.10" that can be used in a .many file section header on Windows.
 
 ```json
 {
-    "languages": [{ "name": "Rust", "timeout": 5.0 }],
-    "show_code": true
+    "show_code": true,
+    "languages": [
+        { "name": "Python", "show_code": false },
+        { "name": "Python 2", "show_code": false }
+    ],
+    "languages_windows": [
+        { "name": "Python 3.10", "extension": ".py", "command": "py -3.10" }
+    ]
 }
 ```
 
-will make Rust programs have a 5 second time limit rather than the default of 10, and `"command"` does not need to be present because Rust is already in the built-in `"default_languages"` array. The `"show_code": true` in the base object makes it so _all_ languages in the RunMany output will show their code.
-
-You should not have to set `"default_languages"` in your custom settings JSON (though technically you can). Only set `"languages"`.
+The `"name"` key is required for every object in a languages list, and the `"command"` and `"extension"` keys
+should always be provided for new custom languages.
 
 ## List of Settings
 

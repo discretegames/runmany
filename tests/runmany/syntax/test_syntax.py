@@ -95,6 +95,20 @@ Print: A
 '''
     verify('settings2.txt', many_file, True)
 
+    many_file = '''\
+Settings: "./tests/runmany/jsons/settings_path.json"
+Print: A
+	B
+	C
+Settings: {
+		"newline": "bar"
+	}
+Print: A
+	B
+	C
+'''
+    verify('settings2.txt', many_file, True)
+
 
 def test_end() -> None:
     many_file = '''\
