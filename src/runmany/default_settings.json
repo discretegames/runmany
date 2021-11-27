@@ -161,7 +161,7 @@
 			"strip_code": "yes"
 		},
 		{
-			"name": "Power Shell",
+			"name": "PowerShell",
 			"command": "Powershell -Command",
 			"extension": ".ps1"
 		},

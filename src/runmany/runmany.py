@@ -91,10 +91,10 @@ def cmdline(argv: List[str]) -> None:
     """
     description = 'Runs a .many file. Full documentation: https://github.com/discretegames/runmany/blob/main/README.md'
     parser = argparse.ArgumentParser(prog='runmany', description=description)
-    parser.add_argument('manyfile', metavar='<manyfile>', help='the path to the .many file to run')
-    parser.add_argument('-s', '--settings', metavar='<settings>',
+    parser.add_argument('manyfile', metavar='<input-file>', help='the path to the .many file to run')
+    parser.add_argument('-s', '--settings', metavar='<settings-file>',
                         help='the path to the .json settings file to use which overrides any embedded settings')
-    parser.add_argument('-o', '--outfile', metavar='<outfile>', help='the path to the file output is redirected to')
+    parser.add_argument('-o', '--outfile', metavar='<output-file>', help='the path to the file output is redirected to')
     args = parser.parse_args(argv)
     runmany(args.manyfile, args.settings, args.outfile)
 

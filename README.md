@@ -10,10 +10,12 @@
 
 **A tool to run many programs written in many languages from one file.**
 
-Normally to practice multiple programming languages at once you need multiple files or multiple projects, perhaps multiple IDE's.
-RunMany is a tool that lets you write multiple programs in _the same_ file using any programming languages you want, and then run them all at once.
+Normally to practice multiple programming languages at once you need multiple files or multiple projects,
+perhaps multiple IDE's. RunMany is a tool that lets you write multiple programs in _the same_ file using
+any programming languages you want, and then run them all at once.
 
-RunMany uses ".many" as its file extension, so for example, if a file called [simple.many](https://github.com/discretegames/runmany/blob/main/examples/simple.many) has the following contents:
+RunMany uses ".many" as its file extension, so for example, if a file called
+[`simple.many`](https://github.com/discretegames/runmany/blob/main/examples/simple.many) has the following contents:
 
 ```text
 Python:
@@ -30,8 +32,9 @@ C:
     }
 ```
 
-Then doing `runmany simple.many` in terminal will produce [this organized
-output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) of running the Python, JavaScript, and C programs within:
+Then doing `runmany simple.many` in terminal will produce
+[this organized output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt)
+of running the Python, JavaScript, and C programs within:
 
 ```text
 ************************************************************
@@ -84,96 +87,118 @@ pip install runmany
 ```
 
 in terminal to install the latest [RunMany Python package from PyPI](https://pypi.org/project/runmany/).
-Then `runmany <filename>` should work to run .many files and `runmany --help` should show the command line options.
+Then `runmany <filename>` should work to run .many files. See more ways to run in
+[Usage](https://github.com/discretegames/runmany#usage).
 
-If `pip install runmany` didn't work try `pip3 install runmany` or `python -m pip install runmany` or `python3 -m pip install runmany`.
-On Windows, if nothing works, you may need to [make sure the Python installation and Scripts directories are in your
-Path environment variable](https://datatofish.com/add-python-to-windows-path/), then restart your terminal and try again.
-
-RunMany was made in Python 3.9 on Windows and has been
-[thoroughly tested](https://github.com/discretegames/runmany/blob/main/coverage.txt)
-on Python versions 3.6 through 3.10 on Windows.
-It should also work fine on Linux and macOS but has been less extensively tested on those operating systems,
-especially when it comes to the
-[built-in commands](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json#L51)
-to run programming languages (which can all be customized anyway).
-
-RunMany is now in version 2 with improved .many file syntax and more settings,
-though the old 1.0.3 version is [still available on PyPI](https://pypi.org/project/runmany/1.0.3/).
-
-# VSCode Extension
-
-The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
-adds syntax highlighting to RunMany files and makes them runnable with one button.
-It is highly recommended for use with RunMany.
-
-With and without syntax highlighting:
-
-![syntax highlighting example](https://raw.githubusercontent.com/discretegames/runmany/main/syntax_highlighting.png)
-
-[Get VSCode here](https://code.visualstudio.com/) and [get the RunMany extension here](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany), or install it directly once you have VSCode by running this in terminal:
+RunMany works best in [VSCode](https://code.visualstudio.com/) with the companion
+[RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany) which provides
+syntax highlighting for .many files and quick ways to run them.
+Install the extension for free
+[from the marketplace](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
+or by running:
 
 ```text
 code --install-extension discretegames.runmany
 ```
 
+You also need the programming languages you want RunMany to run installed on your computer
+because RunMany uses their interpreters/compilers behind the scenes to actually run the programs.
+
+RunMany has built-in support for the following languages:
+
+> Ada, Bash, Batch, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript, Julia, Kotlin, Lisp, Lua, MIPS,
+Pascal, Perl, PHP, PowerShell, Print, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
+
+Meaning, if you already have one of these languages installed,
+there's a good chance it will work in RunMany automatically.
+(`Print` is a special built-in language that simply prints the code content to stdout.)
+
+There are ways to add custom languages and change the behavior of built-in languages, and even make them different on
+different operating systems. For more info see the `"languages"` and `"languages_<os>"` JSON keys in
+[Settings](https://github.com/discretegames/runmany#settings).
+
+## Troubleshooting
+
+If `pip install runmany` didn't work try
+`pip3 install runmany` or `python -m pip install runmany` or `python3 -m pip install runmany`.
+
+On Windows, if nothing works, you may need to [make sure the Python installation and Scripts directories are in your
+Path environment variable](https://datatofish.com/add-python-to-windows-path/),
+then restart your terminal and try again.
+
+RunMany was made in Python 3.9 on Windows and has been
+[thoroughly tested](https://github.com/discretegames/runmany/blob/main/coverage.txt)
+on Python versions 3.6, 3.7, 3.8, 3.9, and 3.10 on Windows.
+It should also work fine on Linux and macOS but has been less extensively tested on those operating systems,
+especially when it comes to
+[the commands](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json#L51)
+that run interpreters/compilers of other programming languages.
+
+RunMany is now in version 2 with improved .many file syntax and more settings.
+The old 1.0.3 version is still available [on PyPI](https://pypi.org/project/runmany/1.0.3/).
+
 # Usage
 
-## Running From Command Line
+## Running RunMany From Command Line
+
+To run a RunMany file named `myfile.many` use the terminal command:
 
 ```text
 runmany myfile.many
 ```
 
-More generally:
+There are also optional arguments to get help and specify the settings and output files:
 
 ```text
-runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <input-file>
+runmany [-h --help] [-s --settings <settings-file>] [-o --outfile <output-file>] <input-file>
 ```
 
 - `<input-file>` is the required .many file to run.
-- `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
-- `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
+- `<settings-file>` is the optional .json file that defines how languages are run and how the output is formatted.
+- `<output-file>` is the optional file to send the output to. When omitted, output goes to stdout.
 
-When a [settings JSON](https://github.com/discretegames/runmany#settings) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
+For example, the command to run `myfile.many` with settings `mysettings.json`
+and send output to `myoutput.txt` would be:
 
-See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try.
-**Note that RunMany expects the system to already have the necessary interpreters and compilers installed for the programming languages it runs.**
-RunMany runs them internally with normal console [commands](https://github.com/discretegames/runmany#command-format).
-
-RunMany has preset commands for a number of languages:
-
-> Ada, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript, Julia, Kotlin, Lisp, Lua, Pascal,
-Perl, PHP, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
-
-But these presets were made for a Windows machine and may fail depending on OS and system configuration.
-However, commands can be overridden and new languages can be added by modifying the settings JSON.
-[See more below.](https://github.com/discretegames/runmany#settings)
-
-## Running From Python
-
-```py
-from runmany import runmany, runmany_to_s, runmany_to_f
-
-# Run to stdout
-runmany('path/to/input.many', 'path/to/settings.json') # settings JSON is always optional
-
-# Run to output file
-runmany('path/to/input.many', 'path/to/settings.json', 'path/to/output.txt')
-
-# Run to string
-string = runmany_to_s('path/to/input.many', 'path/to/settings.json')
-
-# Run to file object
-with open('output.txt', 'w') as file_obj:
-    runmany_to_f(file_obj, 'path/to/input.many', 'path/to/settings.json')
+```text
+runmany -s mysettings.json -o myoutput.txt myfile.many
 ```
 
-As with the command line, the settings JSON provided as an argument takes precedence over the one that may be at the top of the .many file, and [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback for all settings.
+When a settings file is provided on command line, any `Settings:` sections embedded in the input file are ignored.
+If neither are present, or for any missing settings,
+[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
+is used as a fallback. See more info in [Settings](https://github.com/discretegames/runmany#settings).
 
-In each of the 3 runmany functions, the settings JSON argument may be given as a path to the .json file or a JSON-like Python dictionary.
+For some examples of .many files and their output check
+[the examples folder on GitHub](https://github.com/discretegames/runmany/tree/main/examples).
+(The .many extension for RunMany files is not required but recommended for clarity.)
 
-Additionally, the .many file contents may be given as a string rather than a file path with `from_string=True`.
+## Running RunMany From Python
+
+RunMany can be imported and used from Python as follows:
+
+```py
+from runmany import runmany, runmanys
+
+# Run to stdout
+runmany('path/to/myfile.many', 'path/to/mysettings.json')  # settings JSON is always optional and can be None
+
+# Run to output file
+runmany('path/to/myfile.many', 'path/to/mysettings.json', 'path/to/myoutput.txt')
+
+# Run to file object
+with open('myoutput.txt', 'w') as file:
+    runmany('path/to/myfile.many', 'path/to/mysettings.json', file)
+
+# Run to string
+output_string = runmanys('path/to/myfile.many', 'path/to/mysettings.json')
+print(output_string)
+```
+
+In both `runmany.runmany` and `runmany.runmanys` functions, `from_string=True` will make the .many file argument be
+interpreted as a string instead of a file path, and the settings JSON argument may be given as a path to the
+.json file or a JSON-like Python dictionary, or `None` to provide no settings. As with running from the command line,
+providing settings here means all settings embedded in the .many file are ignored.
 
 The function `runmany.cmdline`, which takes a list of command line arguments, is also present as an alternative to using the command line directly.
 
