@@ -1,10 +1,16 @@
 <!-- markdownlint-disable-next-line MD041 -->
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/runmany)](https://www.python.org/downloads/)
-[![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)](https://github.com/discretegames/runmany/blob/main/coverage.txt)
+[![Test Coverage](https://raw.githubusercontent.com/discretegames/runmany/main/coverage.svg)
+](https://github.com/discretegames/runmany/blob/main/coverage.txt)
 
 # [RunMany](https://pypi.org/project/runmany/)
 
-**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation)  | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings) | [About](https://github.com/discretegames/runmany#about)**
+**[Intro](https://github.com/discretegames/runmany#runmany) |
+[Installation](https://github.com/discretegames/runmany#installation) |
+[Usage](https://github.com/discretegames/runmany#usage) |
+[Syntax](https://github.com/discretegames/runmany#many-syntax) |
+[Settings](https://github.com/discretegames/runmany#settings) |
+[About](https://github.com/discretegames/runmany#about)**
 
 *This readme is out of date as RunMany is being updated to v2.*
 
@@ -67,14 +73,19 @@ that can customize how languages are run and displayed in the output.
 
 In general, RunMany can be used for:
 
-- Chrestomathy - Writing identically behaving programs in many languages, like on [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
-    ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
+- Chrestomathy - Writing identically behaving programs in many languages, like on
+[Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
+([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/
+[output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
 - Performance Testing - Timing different implementations of a program, even across languages.
-    ([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
+([example](https://github.com/discretegames/runmany/blob/main/examples/primes.many)/
+[output](https://github.com/discretegames/runmany/blob/main/examples/primes_output.txt))
 - Input Testing - Easily giving many combinations of argv or stdin to programs.
-    ([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
+([example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many)/
+[output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt))
 - Polyglots - Making esoteric code that can be executed in multiple languages at once.
-    ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
+([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/
+[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
 Overall RunMany is hopefully a useful tool for anyone who wants to play with multiple programming languages at a time.
 
@@ -106,8 +117,9 @@ because RunMany uses their interpreters/compilers behind the scenes to actually 
 
 RunMany has built-in support for the following languages:
 
-> Ada, Bash, Batch, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript, Julia, Kotlin, Lisp, Lua, MIPS,
-Pascal, Perl, PHP, PowerShell, Print, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
+> Ada, Bash, Batch, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript,
+Julia, Kotlin, Lisp, Lua, MIPS, Pascal, Perl, PHP, PowerShell, Print, Python, Python 2,
+R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
 
 Meaning, if you already have one of these languages installed,
 there's a good chance it will work in RunMany automatically.
@@ -164,7 +176,8 @@ and send output to `myoutput.txt` would be:
 runmany -s mysettings.json -o myoutput.txt myfile.many
 ```
 
-When a settings file is provided on command line, any `Settings:` sections embedded in the input file are ignored.
+When a settings file is provided on command line, any
+[settings sections](https://github.com/discretegames/runmany#settings-section) embedded in the input file are ignored.
 If neither are present, or for any missing settings,
 [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
 is used as a fallback. See more info in [Settings](https://github.com/discretegames/runmany#settings).
@@ -200,7 +213,8 @@ interpreted as a string instead of a file path, and the settings JSON argument m
 .json file or a JSON-like Python dictionary, or `None` to provide no settings. As with running from the command line,
 providing settings here means all settings embedded in the .many file are ignored.
 
-The function `runmany.cmdline`, which takes a list of command line arguments, is also present as an alternative to using the command line directly.
+The function `runmany.cmdline`, which takes a list of command line arguments,
+is also present as an alternative to using the command line directly.
 
 # .many Syntax
 
@@ -310,9 +324,11 @@ Uncommented code outside of sections is invalid.
 
 ### Code Section
 
-A code section starts right out with a comma separated list of languages and its content is the program to be run in those languages.
+A code section starts right out with a comma separated list of languages
+and its content is the program to be run in those languages.
 
-One language in the comma separated list is almost always sufficient unless you are writing [polyglots](<https://en.wikipedia.org/wiki/Polyglot_(computing)>),
+One language in the comma separated list is almost always sufficient unless you are writing
+[polyglots](<https://en.wikipedia.org/wiki/Polyglot_(computing)>),
 
 ```text
 JavaScript:
@@ -382,42 +398,72 @@ This .many code will run the Python program three times with stdin `A` then `B` 
 
 ---
 
-### Settings Section TODO
+### Settings Section
 
-A [settings JSON](https://github.com/discretegames/runmany#settings) may be placed, indented, before the first section in a .many file. It is only used if a custom setting JSON is not otherwise provided as an argument, and only for the .many file it is in.
-As with section content, the indents may be either single tabs or 4 spaces.
+A settings section starts with `Settings:` and allows embedding a
+[settings](https://github.com/discretegames/runmany#settings)
+JSON in a .many file which is used until another settings section is encountered.
+
+Embedded settings are only used when settings were not specifically provided when runmany was called.
+Any missing settings default to their values in
+[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json).
 
 ```text
-    {
-        "show_time": true,
-        "show_command": true
-    }
+Settings:
+    {"show_code": true}
 Python:
-    print('The time and command will now be shown.')
+    print('this Python code will now be shown as part of the output')
 ```
+
+`Also:` snippet headers in settings sections are shorthand for repeating the section header.
+So they don't serve much purpose since the settings are immediately overwritten.
 
 ---
 
-### Disabling Sections & Snippets TODO
+### Disabled Sections and Snippets
 
-Putting `!` at the very start of any section header will disable that section and any Also Sections attached to it.
+Putting `!!` at the start of a section header disables the entire section and all its snippets.
+
+Putting `!` at the start of a snippet header disables that snippet.
 
 ```text
-!Python:
-    # this is disabled
+!!Python:
+    print('this is disabled')
 Also:
-    # this is effectively disabled too
+    print('this is also disabled')
+
+!Python:
+    print('this is disabled')
+Also:
+    print('this is not disabled')
 !Also:
-    # this is disabled in two ways
+    print('this is disabled')
 ```
 
-### Soloing Sections & Snippets
+### Solo Sections and Snippets
 
-TODO
+If any section headers start with `@@` then only those sections are run, similar to a "solo" check mark in
+audio/video editing software.
+
+If any snippet headers within a section start with `@` then only those snippets are run.
+
+```text
+Python:
+    print('this is not run')
+@Also:
+    print('this is also not run')
+
+@@@Python:
+    print('this is run')
+Also:
+    print('this is not run')
+@Also:
+    print('this is run')
+```
 
 ---
 
-### START & STOP
+### START and STOP
 
 Everything before the last `START:` at the start of a line by itself in a .many file is ignored.
 
