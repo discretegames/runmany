@@ -4,7 +4,7 @@
 
 # [RunMany](https://pypi.org/project/runmany/)
 
-**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation) | [VSCode Extension](https://github.com/discretegames/vscode-extension) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings) | [About](https://github.com/discretegames/runmany#about)**
+**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation)  | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings) | [About](https://github.com/discretegames/runmany#about)**
 
 *This readme is out of date as RunMany is being updated to v2.*
 
@@ -76,11 +76,11 @@ In general, RunMany can be used for:
 - Polyglots - Making esoteric code that can be executed in multiple languages at once.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
-Overall RunMany is hopefully a useful tool for anyone who wants to play with multiple programming languages at once.
+Overall RunMany is hopefully a useful tool for anyone who wants to play with multiple programming languages at a time.
 
 # Installation
 
-Make sure you have [Python](https://www.python.org/downloads/) version 3.6 or above installed then run
+Make sure you have [Python](https://www.python.org/downloads/) version 3.6 or above installed, then run
 
 ```text
 pip install runmany
@@ -132,10 +132,10 @@ on Python versions 3.6, 3.7, 3.8, 3.9, and 3.10 on Windows.
 It should also work fine on Linux and macOS but has been less extensively tested on those operating systems,
 especially when it comes to
 [the commands](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json#L51)
-that run interpreters/compilers of other programming languages.
+that run the interpreters/compilers of other programming languages.
 
 RunMany is now in version 2 with improved .many file syntax and more settings.
-The old 1.0.3 version is still available [on PyPI](https://pypi.org/project/runmany/1.0.3/).
+[The old 1.0.3 version is still available on PyPI.](https://pypi.org/project/runmany/1.0.3/)
 
 # Usage
 
@@ -187,8 +187,8 @@ runmany('path/to/myfile.many', 'path/to/mysettings.json')  # settings JSON is al
 runmany('path/to/myfile.many', 'path/to/mysettings.json', 'path/to/myoutput.txt')
 
 # Run to file object
-with open('myoutput.txt', 'w') as file:
-    runmany('path/to/myfile.many', 'path/to/mysettings.json', file)
+with open('path/to/myoutput.txt', 'w') as output_file:
+    runmany('path/to/myfile.many', 'path/to/mysettings.json', output_file)
 
 # Run to string
 output_string = runmanys('path/to/myfile.many', 'path/to/mysettings.json')
@@ -204,33 +204,37 @@ The function `runmany.cmdline`, which takes a list of command line arguments, is
 
 # .many Syntax
 
-The .many file format is what RunMany expects when given a file to run. (Though, of course, ".many" is not required as an extension.)
+The .many file format is what RunMany expects when given a file to run.
 
-Principally, a .many file consists of unindented lines which are section headers that define the languages and context for the lines indented below them. Languages are given as a comma separated list and the 3 contexts are argv, stdin, and code. Section headers end with a colon.
+Principally, a .many file consists of sections that each contain one or more snippets. A section starts with an
+unindented header line such as `Python:` or `Stdin for Python:`, then the content of its first snippet is the
+indented lines below. Additional snippets may be added to the section with an
+`Also:` header, and a section ends when a new one starts or an unindented `End.` or the end of the file is encountered.
+
+A .many file runs from top to bottom, executing sections and snippets in the order they are encountered. Notably,
+a .many file will run regardless of if it has syntax errors or not. Any invalid syntax will be ignored and mentioned
+in an error message.
 
 ```text
-Argv for Python, JavaScript:
-    foo
 Stdin for Python:
     bar
+Also:
+    baz
+End.
+
 Python:
-    import sys
-    print(sys.argv[1] + input())  # will be "foobar"
-JavaScript:
-    console.log(process.argv[2])  // will be "foo"
+    print('foo' + input())
+End.
 ```
 
-The keywords `Argv` and `Stdin` are used to define the argument vector and standard input for a set of languages. Otherwise the section is assumed to be code.
+In the example .many file above, the `Stdin for Python:` section has two snippets, `bar` and `baz`, and they become the
+standard input for the Python program in the `Python:` section, which has one snippet `print('foo' + input())`.
+Running this file runs the Python program twice, once for `bar` and once for `baz`, giving the respective outputs
+`foobar` and `foobaz`.
 
-So the RunMany program above will send "foo" to Python and JavaScript on argv, and "bar" to Python on stdin when it runs each language's code.
-
-Importantly, a .many file always runs from top to bottom [just-in-time](https://en.wikipedia.org/wiki/Just-in-time_compilation),
-that is, the top lines will run normally even if the bottom lines are invalid syntax.
-For this reason, argv and stdin sections only apply to code sections that come after them.
-
-Those are the essentials but read on for more details and nuance about the syntax of .many files. Notably the [Also Section](https://github.com/discretegames/runmany#also-section) and [hardcoded settings](https://github.com/discretegames/runmany#hardcoded-settings).
-
-Also check [syntax.many](https://github.com/discretegames/runmany/blob/main/examples/syntax.many) and the [other examples](https://github.com/discretegames/runmany/tree/main/examples) for concrete syntax samples.
+Read on for specific details about all .many file syntax, or check out
+[syntax.many](https://github.com/discretegames/runmany/blob/main/examples/syntax.many)
+which has examples of all the syntax as well.
 
 ## Syntax Specifics
 
@@ -238,161 +242,147 @@ Also check [syntax.many](https://github.com/discretegames/runmany/blob/main/exam
 
 ### Comments
 
-`%` at the very start of a line makes an inline comment.
+`%` at the very start of a line always makes a comment until the end of the line.  
+`%%%` anywhere within a line makes a comment until the end of the line unless the `"keep_comments"` setting is true.
 
 ```text
 % this is a comment
+    %%% this is also a comment
 ```
 
 There are no block comments.
 
 ---
 
-### Section Syntax
+### Sections & Snippets
 
-A .many file can be split up into sections, each of which has an unindented header line that ends in a colon (`:`),
-and a potentially multiline string of content that can appear after the colon and on indented lines below the header.
-Each indent must be either a single tab or 4 spaces and the indents do not end up as part of the section content.
+As mentioned, a .many file consists of sections that start with a header and contain snippets.
+There are four types of section:
 
-Any whitespace just after the colon of the section header is ignored, so this is a working Code Section:
+- [Code sections](https://github.com/discretegames/runmany#code-section)
+with the header `<language>:` or `<language1>, <language2>, ...:`
+- [Argv sections](https://github.com/discretegames/runmany#argv-section)
+with the header `Argv:` or `Argv for <language1>, <language2>, ...:`
+- [Stdin sections](https://github.com/discretegames/runmany#stdin-section)
+with the header `Stdin:` or `Stdin for <language1>, <language2>, ...:`
+- [Settings](https://github.com/discretegames/runmany#settings-section)
+sections with the header `Settings:`
+
+All but the settings section can have a comma separated list of the languages it applies to in its header.
+These languages, once stripped of whitespace, must match the `"name"` keys of the languages in the
+[settings JSON](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json),
+but are not case sensitive. (Keywords like "Argv" and "Stdin" *are* case sensitive. Custom languages should not use
+RunMany keywords as names nor contain the characters `,:%`.)
+
+The header `Also:` is used to add snippets to a section and `End.` can optionally be used to end a section.
+
+The content of a snippet is the text after any whitespace after the colon (`:`) in the snippet header,
+plus all the lines below that are indented with a single tab or 4 spaces,
+until the next header or `End.` or end of file.
+
+So this code section
 
 ```text
 Python: import math
     print(math.pi)
+Also: print('pie')
+    print('cake')
 ```
 
-As it corresponds to the Python program:
+has two snippets whose contents are:
 
 ```py
 import math
 print(math.pi)
 ```
 
+```py
+print('pie')
+print('cake')
+```
+
+(Though the `"strip_code"` setting can change this.)
+
 Blank lines above or below sections are only for readability and not required.
-
-As detailed below, only a few types of sections exist and some require comma (`,`) separated language lists in their headers.
-Language names are stripped of whitespace and matched to corresponding `"name"` keys in the languages arrays of the [settings JSON](https://github.com/discretegames/runmany#settings).
-
-Language names are not case-sensitive (`Python` is the same as `python`)
-but other keywords like `Argv`, `Stdin`, `for`, `Also`, and `Exit` are.
-
-Language names cannot contain `,` or `:` and to be safe they should not start with `Argv`, `Stdin`, `Also`, `Exit`, or `!`.
+Uncommented code outside of sections is invalid.
 
 ---
 
 ### Code Section
 
-A Code Section starts right out with a comma separated list of languages and its content is the program to be run in those languages.
+A code section starts right out with a comma separated list of languages and its content is the program to be run in those languages.
 
-One language in the list is almost always sufficient unless you are writing [polyglots](<https://en.wikipedia.org/wiki/Polyglot_(computing)>),
+One language in the comma separated list is almost always sufficient unless you are writing [polyglots](<https://en.wikipedia.org/wiki/Polyglot_(computing)>),
 
 ```text
 JavaScript:
-    console.log('This is some code that will be run in JS.')
+    console.log('Some code that will be run in JavaScript.')
+
 Python, Python 2:
-    print('This is some code that will be run in Python 3 and then Python 2.')
+    print('Some code that will be run in Python 3 then Python 2.')
+Also:
+    print('Some more code that will be run in Python 3 then Python 2.')
 ```
+
+`Also:` snippet headers in code sections are shorthand for repeating the section header.
 
 ---
 
 ### Argv Section
 
-An Argv Section can either start `Argv:` to apply to all languages, or `Argv for Language1, Language2, ...:` to apply to the listed languages.
-Either way overwrites any previous argv set for those languages, but [Also Sections](https://github.com/discretegames/runmany#also-section)
-can be used to supply a series of argvs.
+Argv is the argument vector, aka the command line arguments sent to programs.
 
-The Argv Section's content is stripped of newlines and sent as the argument vector to all the subsequent programs in Code Sections it applies to.
+An argv section can either start `Argv:` to apply to all languages, or `Argv for <language1>, <language2>, ...:` to
+apply to the languages in the comma separated list. Either way overwrites any previous argv set for those languages.
+
+Each snippet in an argv section is a separate argv that will be sent in turn to the programs of the languages
+the section applies to. This makes it easy to test many argvs at once.
 
 ```text
-Argv:
-    argv sent to all languages
-Argv for Python, JavaScript:
-    argv specifically sent to Python and Javascript
+Argv: argv sent to all languages
+
+Argv for Python: 1
+Also: 2
+Also: 3
+
+Python:
+    import sys
+    print(sys.argv[1])
 ```
 
-For argv to work the [`$argv` placeholder](https://github.com/discretegames/runmany#command-format) must be placed properly into the command of the language.
+This .many code will run the Python program three times with argv `1` then `2` then `3`.
+
+For argv to work the [`$argv` placeholder](https://github.com/discretegames/runmany#command-format)
+must be placed properly into the command of the language.
 
 ---
 
 ### Stdin Section
 
-Almost exactly like an Argv Section but for stdin.
+Almost exactly like an argv section but for the standard input stream.
 
-A Stdin Section can either start `Stdin:` to apply to all languages, or `Stdin for Language1, Language2, ...:` to apply to the listed languages.
-Either way overwrites any previous stdin set for those languages, but [Also Sections](https://github.com/discretegames/runmany#also-section)
-can be used to supply a series of stdins.
+An stdin section can either start `Stdin:` to apply to all languages, or `Stdin for <language1>, <language2>, ...:` to
+apply to the languages in the comma separated list. Either way overwrites any previous stdin set for those languages.
 
-The Stdin Section's content is stripped of trailing newlines except one and sent as the standard input stream to all the subsequent programs in Code Sections it applies to.
-
-```text
-Stdin:
-    stdin sent to all languages
-Stdin for Python, JavaScript:
-    stdin specifically sent to Python and Javascript
-```
-
-When a program expects stdin but there is no Stdin Section to give it, the stdin can be typed into the console normally.
-
----
-
-### Also Section
-
-An Also Section starts with `Also:` (with no language list) and is a way to add a series of argvs or stdins to run,
-or to avoid repeating a Code Section header. It cannot be the first section in the file because it needs to attach to the Code, Stdin, or Argv Section above it.
-
-When below an Argv Section or Stdin Section, an Also Section adds an additional input
-to the list of argvs or stdins to run when applicable Code Sections are encountered.
-
-For example, the final Python program here is run 6 times for all the combinations of argvs and stdins that apply to it
-(`1A 1B 2A 2B 3A 3B`):
+Each snippet in an stdin section is a separate stdin that will be sent in turn to the programs of the languages
+the section applies to. This makes it easy to test many stdins at once.
 
 ```text
-Argv: 1
-Also: 2
-Also: 3
+Stdin: stdin sent to all languages
 
-Stdin: A
-Also:  B
+Stdin for Python: A
+Also: B
+Also: C
 
 Python:
-    import sys
-    print(sys.argv[1] + input())
+    print(input())
 ```
 
-This is the real power of the Also Section -- giving multiple argvs and stdins to a program without repeating code.
-[Another example](https://github.com/discretegames/runmany/blob/main/examples/inputs.many) with [output](https://github.com/discretegames/runmany/blob/main/examples/inputs_output.txt).
-
-When below a Code Section, an Also Section is simply shorthand for repeating the Code Section's header.
-
-For example, `Also:` here behaves exactly the same as `Python, Python 2:` would:
-
-```text
-Python, Python 2:
-    print(123)
-Also:
-    print(456)
-Also:
-    print(789)
-```
+This .many code will run the Python program three times with stdin `A` then `B` then `C`.
 
 ---
 
-### Disabling Sections
-
-Putting `!` at the very start of any section header will disable that section and any Also Sections attached to it.
-
-```text
-!Python:
-    # this is disabled
-Also:
-    # this is effectively disabled too
-!Also:
-    # this is disabled in two ways
-```
-
----
-
-### Hardcoded Settings
+### Settings Section TODO
 
 A [settings JSON](https://github.com/discretegames/runmany#settings) may be placed, indented, before the first section in a .many file. It is only used if a custom setting JSON is not otherwise provided as an argument, and only for the .many file it is in.
 As with section content, the indents may be either single tabs or 4 spaces.
@@ -408,14 +398,42 @@ Python:
 
 ---
 
-### Exit Command
+### Disabling Sections & Snippets TODO
 
-`Exit.` at the very start of a line by itself will stop RunMany as if the file ended there.
+Putting `!` at the very start of any section header will disable that section and any Also Sections attached to it.
 
 ```text
-Exit.
-% nothing from here on will be run
+!Python:
+    # this is disabled
+Also:
+    # this is effectively disabled too
+!Also:
+    # this is disabled in two ways
 ```
+
+### Soloing Sections & Snippets
+
+TODO
+
+---
+
+### START & STOP
+
+Everything before the last `START:` at the start of a line by itself in a .many file is ignored.
+
+Everything after the first `STOP.` at the start of a line by itself in a .many file is ignored.
+
+So only the JavaScript section of this .many file is run:
+
+```text
+Python: print('unseen')
+START:
+JavaScript: console.log('seen')
+STOP.
+Python: print('unseen')
+```
+
+There should only be up to one `START:` and one `STOP.` in a .many file.
 
 ---
 
@@ -469,7 +487,7 @@ All settings described and whether or not they they can be overridden in a langu
 
 ## Command Format
 
-The `"command"` key of a language object in the `"languages"` array defines the terminal command that is run to execute the language.
+The `"command"` key of a language object in the `"languages"` or `"languages_<os>"` array defines the terminal command that is run to execute the language.
 
 Placeholders like `$file` and `$dir` are used in a command to refer to the temporary file RunMany creates for the code of each program it runs, or the directory that file is stored in:
 
@@ -497,7 +515,7 @@ Check the `"default_languages"` array in [default_settings.json](https://github.
 
 # About
 
-I was driven to make RunMany by my desire to learn more programming languages combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
+I was driven to make RunMany by my desire to learn more programming languages, combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
 
 I plan to use it to practice solving code challenges in multiple languages from code challenge websites.
 
