@@ -4,26 +4,32 @@
 
 # [RunMany](https://pypi.org/project/runmany/)
 
-**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation-supports-python-36) | [VSCode Extension](https://github.com/discretegames/vscode-extension) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings-json) | [About](https://github.com/discretegames/runmany#about)**
+**[Intro](https://github.com/discretegames/runmany#runmany) | [Installation](https://github.com/discretegames/runmany#installation) | [VSCode Extension](https://github.com/discretegames/vscode-extension) | [Usage](https://github.com/discretegames/runmany#usage) | [Syntax](https://github.com/discretegames/runmany#many-syntax) | [Settings](https://github.com/discretegames/runmany#settings) | [About](https://github.com/discretegames/runmany#about)**
+
+*This readme is out of date as RunMany is being updated to v2.*
 
 **A tool to run many programs written in many languages from one file.**
 
-Suppose you want to practice multiple programming languages at once. Normally you'd have to juggle multiple files or multiple projects, perhaps multiple IDEs. RunMany lets you write multiple programs in _the same_ file using any programming languages you want, and then run them all at once.
+Normally to practice multiple programming languages at once you need multiple files or multiple projects, perhaps multiple IDE's.
+RunMany is a tool that lets you write multiple programs in _the same_ file using any programming languages you want, and then run them all at once.
 
-For example, give RunMany [this](https://github.com/discretegames/runmany/blob/main/examples/simple.many) simple file
+RunMany uses ".many" as its file extension, so, for example, if a file called [simple.many](https://github.com/discretegames/runmany/blob/main/examples/simple.many) has the following contents:
 
 ```text
 Python:
     print("Hi")
+
 JavaScript:
     console.log("Hi")
+
 Rust:
     fn main() {
         println!("Hi");
     }
 ```
 
-and it will number and run each program, giving [this](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) output:
+Then doing `runmany simple.many` in terminal will produce [this organized
+output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt) of running the Python, JavaScript, and Rust programs within:
 
 ```text
 ************************************************************
@@ -31,16 +37,15 @@ and it will number and run each program, giving [this](https://github.com/discre
 -------------------- output from line 1 --------------------
 Hi
 
-
 ************************************************************
 2. JavaScript
--------------------- output from line 3 --------------------
+-------------------- output from line 4 --------------------
 Hi
 
 
 ************************************************************
 3. Rust
--------------------- output from line 5 --------------------
+-------------------- output from line 7 --------------------
 Hi
 
 
@@ -49,6 +54,10 @@ Hi
 3/3 had the exact same stdout!
 ************************************************************
 ```
+
+Argv and stdin can also be specified in the .many file on a per-language basis, and there is a plethora of
+[settings](https://github.com/discretegames/runmany#settings)
+that can customize how languages are run and displayed in the output.
 
 In general, RunMany can be used for:
 
@@ -61,9 +70,9 @@ In general, RunMany can be used for:
 - Polyglots - Making esoteric code that can be executed in multiple languages at once.
     ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/[output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
-Overall it is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
+Overall RunMany is hopefully a good tool for anyone who wants to play with multiple programming languages at once.
 
-# Installation (supports Python 3.6+)
+# Installation
 
 ```text
 pip install runmany
@@ -71,7 +80,7 @@ pip install runmany
 
 If that doesn't work try `pip3 install runmany` or `python -m pip install runmany` or `python3 -m pip install runmany`.
 
-[PyPI Package Page](https://pypi.org/project/runmany/) | [Bleeding edge version on TestPyPI](https://test.pypi.org/project/runmany/)
+[PyPI Package Page](https://pypi.org/project/runmany/) 
 
 ## VSCode Extension
 
@@ -107,7 +116,7 @@ runmany [-h --help] [-j --json <settings-file>] [-o --output <output-file>] <inp
 - `<settings-json>` is the optional .json file that defines how languages are run and how the output is formatted.
 - `<output-file>` is the optional file to send the output to. When omitted output goes to stdout.
 
-When a [settings JSON](https://github.com/discretegames/runmany#settings-json) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
+When a [settings JSON](https://github.com/discretegames/runmany#settings) file is not provided, the [hardcoded settings JSON](https://github.com/discretegames/runmany#hardcoded-settings) at the top of the .many file is used. If neither is present, or for any missing settings, [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) is used as a fallback.
 
 See [the examples folder](https://github.com/discretegames/runmany/tree/main/examples) for some .many files to try.
 **Note that RunMany expects the system to already have the necessary interpreters and compilers installed for the programming languages it runs.**
@@ -120,7 +129,7 @@ Perl, PHP, Python, Python 2, R, Racket, Ruby, Rust, Scala, TypeScript, VBScript,
 
 But these presets were made for a Windows machine and may fail depending on OS and system configuration.
 However, commands can be overridden and new languages can be added by modifying the settings JSON.
-[See more below.](https://github.com/discretegames/runmany#settings-json)
+[See more below.](https://github.com/discretegames/runmany#settings)
 
 ## Running From Python
 
@@ -218,7 +227,7 @@ print(math.pi)
 Blank lines above or below sections are only for readability and not required.
 
 As detailed below, only a few types of sections exist and some require comma (`,`) separated language lists in their headers.
-Language names are stripped of whitespace and matched to corresponding `"name"` keys in the languages arrays of the [settings JSON](https://github.com/discretegames/runmany#settings-json).
+Language names are stripped of whitespace and matched to corresponding `"name"` keys in the languages arrays of the [settings JSON](https://github.com/discretegames/runmany#settings).
 
 Language names are not case-sensitive (`Python` is the same as `python`)
 but other keywords like `Argv`, `Stdin`, `for`, `Also`, and `Exit` are.
@@ -341,7 +350,7 @@ Also:
 
 ### Hardcoded Settings
 
-A [settings JSON](https://github.com/discretegames/runmany#settings-json) may be placed, indented, before the first section in a .many file. It is only used if a custom setting JSON is not otherwise provided as an argument, and only for the .many file it is in.
+A [settings JSON](https://github.com/discretegames/runmany#settings) may be placed, indented, before the first section in a .many file. It is only used if a custom setting JSON is not otherwise provided as an argument, and only for the .many file it is in.
 As with section content, the indents may be either single tabs or 4 spaces.
 
 ```text
@@ -366,7 +375,7 @@ Exit.
 
 ---
 
-# Settings JSON
+# Settings
 
 The settings JSON defines what languages RunMany can run and how it will run them. It also defines how the RunMany output will be formatted.
 

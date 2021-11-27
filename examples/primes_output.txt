@@ -1,6 +1,6 @@
 ************************************************************
-1. Python (14.00s)
---------------------- code at line 12 ----------------------
+1. Python (14.821s)
+--------------------- code at line 14 ----------------------
 # Python program that lists primes by checking for factors up to square root
 import sys
 def isprime(n):
@@ -18,8 +18,8 @@ for n in range(int(sys.argv[1]) + 1):
                 print(n)
 
 ************************************************************
-2. Python (1.10s)
---------------------- code at line 29 ----------------------
+2. Python (2.350s)
+--------------------- code at line 31 ----------------------
 # Python program that lists primes using a sieve of Eratosthenes
 import sys
 
@@ -36,8 +36,8 @@ for n, isprime in enumerate(sieve(int(sys.argv[1]))):
                 print(n)
 
 ************************************************************
-3. JavaScript (4.28s)
---------------------- code at line 45 ----------------------
+3. JavaScript (4.185s)
+--------------------- code at line 47 ----------------------
 // JavaScript program that lists primes by checking for factors up to square root
 function isprime(n) {
         if (n === 2) {
@@ -61,8 +61,8 @@ for (let n = 0; n < parseInt(process.argv[2]); n++) {
 }
 
 ************************************************************
-4. JavaScript (1.81s)
---------------------- code at line 68 ----------------------
+4. JavaScript (1.780s)
+--------------------- code at line 70 ----------------------
 // JavaScript program that lists primes using a sieve of Eratosthenes
 function sieve(limit) {
         const primes = new Array(limit + 1).fill(true);
@@ -86,6 +86,6 @@ for (let n = 0; n < primes.length; n++) {
 }
 
 ************************************************************
-4/4 programs successfully run!
+4/4 programs successfully run in 23.168s!
 4/4 had the exact same stdout!
 ************************************************************

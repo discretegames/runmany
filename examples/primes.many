@@ -1,4 +1,6 @@
 % Timing two ways of listing primes in both Python and JavaScript.
+
+Settings:
 	{
 		"show_time": true,
 		"show_output": false,

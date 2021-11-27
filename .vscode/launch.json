@@ -18,9 +18,9 @@
 			"type": "python",
 			"request": "launch",
 			"program": "src/runmany/runmany.py",
-			// "console": "integratedTerminal",
-			"console": "internalConsole",
-			"internalConsoleOptions": "openOnSessionStart",
+			"console": "integratedTerminal",
+			// "console": "internalConsole",
+			// "internalConsoleOptions": "openOnSessionStart",
 			"env": {
 				"DEBUG_RUNMANY": "True"
 			}
