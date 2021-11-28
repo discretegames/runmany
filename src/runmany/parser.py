@@ -214,7 +214,7 @@ class ArgvSection(Section):
             argv = self.get_content(snippet)
             if argv:
                 argvs.append(argv)
-        for language_name in self.language_names or self.parser.settings.all_language_names:
+        for language_name in self.language_names or self.parser.settings.computed_languages():
             self.parser.runner.set_argvs(language_name, argvs)
 
 
@@ -246,7 +246,7 @@ class StdinSection(Section):
             stdin = self.get_content(snippet)
             if stdin:
                 stdins.append(stdin)
-        for language_name in self.language_names or self.parser.settings.all_language_names:
+        for language_name in self.language_names or self.parser.settings.computed_languages():
             self.parser.runner.set_stdins(language_name, stdins)
 
 
