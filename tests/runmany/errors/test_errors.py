@@ -15,6 +15,12 @@ def stderr_of_run(manyfile: Union[PathLike, str], settings: JsonLike = None, fro
         return file.read()
 
 
+def test_json_combine_error() -> None:
+    expected = '''%%% RunMany Error: Issue combining JSONs "string indices must be integers". \
+Something may be the wrong type. Using default settings JSON. %%%\n'''
+    assert stderr_of_run('', {"languages": {"name": "C"}}) == expected
+
+
 def test_invalid_line() -> None:
     def expected(spaces: str) -> str:
         return f'%%% RunMany Error: Skipping invalid unindented line 2 "{spaces}Argv:". %%%\n'

@@ -82,7 +82,7 @@ class Settings:
         supplied_languages = self.make_language_dict(combined[supplied_key])
         languages = self.make_language_dict(combined[languages_key])
 
-        if self.has_os():
+        if self.has_os():  # pragma: no cover
             supplied_languages_os = self.make_language_dict(combined[self.with_os(supplied_key)])
             supplied_languages = self.combine_dicts(supplied_languages_os, supplied_languages)
 
