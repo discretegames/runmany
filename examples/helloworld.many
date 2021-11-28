@@ -1,5 +1,5 @@
 % Programs that print "Hello, World!" to stdout.
-% Languages disabled with "!" are not built-in to RunMany but do have syntax highlighting support in the RunMany VSCode extension.
+% Languages disabled with "!" are not built-in to RunMany but do have syntax highlighting support with the RunMany VSCode extension.
 
 Ada:
     with Text_IO; use Text_IO;
@@ -54,6 +54,11 @@ Dart:
     void main() {
         print('Hello, World!');
     }
+
+!Erlang:
+	-module(helloworld).
+	-export([start/0]).
+	start() -> io:fwrite("Hello, World!\n").
 
 Fortran:
     program helloworld
@@ -113,6 +118,9 @@ MIPS:
         return 0;
     }
 
+!OCaml:
+	print_string "Hello, World!\n";;
+
 Pascal:
     program helloworld;
     begin
@@ -129,8 +137,7 @@ PHP:
 PowerShell:
 	Write-Host "Hello, World!"
 
-Print:
-	Hello, World!
+Print:Hello, World!
 
 Python: print('Hello, World!')
 

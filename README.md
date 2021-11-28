@@ -120,14 +120,16 @@ R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
 Meaning, if you already have one of these languages installed,
 there's a good chance it will work in RunMany automatically.
 
-- `Print` is a utility language that simply prints the code content to stdout.
-- `MIPS` expects `mars.jar` to be in the current working directory.
-
-It also has a special language called `Print` that simply prints the code content to stdout.
-
 There are ways to add custom languages and change the behavior of built-in languages, and even make them different on
 different operating systems. For more info see
 [Customizing Languages](https://github.com/discretegames/runmany#customizing-languages).
+
+The [RunMany VSCode extension](https://marketplace.visualstudio.com/items?itemName=discretegames.runmany)
+provides syntax highlighting for a few more languages than those listed above.
+
+Note that `Print` is a utility language that simply prints the code content to stdout, and
+`MIPS` expects `mars.jar` to be in the current working directory. The RunMany VSCode extension
+provides syntax
 
 ## Troubleshooting
 
