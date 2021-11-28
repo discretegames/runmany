@@ -28,17 +28,17 @@ def test_invalid_line() -> None:
     assert stderr_of_run('Settings:\n\nPython', {}) == expected2
 
 
-def test_no_name() -> None:
+def test_no_name() -> None:  # this test only works on Windows
     def expected(json: Dict[str, Any]) -> str:
         return f'%%% RunMany Error: No "name" key found for {str(json)}. Skipping language. %%%\n'
     no_name_json = {"languages": [{"command": ""}]}
     assert stderr_of_run('', no_name_json) == expected(no_name_json['languages'][0])
-    no_name_json = {"languages_mac": [{" name ": "C"}]}
-    assert stderr_of_run('', no_name_json) == expected(no_name_json['languages_mac'][0])
+    no_name_json = {"languages_windows": [{" name ": "C"}]}
+    assert stderr_of_run('', no_name_json) == expected(no_name_json['languages_windows'][0])
     no_name_json = {"supplied_languages": [{"command": ""}]}
     assert stderr_of_run('', no_name_json) == expected(no_name_json['supplied_languages'][0])
-    no_name_json = {"supplied_languages_mac": [{"NAME": "C"}]}
-    assert stderr_of_run('', no_name_json) == expected(no_name_json['supplied_languages_mac'][0])
+    no_name_json = {"supplied_languages_windows": [{"NAME": "C"}]}
+    assert stderr_of_run('', no_name_json) == expected(no_name_json['supplied_languages_windows'][0])
     no_name_json = {"languages": [{"name": "C"}]}
     assert stderr_of_run('', no_name_json) == ''
 
