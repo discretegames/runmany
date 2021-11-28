@@ -498,7 +498,7 @@ These defaults are automatically used if not present in a provided or embedded s
 
 ## Customizing Languages
 
-Most settings are simple flags or values that can be set in the base settings JSON object
+Most settings are simple flags or values that can be set in the base settings JSON object to apply them globally
 (see [List of Settings](https://github.com/discretegames/runmany#list-of-settings))
 but four special keys in the JSON are used to customize the languages RunMany can run or add more languages.
 These are `"languages"`, `"languages_windows"`, `"languages_linux"` and `"languages_mac"`
@@ -506,15 +506,15 @@ These are `"languages"`, `"languages_windows"`, `"languages_linux"` and `"langua
 They are lists of single-level JSON objects that specify the settings for the language that
 matches the `"name"` key of the object.
 
-(The `"supplied_languages..."` lists in
-[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
-are combined with their `"languages..."` counterparts before RunMany ever starts running programs.
-So all the supplied names and language settings are present, but any new ones take precedence.)
-
 When RunMany goes to run a language, it first looks for the language name in the `"languages_<os>"` list that
 best matches the system OS, and if it doesn't find the name then looks in the `"languages"` list.
 In this way you can have OS-specific settings and commands per language, or use `"languages"`
-as a default that applies to all OSes.
+as a default that applies to all operating systems.
+
+(The `"supplied_languages..."` lists in
+[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
+are combined with their `"languages..."` counterparts before RunMany ever starts running programs.
+So all the built-in names and language settings are present, but any new ones take precedence.)
 
 For example, the following settings JSON sets the `"show_code"` setting (which is false by default)
 to true for all languages except for Python and Python 2. It also creates a new language
@@ -533,12 +533,15 @@ to true for all languages except for Python and Python 2. It also creates a new 
 }
 ```
 
-The `"name"` key is required for every object in a languages list, and the `"command"` and `"extension"` keys
-should always be provided for new custom languages.
+The `"name"` key is required for every object in a languages array, and the `"command"` and `"extension"` keys
+should always be provided for new custom languages. Not every setting makes sense to apply on a per-language basis
+though. For example, `"show_equal"` applies to the run of the .many file as a whole, so it only makes sense in the
+base JSON object.
 
 ## List of Settings
 
-All settings described and whether or not they they can be overridden in a language object in the `"languages"` array:
+All settings described and whether or not they can be overridden on a per-language basis in the
+`"languages"` and `"languages_<os>"` array objects:
 
 | JSON Key         | Type   | Default  | Overridable | Description                                                                                                                                                                                                                   |
 | ---------------- | ------ | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -559,9 +562,11 @@ All settings described and whether or not they they can be overridden in a langu
 
 ## Command Format
 
-The `"command"` key of a language object in the `"languages"` or `"languages_<os>"` array defines the terminal command that is run to execute the language.
+The `"command"` key of an object in the `"languages"` or `"languages_<os>"`
+array defines the terminal command that is run to execute that language.
 
-Placeholders like `$file` and `$dir` are used in a command to refer to the temporary file RunMany creates for the code of each program it runs, or the directory that file is stored in:
+Placeholders like `$file` and `$dir` can be used in a command to refer to the temporary file RunMany creates
+for the code of each program it runs and the directory that file is stored in:
 
 | Placeholder  | Portion of `.../dir/file.ext`   |
 | ------------ | ------------------------------- |
@@ -576,19 +581,25 @@ Placeholders like `$file` and `$dir` are used in a command to refer to the tempo
 | `$ext`       | `.ext`                          |
 | `$sep`       | `/` (OS specific)               |
 | `$argv`      | n/a - the argv is inserted here |
+| `$code`      | n/a - the raw snippet content   |
 
-Note that some placeholders are "quoted" and some are not. Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
+Note that some placeholders are "quoted" and some are not.
+Some operating systems like Windows may have spaces in the path to temporary files so correct quoting is important.
 
 <!-- markdownlint-disable-next-line MD038 -->
 If `$` is not present anywhere in the command string, ` $file $argv` is appended to it.
 For example, the command `python` is implicitly `python $file $argv`.
 
-Check the `"default_languages"` array in [default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json) for more examples of commands.
+Check the `"supplied_languages"` array in
+[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
+for more examples of commands.
 
 # About
 
-I was driven to make RunMany by my desire to learn more programming languages, combined with my annoyance that whenever I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
+I was driven to make RunMany by my desire to learn more programming languages,combined with my annoyance that whenever
+I tried I would invariably have to make a whole new project for that language, or even switch IDEs.
 
-I plan to use it to practice solving code challenges in multiple languages from code challenge websites.
+I plan to use it to practice solving code challenges in multiple languages from sites like
+[Project Euler](https://projecteuler.net/archives).
 
 [Check out some of my other Python packages.](https://pypi.org/user/discretegames/)

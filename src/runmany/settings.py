@@ -65,7 +65,12 @@ class Settings:
         self.all_language_names = {*self.languages, *self.languages_windows, *self.languages_linux, *self.languages_mac}
 
     def update(self, new_provided_settings: Dict[str, Any]) -> None:
-        self.dict = self.combine_settings(self.default_settings, new_provided_settings)
+        try:
+            self.dict = self.combine_settings(self.default_settings, new_provided_settings)
+        except Exception as error:  # pylint: disable=broad-except
+            print_err(f'Issue combining JSONs "{error}". Something may be the wrong type. Using default settings JSON.')
+            self.dict = self.combine_settings(self.default_settings, {})
+
         set_show_errors(self.show_errors)
 
     def combine_settings(self, default_settings: Dict[str, Any], provided_settings: Dict[str, Any]) -> Dict[str, Any]:
