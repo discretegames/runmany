@@ -566,24 +566,10 @@ All settings described and whether or not they can be overridden on a per-langua
 | `"show_stats"`    | bool   | `true`             | no          | Whether the success and failure counts are shown after everything has run.
 | `"show_equal"`    | bool   | `true`             | no          | Whether the matching stdouts are compared and grouped after everything has run.
 | `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `%%% RunMany Error: ... %%%` are sent to stderr or silenced.
-| `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content fully of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
+| `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
 | `"strip_stdin"`   | string | `"smart"`          | no          | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to do the same as `"yes"`/`true` but also append a single newline.
-| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of all leading and trailing whitespace. `"no"`/`false` to leave program output unchanged. `"smart"`/`null` to strip program output of leading and trailing empty lines.
-| `"strip_code"`    | string | `"smart"`          | yes         | How code snippets get formatted before they are run. See long description below table.
-
-The `"strip_code"` setting can be:
-
-- `"smart"`/`null` to treat the top of the .many file as the start of the code snippet with all irrelevant parts
-blanked out so errors in programs report correct line numbers.
-This mode also ensures programs end with a newline as is sometimes required.
-
-- `"no"`/`false` to treat the top of the .many file as the start of the code snippet with all irrelevant parts
-blanked out, *and* to never unindent the snippet contents in the first place,
-so errors in programs report correct line and column numbers.
-(Though this may not won't work in whitespace-sensitive languages like Python.)
-
-- `"yes"`/`true` to treat the header of the snippet as its start as usual and remove leading and trailing
-whitespace only lines.
+| `"strip_code"`    | string | `"smart"`          | yes         | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to treat the top of the .many file as the start of the code snippet with all irrelevant parts blanked out so errors in programs report correct line numbers.
+| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of leading and trailing whitespace. `"no"`/`false` to leave program output as is. `"smart"`/`null` to strip program output of empty leading and trailing lines.
 
 It should be mentioned that the code, argv, and stdin portions of the .many file output are stripped of empty lines
 to keep things visually clean regardless of the values of `"strip_code"`, `"strip_argv"`, and `"strip_stdin"`.

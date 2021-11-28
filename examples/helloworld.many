@@ -129,6 +129,9 @@ PHP:
 PowerShell:
 	Write-Host "Hello, World!"
 
+Print:
+	Hello, World!
+
 Python: print('Hello, World!')
 
 Python 2: print 'Hello, World!'

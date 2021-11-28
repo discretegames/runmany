@@ -42,7 +42,7 @@
 		{
 			"name": "Print",
 			"command": "type",
-			"strip_code": "yes"
+			"strip_code": "no"
 		}
 	],
 	"supplied_languages_linux": [],
@@ -162,7 +162,7 @@
 		{
 			"name": "Print",
 			"command": "cat",
-			"strip_code": "yes"
+			"strip_code": "no"
 		},
 		{
 			"name": "Python",

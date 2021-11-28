@@ -269,7 +269,7 @@ class CodeSection(Section):
         elif strip:
             content = snippet.get_content(False, True, True, tab, newline)
         else:
-            content = snippet.get_content(True, False, False, tab, newline)
+            content = snippet.get_content(False, False, True, tab, newline)
         return content
 
     def run(self, directory: str) -> None:

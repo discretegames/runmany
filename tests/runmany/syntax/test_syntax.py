@@ -65,16 +65,14 @@ def test_empty() -> None:
 def test_settings() -> None:
     many_file = '''\
 Settings: {"languages_windows": [{"name": "Print", "newline": "N"}]}
-Print: 1
+Print:1
 	2
-
 Settings:
-Print: 3
+Print:3
 	4
-
 Settings: {"show_equal": false}
-Print: 5
-	6
+Print:5
+	6\
 '''
     verify('settings1.txt', many_file, True)
     verify('settings1b.txt', many_file, False)
@@ -83,29 +81,29 @@ Print: 5
 def test_settings_path() -> None:
     many_file = '''\
 Settings: ".\\\\tests\\\\runmany\\\\jsons\\\\settings_path.json"
-Print: A
+Print:A
 	B
 	C
 Settings: {
 		"newline": "bar"
 	}
-Print: A
+Print:A
 	B
-	C
+	C\
 '''
     verify('settings2.txt', many_file, True)
 
     many_file = '''\
 Settings: "./tests/runmany/jsons/settings_path.json"
-Print: A
+Print:A
 	B
 	C
 Settings: {
 		"newline": "bar"
 	}
-Print: A
+Print:A
 	B
-	C
+	C\
 '''
     verify('settings2.txt', many_file, True)
 
@@ -311,29 +309,26 @@ Python: print(9)
 
 def test_solo1() -> None:
     many_file = '''\
-@@@Print: 1
-Also: 2
-
-@@Print: 3
-Also: 4
-@Also: 5
-
-@Print: 6
-@Also: 7
-Also: 8
-
-@@ Print: 9
-Also: 10
+@@@Print:1
+Also:2
+@@Print:3
+Also:4
+@Also:5
+@Print:6
+@Also:7
+Also:8
+@@ Print:9
+Also:10
 '''
     verify('solo1.txt', many_file)
 
 
 def test_solo2() -> None:
     many_file = '''\
-@Print: 1
-Also: 2
-Print: 3
-@Also: 4
+@Print:1
+Also:2
+Print:3
+@Also:4
 '''
     verify('solo2.txt', many_file)
 
@@ -468,20 +463,20 @@ Python: print(8)
 
 def test_start_stop() -> None:
     many_file = '''\
-Print: 1
+Print:1
 START:
-Print: 2
+Print:2
 STOP.
-Print: 3
+Print:3
 '''
     verify('start_stop.txt', many_file)
 
     many_file = '''\
-Print: 1
+Print:1
 STOP.
-Print: 2
+Print:2
 START:
-Print: 3
+Print:3
 
 '''
     verify('empty.txt', many_file)

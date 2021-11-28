@@ -168,8 +168,10 @@ def test_strip_code() -> None:
 !Python:
 End.
 Python:
+
+
     pass
-    pass
+
     raise Exception
 '''
 
@@ -181,13 +183,13 @@ Python:
     settings_json: Dict[str, Any] = {"show_code": True, "show_runs": True, "show_output": True, "minimalist": True}
     for val in SMARTS:
         settings_json["strip_code"] = val
-        verify(settings_json, None, many_file, make_asserter(7))
+        verify(settings_json, None, many_file, make_asserter(9))
     for val in YESES:
         settings_json["strip_code"] = val
         verify(settings_json, None, many_file, make_asserter(3))
     for val in NOS:
         settings_json["strip_code"] = val
-        verify(settings_json, 'strip_stdin_no.txt', many_file, make_asserter(5))
+        verify(settings_json, None, many_file, make_asserter(6))
 
 
 def test_strip_output() -> None:
