@@ -114,11 +114,14 @@ because RunMany uses their interpreters/compilers behind the scenes to actually 
 RunMany has built-in support for the following languages:
 
 > Ada, Bash, Batch, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript,
-Julia, Kotlin, Lisp, Lua, MIPS, Pascal, Perl, PHP, PowerShell, Python, Python 2,
-R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, Visual Basic
+Julia, Kotlin, Lisp, Lua, MIPS, Pascal, Perl, PHP, PowerShell, Print, Python, Python 2,
+R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
 
 Meaning, if you already have one of these languages installed,
 there's a good chance it will work in RunMany automatically.
+
+- `Print` is a utility language that simply prints the code content to stdout.
+- `MIPS` expects `mars.jar` to be in the current working directory.
 
 It also has a special language called `Print` that simply prints the code content to stdout.
 

@@ -35,25 +35,19 @@
 
 	"supplied_languages_windows": [
 		{
+			"name": "Bash",
+			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
+			"extension": ".sh"
+		},
+		{
 			"name": "Print",
 			"command": "type",
 			"strip_code": "yes"
-		},
-		{
-			"name": "Bash",
-			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
-			"extension": ".sh",
-			"newline": "\r"
 		}
 	],
 	"supplied_languages_linux": [],
 	"supplied_languages_mac": [],
 	"supplied_languages": [
-		{
-			"name": "Print",
-			"command": "cat",
-			"strip_code": "yes"
-		},
 		{
 			"name": "Ada",
 			"command": "cd $dir && gcc -c $file && gnatmake $file && $branch $argv",
@@ -141,7 +135,7 @@
 		},
 		{
 			"name": "MIPS",
-			"command": "java -jar mars.jar nc",
+			"command": "java -jar mars.jar nc $file pa $argv",
 			"extension": ".asm"
 		},
 		{
@@ -164,6 +158,11 @@
 			"name": "PowerShell",
 			"command": "Powershell -Command",
 			"extension": ".ps1"
+		},
+		{
+			"name": "Print",
+			"command": "cat",
+			"strip_code": "yes"
 		},
 		{
 			"name": "Python",

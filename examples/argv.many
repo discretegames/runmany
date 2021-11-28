@@ -10,12 +10,20 @@ Ada:
         Put_Line(Argument(1));
     end Argv;
 
+Bash:
+	#!/bin/bash
+	echo $1
+
+Batch:
+	@echo off
+	echo %1
+
 C:
     #include <stdio.h>
 
     int main(int argc, char *argv[]) {
-    printf("%s\n", argv[1]);
-    return 0;
+    	printf("%s\n", argv[1]);
+    	return 0;
     }
 
 C#:
@@ -88,6 +96,14 @@ Lisp:
 
 Lua: print(arg[1])
 
+MIPS:
+	main:
+	lw $a0, 0($a1)
+	li $v0, 4
+	syscall
+	li $v0, 10
+	syscall
+
 Pascal:
     program argv;
     begin
@@ -100,6 +116,9 @@ PHP:
     <?php
     echo $argv[1] . "\n";
     ?>
+
+PowerShell:
+	Write-Host $args[0]
 
 Python:
     import sys
