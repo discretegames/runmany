@@ -509,15 +509,10 @@ These are `"languages"`, `"languages_windows"`, `"languages_linux"` and `"langua
 They are arrays of single-level JSON objects that specify the settings for the language that
 matches the `"name"` key of the object.
 
-When RunMany goes to run a language, it first looks for the language name in the `"languages_<os>"` list that
-best matches the system OS, and if it doesn't find the name then looks in the `"languages"` list.
-In this way you can have OS-specific settings and commands per language, or use `"languages"`
-as a default that applies to all operating systems.
-
-(The `"supplied_languages..."` lists in
-[default_settings.json](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json)
-are combined with their `"languages..."` counterparts before RunMany ever starts running programs.
-So all the built-in names and language settings are present, but any new ones take precedence.)
+The `"languages_<os>"` array that matches the system OS has highest priority when determining a language's settings,
+followed by the `"languages"` array, followed by the built-in `"supplied_languages_<os>"` and `"supplied_languages"`
+arrays. (These `"supplied_languages..."` arrays should never be set in your settings JSON.) Languages use the settings
+in the base JSON object as a final fallback.
 
 For example, the following settings JSON sets the `"show_code"` setting (which is false by default)
 to true for all languages except for Python and Python 2. It also creates a new language
