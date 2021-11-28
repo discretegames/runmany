@@ -86,7 +86,7 @@ class Runnable:
     def run(self, run_number: int, argv: Optional[Content], stdin: Optional[Content]) -> Tuple[str, bool]:
         command = self.get_command(argv)
         stderr = self.get_stderr()
-        if self.language.show_runs:
+        if self.settings.show_runs:
             self.start_printing_headline(run_number)
 
         start_time = time.perf_counter()
@@ -116,7 +116,7 @@ class Runnable:
         elif strip:
             output = output.strip()
 
-        if self.language.show_runs:
+        if self.settings.show_runs:
             self.finish_printing_headline(time_taken, exit_code, command)
             self.print_results(argv, stdin, output)
         return output, exit_code == 0
@@ -151,7 +151,7 @@ class Runnable:
                 self.print_result_part('stdin at', stdin.text, stdin.line_number, True)
         if self.language.show_output:
             self.print_result_part('output from', output, self.code.line_number, False)
-        for _ in range(self.settings.spacing):
+        for _ in range(self.language.spacing):
             # print annoyingly does not use os.linesep, so just repeat blank prints for consistency.
             print(flush=True)
 

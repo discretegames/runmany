@@ -12,7 +12,7 @@ from runmany import runmanys
 BASE_SETTINGS = {
     "timeout": 9.0,
     "extension": "",
-    "command": "echo MISSINGCOMMAND",
+    "command": "echo NOCOMMAND",
     "spacing": 1,
     "minimalist": False,
     "stderr": "yes",

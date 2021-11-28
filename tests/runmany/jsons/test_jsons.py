@@ -11,7 +11,7 @@ from runmany import runmanys
 BASE_SETTINGS = {
     "timeout": 10.0,
     "extension": "",
-    "command": "echo MISSINGCOMMAND",
+    "command": "echo NOCOMMAND",
     "spacing": 1,
     "minimalist": False,
     "stderr": "smart",

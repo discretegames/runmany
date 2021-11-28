@@ -291,7 +291,7 @@ RunMany keywords as names nor contain the characters `,:%!@`.)
 The header `Also:` is used to add snippets to a section and `End.` can optionally be used to end a section.
 
 The content of a snippet is the text after any whitespace after the colon (`:`) in the snippet header,
-plus all the lines below that are indented with a single tab or 4 spaces,
+plus all the lines below that are indented with a single tab or 4 spaces (with these indents removed),
 until the next header or `End.` or end of file.
 
 So this code section
@@ -543,22 +543,49 @@ base JSON object.
 All settings described and whether or not they can be overridden on a per-language basis in the
 `"languages"` and `"languages_<os>"` array objects:
 
-| JSON Key         | Type   | Default  | Overridable | Description                                                                                                                                                                                                                   |
-| ---------------- | ------ | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `"timeout"`      | float  | `10.0`   | yes         | The time limit of each program in seconds.                                                                                                                                                                                    |
-| `"stderr"`       | string | `"nzec"` | yes         | `"always"` or `true` to always combine program stderr streams with stdout. `"never"` or `false` to always hide program stderr streams. `"nzec"` or `null` to only show stderr streams when programs have non-zero exit codes. |
-| `"ext"`          | string | `""`     | yes         | The file extension of a language including the dot. Best to always define in the language object.                                                                                                                             |
-| `"spacing"`      | int    | `1`      | yes         | The number of blank lines to add after each run. Note that trailing newlines are not stripped from stdouts.                                                                                                                   |
-| `"show_time"`    | bool   | `false`  | yes         | Whether the execution time of each program is shown.                                                                                                                                                                          |
-| `"show_command"` | bool   | `false`  | yes         | Whether the command used to run each program is shown. Useful for debugging command setup for new languages.                                                                                                                  |
-| `"show_code"`    | bool   | `false`  | yes         | Whether the source code of the program is shown.                                                                                                                                                                              |
-| `"show_argv"`    | bool   | `true`   | yes         | Whether the argv for the program is shown (when present and non-empty).                                                                                                                                                       |
-| `"show_stdin"`   | bool   | `true`   | yes         | Whether the stdin for the program is shown (when present and not all empty lines).                                                                                                                                            |
-| `"show_output"`  | bool   | `true`   | yes         | Whether the output for the program is shown. This includes the stdout, and, depending on the `"stderr"` setting, the stderr.                                                                                                  |
-| `"show_errors"`  | bool   | `true`   | no          | Whether RunMany errors like `!!!\| RunMany Error: ... \|!!!` are sent to stderr or silenced.                                                                                                                                  |
-| `"show_runs"`    | bool   | `true`   | no          | Whether the list of runs is shown. This is usually the bulk of the output.                                                                                                                                                    |
-| `"show_stats"`   | bool   | `true`   | no          | Whether the success and failure counts are shown after everything has run.                                                                                                                                                    |
-| `"show_equal"`   | bool   | `true`   | no          | Whether the matching stdouts are compared and grouped after everything has run.                                                                                                                                               |
+| JSON Key          | Type   | Default            | Overridable | Description |
+| ----------------- | ------ | ------------------ | ----------- | ----------- |
+| `"timeout"`       | float  | `10.0`             | yes         | The time limit of each program in seconds.
+| `"extension"`     | string | `""`               | yes         | The file extension of a language, including the dot.
+| `"command"`       | string | `"echo NOCOMMAND"` | yes         | The console command to run a language.
+| `"spacing"`       | int    | `1`                | yes         | The number of blank lines to add after each run.
+| `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
+| `"stderr"`        | string | `"smart"`          | yes         | `"yes"`/`true` to combine program stderr with stdout. `"no"`/`false` to hide program stderr. `"smart"`/`null` to only show stderr after stdout when programs have non-zero exit codes.
+| `"strip_code"`    | string | `"smart"`          | yes         | How code snippets get formatted before they are run. See long description below table.
+| `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content fully of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
+| `"strip_stdin"`   | string | `"smart"`          | no          | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to do the same as `"yes"`/`true` but also append a single newline.
+| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of all whitespace. `"no"`/`false` to leave program output unchanged. `"smart"`/`null` to strip program output of empty lines.
+| `"newline"`       | string | `"\n"`             | yes         | What newlines are replaced with in code, argv, and stdin snippet content. Or `null` for the OS default.
+| `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
+| `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
+| `"keep_comments"` | bool   | `false`            | no          | Whether `%%%` comments are kept as snippet contents and thus not treated as comments.
+| `"show_runs"`     | bool   | `true`             | no          | Whether the list of runs is shown. This is usually the bulk of the output.
+| `"show_stats"`    | bool   | `true`             | no          | Whether the success and failure counts are shown after everything has run.
+| `"show_equal"`    | bool   | `true`             | no          | Whether the matching stdouts are compared and grouped after everything has run.
+| `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `%%% RunMany Error: ... %%%` are sent to stderr or silenced.
+| `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown.
+| `"show_command"`  | bool   | `false`            | yes         | Whether the command used to run each program is shown. Useful for debugging commands for new languages.
+| `"show_code"`     | bool   | `false`            | yes         | Whether the source code of the program is shown.
+| `"show_argv"`     | bool   | `true`             | yes         | Whether the argv for the program is shown (when present).
+| `"show_stdin"`    | bool   | `true`             | yes         | Whether the stdin for the program is shown (when present).
+| `"show_output"`   | bool   | `true`             | yes         | Whether the output for the program is shown. This includes the stdout, and, depending on `"stderr"`, the stderr.
+
+The `"strip_code"` setting can be:
+
+- `"smart"`/`null` to treat the top of the .many file as the start of the code snippet with all irrelevant parts
+blanked out so errors in programs report correct line numbers.
+This mode also ensures programs end with a newline as is sometimes required.
+
+- `"no"`/`false` to treat the top of the .many file as the start of the code snippet with all irrelevant parts
+blanked out, *and* to never unindent the snippet contents in the first place,
+so errors in programs report correct line and column numbers.
+(Though this won't work in indent-sensitive languages like Python.)
+
+- `"yes"`/`true` to treat the header of the snippet as its start as usual and remove leading and trailing
+whitespace only lines.
+
+It should be mentioned that the code, argv, and stdin portions of the .many file output are stripped of empty lines
+to keep things visually clean regardless of the values of `"strip_code"`, `"strip_argv"`, and `"strip_stdin"`.
 
 ## Command Format
 

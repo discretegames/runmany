@@ -48,7 +48,7 @@ def test_no_command() -> None:
         runmany('MyLang: x', {"minimalist": True, "languages": [{"name": "MyLang"}]}, from_string=True)
         file.seek(0)
         string = file.read()
-    assert string.startswith('1. MyLang\nMISSINGCOMMAND')
+    assert string.startswith('1. MyLang\nNOCOMMAND')
 
 
 def test_unknown_language() -> None:
