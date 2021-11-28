@@ -92,22 +92,10 @@ class Settings:
         computed_languages = self.combine_dicts(languages, supplied_languages)
         combined['computed_languages'] = {name: Language(value, self) for name, value in computed_languages.items()}
         return combined
-        # compute the os, then do several combines to end with one final_languages
 
     def computed_languages(self) -> Dict[str, Language]:
         return cast(Dict[str, Language], self.dict['computed_languages'])
 
-        # TODO rework
-        # for op_sys in ('', '_windows', '_linux', '_mac'):
-        #     custom = 'languages' + op_sys
-        #     supplied = 'supplied_' + custom
-        #     combined[custom] = self.combine_lists(combined[custom], combined[supplied])
-        #     del combined[supplied]
-        # return combined
-
-    # TODO consider reworking so languages_os > langages > supplied_languages_os > supplied_languages
-    # could combine languages into one object and then only a final_languages dict is needed in settings
-    # readme would need some tweaks
     @staticmethod
     def combine_dicts(new: Dict[str, Dict[str, Any]], base: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
         combined: Dict[str, Dict[str, Any]] = {}
@@ -119,39 +107,13 @@ class Settings:
                     combined[name][key] = new_language.get(key, base_language.get(key))
         return combined
 
-        # for name in chain(custom_dict, supplied_dict):
-        #     if name not in combined:
-        #         combined[name] = self.combine_languages(custom_dict.get(name, {}), supplied_dict.get(name, {}))
-        # return combined
-
-    # @staticmethod
-    # def combine_language_dicts(new: Dict[str, Any], base: Dict[str, Any]) -> Dict[str, Any]:
-    #     return {key: custom.get(key, supplied.get(key)) for key in chain(custom, supplied)}
-
-        # def combine_languages(self, custom: Dict[str, Any], supplied: Dict[str, Any]) -> Language:
-        #     return Language({key: custom.get(key, supplied.get(key)) for key in chain(custom, supplied)}, self)
-
-        # TODO this would be gone
-        # def platform_language_dicts(self) -> Tuple[Dict[str, Language], Dict[str, Language]]:
-        #     key = 'languages'
-        #     platforms = {'windows': '_windows', 'linux': '_linux', 'darwin': '_mac'}
-        #     os_key = key + platforms.get(platform.system().lower(), '')
-        #     return getattr(self, os_key), getattr(self, key)
-
     def __getattr__(self, key: str) -> Any:  # "." is for retrieving base settings
         return self.dict[key]
 
     def __contains__(self, language_name: str) -> bool:  # "in" is for checking Language existence
         return Language.normalize(language_name) in self.computed_languages()
-        # os_languages, languages = self.platform_language_dicts()
-        # language_name = Language.normalize(language_name)
-        # return language_name in os_languages or language_name in languages
-    # TODO these would simplify
 
     def __getitem__(self, language_name: str) -> Language:  # "[ ]" is for retrieving Languages
-        # os_languages, languages = self.platform_language_dicts()
-        # language_name = Language.normalize(language_name)
-        # return os_languages.get(language_name, cast(Language, languages.get(language_name)))
         return self.computed_languages()[language_name]
 
     @staticmethod
