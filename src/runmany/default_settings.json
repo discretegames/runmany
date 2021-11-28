@@ -43,7 +43,7 @@
 			"name": "Bash",
 			"command": "bash \"$(wsl.exe wslpath -a $(echo '$rawfile' | sed 's/\\\\/\\\\\\\\/g'))\" $argv",
 			"extension": ".sh",
-			"replace_newline": "\r"
+			"newline": "\r"
 		}
 	],
 	"supplied_languages_linux": [],

@@ -12,16 +12,13 @@
 [Settings](https://github.com/discretegames/runmany#settings) |
 [About](https://github.com/discretegames/runmany#about)**
 
-*This readme is out of date as RunMany is being updated to v2.*
-
 **A tool to run many programs written in many languages from one file.**
 
 Normally to practice multiple programming languages at once you need multiple files or multiple projects,
 perhaps multiple IDE's. RunMany is a tool that lets you write multiple programs in _the same_ file using
 any programming languages you want, and then run them all at once.
 
-RunMany uses ".many" as its file extension, so for example, if a file called
-[`simple.many`](https://github.com/discretegames/runmany/blob/main/examples/simple.many) has the following contents:
+RunMany uses ".many" as its file extension, so for example, if a file called `simple.many` has the following contents:
 
 ```text
 Python:
@@ -38,8 +35,7 @@ C:
     }
 ```
 
-Then doing `runmany simple.many` in terminal will produce
-[this organized output](https://github.com/discretegames/runmany/blob/main/examples/simple_output.txt)
+Then doing `runmany simple.many` in terminal will produce this organized output
 of running the Python, JavaScript, and C programs within:
 
 ```text
@@ -73,7 +69,7 @@ that can customize how languages are run and displayed in the output.
 
 In general, RunMany can be used for:
 
-- Chrestomathy - Writing identically behaving programs in many languages, like on
+- Chrestomathy - Writing equivalent programs in many languages, like on
 [Rosetta Code](http://www.rosettacode.org/wiki/Rosetta_Code).
 ([example](https://github.com/discretegames/runmany/blob/main/examples/helloworld.many)/
 [output](https://github.com/discretegames/runmany/blob/main/examples/helloworld_output.txt))
@@ -87,7 +83,7 @@ In general, RunMany can be used for:
 ([example](https://github.com/discretegames/runmany/blob/main/examples/polyglot.many)/
 [output](https://github.com/discretegames/runmany/blob/main/examples/polyglot_output.txt))
 
-Overall RunMany is hopefully a useful tool for anyone who wants to play with multiple programming languages at a time.
+Overall RunMany is a useful tool for anyone who wants to play with multiple programming languages at a time.
 
 # Installation
 
@@ -113,17 +109,18 @@ code --install-extension discretegames.runmany
 ```
 
 You also need the programming languages you want RunMany to run installed on your computer
-because RunMany uses their interpreters/compilers behind the scenes to actually run the programs.
+because RunMany uses their interpreters/compilers behind the scenes to actually run programs.
 
 RunMany has built-in support for the following languages:
 
 > Ada, Bash, Batch, C, C#, C++, Dart, Fortran, Go, Groovy, Haskell, Java, JavaScript,
-Julia, Kotlin, Lisp, Lua, MIPS, Pascal, Perl, PHP, PowerShell, Print, Python, Python 2,
-R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, and Visual Basic
+Julia, Kotlin, Lisp, Lua, MIPS, Pascal, Perl, PHP, PowerShell, Python, Python 2,
+R, Racket, Ruby, Rust, Scala, TypeScript, VBScript, Visual Basic
 
 Meaning, if you already have one of these languages installed,
 there's a good chance it will work in RunMany automatically.
-(`Print` is a special built-in language that simply prints the code content to stdout.)
+
+It also has a special language called `Print` that simply prints the code content to stdout.
 
 There are ways to add custom languages and change the behavior of built-in languages, and even make them different on
 different operating systems. For more info see
@@ -184,7 +181,8 @@ is used as a fallback. See more info in [Settings](https://github.com/discretega
 
 For some examples of .many files and their output check
 [the examples folder on GitHub](https://github.com/discretegames/runmany/tree/main/examples).
-(The .many extension for RunMany files is not required but recommended for clarity.)
+
+The .many extension for RunMany files is not required but recommended for clarity.
 
 ## Running RunMany From Python
 
@@ -194,7 +192,7 @@ RunMany can be imported and used from Python as follows:
 from runmany import runmany, runmanys
 
 # Run to stdout
-runmany('path/to/myfile.many', 'path/to/mysettings.json')  # settings JSON is always optional and can be None
+runmany('path/to/myfile.many', 'path/to/mysettings.json')  # settings JSON is always optional
 
 # Run to output file
 runmany('path/to/myfile.many', 'path/to/mysettings.json', 'path/to/myoutput.txt')
@@ -224,11 +222,16 @@ Principally, a .many file consists of sections that each contain one or more sni
 unindented header line such as `Python:` or `Stdin for Python:`,
 then the content of the first snippet is what appears after the colon and on indented lines below.
 Additional snippets may be added to the section with an unindented
-`Also:` header, and a section ends when a new one starts or an unindented `End.` or the end of the file is encountered.
+`Also:` header, and a section ends when a new one starts or an unindented `End.` or the end of the file is reached.
 
 A .many file runs from top to bottom, executing sections and snippets in the order they are encountered. Notably,
 a .many file will run regardless of if it has syntax errors or not. Any invalid syntax will be ignored and mentioned
 in an error message.
+
+In the example .many file below, the `Stdin for Python:` section has two snippets, `bar` and `baz`, and they become the
+standard input for the Python program in the `Python:` section, which has one snippet `print('foo' + input())`.
+Running this file runs the Python program twice, once for `bar` and once for `baz`, giving the respective outputs
+`foobar` and `foobaz`.
 
 ```text
 Stdin for Python:
@@ -242,14 +245,9 @@ Python:
 End.
 ```
 
-In the example .many file above, the `Stdin for Python:` section has two snippets, `bar` and `baz`, and they become the
-standard input for the Python program in the `Python:` section, which has one snippet `print('foo' + input())`.
-Running this file runs the Python program twice, once for `bar` and once for `baz`, giving the respective outputs
-`foobar` and `foobaz`.
-
-Read on for specific details about all .many file syntax, or check out
+Read on for specifics about all .many file syntax, or check out
 [syntax.many](https://github.com/discretegames/runmany/blob/main/examples/syntax.many)
-which has examples of all the syntax as well.
+which has examples of all syntax as well.
 
 ## Syntax Specifics
 
@@ -258,7 +256,7 @@ which has examples of all the syntax as well.
 ### Comments
 
 `%` at the very start of a line makes a comment until the end of the line.  
-`%%%` anywhere within a line makes a comment until the end of the line unless the `"keep_comments"` setting is true.
+`%%%` anywhere in a line makes a comment until the end of the line unless the `"keep_comments"` setting is true.
 
 ```text
 % this is a comment
@@ -284,7 +282,7 @@ with the header `Stdin:` or `Stdin for <language1>, <language2>, ...:`
 
 All but the settings section can have a comma separated list of the languages it applies to in the header.
 These languages, once stripped of whitespace, must match the `"name"` keys of the languages in the
-[settings JSON](https://github.com/discretegames/runmany/blob/main/src/runmany/default_settings.json),
+[settings](https://github.com/discretegames/runmany#settings) JSON,
 but are not case sensitive. (Keywords like "Argv" and "Stdin" *are* case sensitive. Custom languages should not use
 RunMany keywords as names nor contain the characters `,:%!@`.)
 
@@ -394,6 +392,9 @@ Python:
 
 This .many code will run the Python program three times with stdin `A` then `B` then `C`.
 
+When multiple argvs and stdins apply to one language, all possible combinations of every argv and every stdin
+are sent to programs of that language.
+
 ---
 
 ### Settings Section
@@ -408,19 +409,19 @@ Any missing settings default to their values in
 
 ```text
 Settings:
-    {"show_code": true}
+    { "show_code": true }
 Python:
     print('this Python code will now be shown as part of the output')
 ```
 
-A JSON string of the path to a settings file to load can also be used, like `Settings: "path/to/mysettings.json"`.
+A JSON string of the path to a settings file can also be used, like `Settings: "path/to/mysettings.json"`.
 
 `Also:` snippet headers in settings sections are shorthand for repeating the section header.
 So they don't serve much purpose since they immediately overwrite the previous settings.
 
 ---
 
-### Disabled Sections and Snippets
+### Disabled Sections & Snippets
 
 Putting `!!` at the start of a section header disables the entire section and all its snippets.
 
@@ -440,7 +441,7 @@ Also:
     print('this is disabled')
 ```
 
-### Solo Sections and Snippets
+### Solo Sections & Snippets
 
 If any section headers start with `@@` then only those sections are run, similar to a "solo" checkbox in
 audio/video editing software.
@@ -448,22 +449,24 @@ audio/video editing software.
 If any snippet headers within a section start with `@` then only those snippets are run when the section runs.
 
 ```text
-Python:
-    print('this is not run')
-@Also:
-    print('this is also not run')
-
 @@@Python:
     print('this is run')
 Also:
     print('this is not run')
 @Also:
     print('this is run')
+
+Python:
+    print('this is not run')
+@Also:
+    print('this is also not run')
 ```
+
+Note how the first line has three `@@@`, two to solo the section and another to solo its first snippet.
 
 ---
 
-### Start and Stop
+### Start & Stop
 
 Everything before the last `START:` at the start of a line by itself in a .many file is ignored.
 
@@ -500,10 +503,10 @@ These defaults are automatically used if not present in a provided or embedded s
 
 Most settings are simple flags or values that can be set in the base settings JSON object to apply them globally
 (see [List of Settings](https://github.com/discretegames/runmany#list-of-settings))
-but four special keys in the JSON are used to customize the languages RunMany can run or add more languages.
+but four special keys in the JSON are used to customize the languages RunMany can run or to add more languages.
 These are `"languages"`, `"languages_windows"`, `"languages_linux"` and `"languages_mac"`
 (`"languages_<os>"` will be used to refer to the last three).
-They are lists of single-level JSON objects that specify the settings for the language that
+They are arrays of single-level JSON objects that specify the settings for the language that
 matches the `"name"` key of the object.
 
 When RunMany goes to run a language, it first looks for the language name in the `"languages_<os>"` list that
@@ -545,30 +548,30 @@ All settings described and whether or not they can be overridden on a per-langua
 
 | JSON Key          | Type   | Default            | Overridable | Description |
 | ----------------- | ------ | ------------------ | ----------- | ----------- |
-| `"timeout"`       | float  | `10.0`             | yes         | The time limit of each program in seconds.
-| `"extension"`     | string | `""`               | yes         | The file extension of a language, including the dot.
 | `"command"`       | string | `"echo NOCOMMAND"` | yes         | The console command to run a language.
-| `"spacing"`       | int    | `1`                | yes         | The number of blank lines to add after each run.
-| `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
+| `"extension"`     | string | `""`               | yes         | The file extension of a language, including the dot.
+| `"timeout"`       | float  | `10.0`             | yes         | The time limit of each program in seconds.
 | `"stderr"`        | string | `"smart"`          | yes         | `"yes"`/`true` to combine program stderr with stdout. `"no"`/`false` to hide program stderr. `"smart"`/`null` to only show stderr after stdout when programs have non-zero exit codes.
+| `"spacing"`       | int    | `1`                | yes         | The number of blank lines to add after each run.
+| `"newline"`       | string | `"\n"`             | yes         | What newlines are replaced with in code, argv, and stdin snippet content. Or `null` for the OS default.
+| `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
+| `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
+| `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
+| `"keep_comments"` | bool   | `false`            | no          | Whether `%%%` comments are kept as snippet contents and thus not treated as comments.
+| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of all whitespace. `"no"`/`false` to leave program output unchanged. `"smart"`/`null` to strip program output of empty lines.
 | `"strip_code"`    | string | `"smart"`          | yes         | How code snippets get formatted before they are run. See long description below table.
 | `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content fully of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
 | `"strip_stdin"`   | string | `"smart"`          | no          | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to do the same as `"yes"`/`true` but also append a single newline.
-| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of all whitespace. `"no"`/`false` to leave program output unchanged. `"smart"`/`null` to strip program output of empty lines.
-| `"newline"`       | string | `"\n"`             | yes         | What newlines are replaced with in code, argv, and stdin snippet content. Or `null` for the OS default.
-| `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
-| `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
-| `"keep_comments"` | bool   | `false`            | no          | Whether `%%%` comments are kept as snippet contents and thus not treated as comments.
-| `"show_runs"`     | bool   | `true`             | no          | Whether the list of runs is shown. This is usually the bulk of the output.
-| `"show_stats"`    | bool   | `true`             | no          | Whether the success and failure counts are shown after everything has run.
-| `"show_equal"`    | bool   | `true`             | no          | Whether the matching stdouts are compared and grouped after everything has run.
-| `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `%%% RunMany Error: ... %%%` are sent to stderr or silenced.
 | `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown.
 | `"show_command"`  | bool   | `false`            | yes         | Whether the command used to run each program is shown. Useful for debugging commands for new languages.
 | `"show_code"`     | bool   | `false`            | yes         | Whether the source code of the program is shown.
 | `"show_argv"`     | bool   | `true`             | yes         | Whether the argv for the program is shown (when present).
 | `"show_stdin"`    | bool   | `true`             | yes         | Whether the stdin for the program is shown (when present).
 | `"show_output"`   | bool   | `true`             | yes         | Whether the output for the program is shown. This includes the stdout, and, depending on `"stderr"`, the stderr.
+| `"show_runs"`     | bool   | `true`             | no          | Whether the list of runs is shown. This is usually the bulk of the output.
+| `"show_stats"`    | bool   | `true`             | no          | Whether the success and failure counts are shown after everything has run.
+| `"show_equal"`    | bool   | `true`             | no          | Whether the matching stdouts are compared and grouped after everything has run.
+| `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `%%% RunMany Error: ... %%%` are sent to stderr or silenced.
 
 The `"strip_code"` setting can be:
 
