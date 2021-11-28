@@ -275,11 +275,10 @@ def test_supplied_languages() -> None:  # Should only pass on Windows.
     verify(settings, 'supplied1.txt', many_file)
     settings["supplied_languages_windows"] = [{"name": "Python", "command": "echo $2"}]
     verify(settings, 'supplied2.txt', many_file)
-    settings["languages"] = [{"name": "Python", "command": "echo $unseen"}]
-    # Still supplied2.txt below because languages is not combined with supplied_languages_windows.
-    verify(settings, 'supplied2.txt', many_file)
-    settings["languages_windows"] = [{"name": "Python", "command": "echo $3"}]
+    settings["languages"] = [{"name": "python", "command": "echo $3"}]
     verify(settings, 'supplied3.txt', many_file)
+    settings["languages_windows"] = [{"name": "  pythoN  ", "command": "echo $4"}]
+    verify(settings, 'supplied4.txt', many_file)  # also tests for full language arrays overwriting
 
 
 def test_timeout() -> None:

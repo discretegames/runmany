@@ -1,2 +1,2 @@
-1. Python
+1. python
 $3
