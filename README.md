@@ -548,20 +548,16 @@ All settings described and whether or not they can be overridden on a per-langua
 
 | JSON Key          | Type   | Default            | Overridable | Description |
 | ----------------- | ------ | ------------------ | ----------- | ----------- |
-| `"command"`       | string | `"echo NOCOMMAND"` | yes         | The console command to run a language.
+| `"command"`       | string | `"echo NOCOMMAND"` | yes         | The console command to run a language, following the [command format](https://github.com/discretegames/runmany#command-format).
 | `"extension"`     | string | `""`               | yes         | The file extension of a language, including the dot.
 | `"timeout"`       | float  | `10.0`             | yes         | The time limit of each program in seconds.
-| `"stderr"`        | string | `"smart"`          | yes         | `"yes"`/`true` to combine program stderr with stdout. `"no"`/`false` to hide program stderr. `"smart"`/`null` to only show stderr after stdout when programs have non-zero exit codes.
+| `"stderr"`        | string | `"smart"`          | yes         | `"yes"`/`true` to combine program stderr with stdout. `"no"`/`false` to hide program stderr. `"smart"`/`null` to only show stderr when programs have non-zero exit codes.
 | `"spacing"`       | int    | `1`                | yes         | The number of blank lines to add after each run.
 | `"newline"`       | string | `"\n"`             | yes         | What newlines are replaced with in code, argv, and stdin snippet content. Or `null` for the OS default.
 | `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
 | `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
 | `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
 | `"keep_comments"` | bool   | `false`            | no          | Whether `%%%` comments are kept as snippet contents and thus not treated as comments.
-| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of all whitespace. `"no"`/`false` to leave program output unchanged. `"smart"`/`null` to strip program output of empty lines.
-| `"strip_code"`    | string | `"smart"`          | yes         | How code snippets get formatted before they are run. See long description below table.
-| `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content fully of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
-| `"strip_stdin"`   | string | `"smart"`          | no          | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to do the same as `"yes"`/`true` but also append a single newline.
 | `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown.
 | `"show_command"`  | bool   | `false`            | yes         | Whether the command used to run each program is shown. Useful for debugging commands for new languages.
 | `"show_code"`     | bool   | `false`            | yes         | Whether the source code of the program is shown.
@@ -572,6 +568,10 @@ All settings described and whether or not they can be overridden on a per-langua
 | `"show_stats"`    | bool   | `true`             | no          | Whether the success and failure counts are shown after everything has run.
 | `"show_equal"`    | bool   | `true`             | no          | Whether the matching stdouts are compared and grouped after everything has run.
 | `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `%%% RunMany Error: ... %%%` are sent to stderr or silenced.
+| `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content fully of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
+| `"strip_stdin"`   | string | `"smart"`          | no          | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to do the same as `"yes"`/`true` but also append a single newline.
+| `"strip_output"`  | string | `"no"`             | yes         | `"yes"`/`true` to strip program output of all leading and trailing whitespace. `"no"`/`false` to leave program output unchanged. `"smart"`/`null` to strip program output of leading and trailing empty lines.
+| `"strip_code"`    | string | `"smart"`          | yes         | How code snippets get formatted before they are run. See long description below table.
 
 The `"strip_code"` setting can be:
 
@@ -582,7 +582,7 @@ This mode also ensures programs end with a newline as is sometimes required.
 - `"no"`/`false` to treat the top of the .many file as the start of the code snippet with all irrelevant parts
 blanked out, *and* to never unindent the snippet contents in the first place,
 so errors in programs report correct line and column numbers.
-(Though this won't work in indent-sensitive languages like Python.)
+(Though this may not won't work in whitespace-sensitive languages like Python.)
 
 - `"yes"`/`true` to treat the header of the snippet as its start as usual and remove leading and trailing
 whitespace only lines.
