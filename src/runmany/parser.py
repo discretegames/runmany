@@ -16,9 +16,9 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     STDIN = 'Stdin'
     FOR = 'for'
     ALSO = 'Also'
-    END = 'End.'
-    START = 'START:'
-    STOP = 'STOP.'
+    END_PATTERN = '^End\\s*\\.$'
+    START_PATTERN = '^START\\s*:$'
+    STOP_PATTERN = '^STOP\\s*\\.$'
     DISABLER = '!'
     SOLOER = '@'
     SECTION_DISABLER = '!!'
@@ -46,8 +46,8 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
         return line.split(Syntax.INLINE_COMMENT, 1)[0]
 
     @staticmethod
-    def string_starts_line(string: str, line: str) -> bool:
-        return string == Syntax.remove_inline_comment(line).rstrip()
+    def pattern_matches_line(pattern: str, line: str) -> bool:
+        return bool(re.match(pattern, Syntax.remove_inline_comment(line).rstrip()))
 
 
 class Snippet:
@@ -297,13 +297,13 @@ class Parser:
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
-            if Syntax.string_starts_line(Syntax.START, self.lines[i]):
+            if Syntax.pattern_matches_line(Syntax.START_PATTERN, self.lines[i]):
                 return i + 1
         return 0
 
     def get_last_line(self) -> int:
         for i, line in enumerate(self.lines):
-            if Syntax.string_starts_line(Syntax.STOP, line):
+            if Syntax.pattern_matches_line(Syntax.STOP_PATTERN, line):
                 return i - 1
         return len(self.lines) - 1
 
@@ -325,10 +325,10 @@ class Parser:
                     section_type = tried_section_type
                 elif Syntax.remove_inline_comment(line).strip():
                     print_err(f'Line {i+1} "{line}" is not part of a section. Skipping line.')
-            elif Syntax.string_starts_line(Syntax.END, line) or Section.try_get_section_type(line):
+            elif Syntax.pattern_matches_line(Syntax.END_PATTERN, line) or Section.try_get_section_type(line):
                 in_section = False
                 self.sections.append(section_type(self, section_first_line, i - 1))
-                if not Syntax.string_starts_line(Syntax.END, line):
+                if not Syntax.pattern_matches_line(Syntax.END_PATTERN, line):
                     i -= 1
             i += 1
         if in_section:

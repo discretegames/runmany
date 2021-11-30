@@ -62,6 +62,34 @@ def test_empty() -> None:
     verify('empty.txt', '')
 
 
+def test_start_stop_end() -> None:
+    many_file = '''\
+Python: print(1)
+ START:
+START::
+
+Python: print(2)
+START   : %%%
+Settings: {"minimalist": true %%%, "spacing": 3
+    ,"spacing": -1
+    }
+Python :
+    print(3)
+End   .
+Python: %%%
+    print(4)
+end.
+    print(5)
+End    . %%%
+    print(55)
+STOP:
+Python: print(6)
+STOP    . %%% 
+Python: print(7)
+'''
+    verify('start_stop_end.txt', many_file, True)
+
+
 def test_settings() -> None:
     many_file = '''\
 Settings: {"languages_windows": [{"name": "Print", "newline": "N"}]}
