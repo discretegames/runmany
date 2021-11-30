@@ -337,7 +337,7 @@ Python: print(9)
 
 def test_solo1() -> None:
     many_file = '''\
-@@@Print:1
+@@ @Print:1
 Also:2
 @@Print:3
 Also:4

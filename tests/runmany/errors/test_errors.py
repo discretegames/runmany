@@ -102,6 +102,7 @@ def test_json_decode_error() -> None:
     assert stderr_of_run("START:\nSettings:\n\t}") == expected
 
 
+# flake8: noqa
 def test_no_unindented_comment_error() -> None:
     many_file = '''\
 Python:
@@ -112,6 +113,10 @@ Python:
    %%% d
     %%% e
      %%% f
+ 	%%% g
+  	%%% h
+  	%%% i
+    	%%% j
     print(2)
 '''
     assert stderr_of_run(many_file) == ''

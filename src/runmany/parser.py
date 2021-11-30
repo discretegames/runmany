@@ -32,8 +32,9 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     SPACE_INDENT_LENGTH = 4
     SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
 
+    INLINE_COMMENT_PATTERN = f'^{SPACE}{{1,{SPACE_INDENT_LENGTH-1}}}{TAB_INDENT}?{INLINE_COMMENT}'
     UNINDENT_PATTERN = f'^(?:{TAB_INDENT}|{SPACE}{{1,{SPACE_INDENT_LENGTH}}})'
-    HEADER_START = f'^(?=\\S)({SECTION_DISABLER}|{SECTION_SOLOER}|)?({DISABLER}|{SOLOER}|)?\\s*'
+    HEADER_START = f'^(?=\\S)({SECTION_DISABLER}|{SECTION_SOLOER}|)?\\s*({DISABLER}|{SOLOER}|)?\\s*'
     HEADER_END = '\\s*:'
     SETTINGS_HEADER = HEADER_START + f'({SETTINGS})' + HEADER_END
     ARGV_HEADER = HEADER_START + f'{ARGV}(?:\\s+{FOR}\\b([^:]*))?' + HEADER_END
@@ -133,7 +134,7 @@ class Section(ABC):
             if Snippet.line_is_also_header(line):
                 add_snippet()
                 snippet_first_line = i
-            elif any(line.startswith(s * ' ' + Syntax.INLINE_COMMENT) for s in range(1, Syntax.SPACE_INDENT_LENGTH)):
+            elif re.match(Syntax.INLINE_COMMENT_PATTERN, line):
                 self.parser.lines[i] = ''
             elif not Snippet.line_is_indented(line):
                 self.parser.lines[i] = ''
