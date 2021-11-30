@@ -133,6 +133,8 @@ class Section(ABC):
             if Snippet.line_is_also_header(line):
                 add_snippet()
                 snippet_first_line = i
+            elif any(line.startswith(s * ' ' + Syntax.INLINE_COMMENT) for s in range(1, Syntax.SPACE_INDENT_LENGTH)):
+                self.parser.lines[i] = ''
             elif not Snippet.line_is_indented(line):
                 self.parser.lines[i] = ''
                 print_err(f'Skipping invalid unindented line {i + 1} "{line}".')

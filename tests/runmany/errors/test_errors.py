@@ -100,3 +100,18 @@ def test_json_decode_error() -> None:
         '"Expecting value: line 3 column 2 (char 4)". Using default settings JSON. %%%\n'
     assert stderr_of_run(pathlib.Path(__file__).with_name('bad_settings.many'), None, False) == expected
     assert stderr_of_run("START:\nSettings:\n\t}") == expected
+
+
+def test_no_unindented_comment_error() -> None:
+    many_file = '''\
+Python:
+    print(1)
+%%% a
+ %%% b
+  %%% c
+   %%% d
+    %%% e
+     %%% f
+    print(2)
+'''
+    assert stderr_of_run(many_file) == ''
