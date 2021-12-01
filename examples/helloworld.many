@@ -1,5 +1,5 @@
-% Programs that print "Hello, World!" to stdout.
-% Languages disabled with "!" are not built-in to RunMany but do have syntax highlighting support with the RunMany VSCode extension.
+%% Programs that print "Hello, World!" to stdout.
+%% Languages disabled with "!" are not built-in to RunMany but do have syntax highlighting support with the RunMany VSCode extension.
 
 Ada:
     with Text_IO; use Text_IO;

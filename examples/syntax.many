@@ -1,60 +1,62 @@
-% This file shows the various syntax of RunMany. For it to run properly Python and Node.js must be installed.
+%% This file shows the various syntax of RunMany. For it to run properly Python and Node.js must be installed.
 
-% a percent sign "%" at the start of a line makes a comment
+	%% two percent signs "%%" as the first non-whitespace characters in a line makes a comment
 
-	%%% three percent signs makes a comment anywhere else (unless "keep_comments"=true in settings)
-
-
-% a .many file consists of sections that run in order, each section contains one or more snippets
-% the 4 section types are code, settings, argv, and stdin
+%% a .many file consists of sections that run in order, each section contains one or more snippets
+%% the 4 section types are code, settings, argv, and stdin
 
 
-% "<language name>:" starts a code section, everything after the colon and indented below is part of the first snippet 
+%% "<language name>:" starts a code section, everything after the colon and indented below is part of the first snippet 
 Python: print('Hello')
 	print('World')
-Also: %%% "Also:" adds another snippet to a section, in this case another Python program
+Also:
 	print('foobar')
+%% "Also:" adds another snippet to a section, in this case another Python program
 
 
-START: %%% everything before the last "START:" line in a file is ignored
+%% everything before the last "START:" line in a file is ignored
+START:
 
 
-Settings: %%% "Settings:" starts a settings section where the settings JSON may be hardcoded
+%% "Settings:" starts a settings section where the settings JSON may be hardcoded
+Settings:
 	{
-		"show_code": true, %%% with these settings all languages but JavaScript will show their code in the output
+		"show_code": true,
 		"languages": [{"name": "JavaScript", "show_code": false}],
 		"show_equal": false
 	}
-End. %%% "End." can be used to explicitly end a section but is not required
+End.
+%% "End." can be used to explicitly end a section but is not required
 
 
-% "!!" before a section header disables the entire section
+%% "!!" before a section header disables the entire section
 !!Python: print('disabled')
 Also: print('also disabled')
 
-% "!" before a snippet disables that snippet
+%% "!" before a snippet disables that snippet
 !Python: print('disabled')
 Also: print('not disabled')
 !Also: print('disabled')
 
 
-% "@@" before a section header makes only similarly marked sections run (like the solo button in audio software)
-% "@" before a snippet makes only similarly marked snippets within the section run
+%% "@@" before a section header makes only similarly marked sections run (like the solo button in audio software)
+%% "@" before a snippet makes only similarly marked snippets within the section run
 
-% uncomment the following 3 lines for a demo of @ usage
-%@@@Python: print('seen')
-%Also: print('unseen')
-%@Also: print('also seen')
+%% uncomment the following 3 lines for a demo of @ usage
+%%@@@Python: print('seen')
+%%Also: print('unseen')
+%%@Also: print('also seen')
 
 
-% "Argv:" or "Argv for <comma separated language names>:" starts an argv section
+%% "Argv:" or "Argv for <comma separated language names>:" starts an argv section
 Argv: foo
 
 Argv for JavaScript, TypeScript: bar
-Also: baz %%% an also in an argv or stdin section is given as an additional input case
+Also: baz
+%% an "Also:"" in an argv or stdin section is given as an additional input case
 
 
-% "Stdin:" or "Stdin for <comma separated language names>:" starts an stdin section
+%% "Stdin:" or "Stdin for <comma separated language names>:" starts an stdin section
 Stdin for Python: 123
 Also: 456
 	
@@ -68,111 +70,112 @@ JavaScript:
 	console.log('Argv was', process.argv[2])
 
 
-% code sections can have multiple comma separated languages, but this is usually only good for polyglots
+%% code sections can have multiple comma separated languages, but this is usually only good for polyglots
 Python, JavaScript:
     1//1; console = {'log': print}
     console['log']('This program runs in both Python and JS!')
 
 
-STOP. %%% everything after the first "STOP." line in a file is ignored
+%% everything after the first "STOP." line in a file is ignored
+STOP.
 
 
-% The output of running this syntax.many file should be the following:
+%% The output of running this syntax.many file should be the following:
 
 
 ************************************************************
 1. Python
---------------------- code at line 37 ----------------------
+--------------------- code at line 38 ----------------------
 print('not disabled')
-------------------- output from line 37 --------------------
+------------------- output from line 38 --------------------
 not disabled
 
 
 ************************************************************
 2. Python
---------------------- code at line 62 ----------------------
+--------------------- code at line 64 ----------------------
 import sys
 print('Argv was', sys.argv[1])
 print('Stdin was', input())
---------------------- argv at line 51 ----------------------
+--------------------- argv at line 52 ----------------------
 foo
---------------------- stdin at line 58 ---------------------
+--------------------- stdin at line 60 ---------------------
 123
-------------------- output from line 62 --------------------
+------------------- output from line 64 --------------------
 Argv was foo
 Stdin was 123
 
 
 ************************************************************
 3. Python
---------------------- code at line 62 ----------------------
+--------------------- code at line 64 ----------------------
 import sys
 print('Argv was', sys.argv[1])
 print('Stdin was', input())
---------------------- argv at line 51 ----------------------
+--------------------- argv at line 52 ----------------------
 foo
---------------------- stdin at line 59 ---------------------
+--------------------- stdin at line 61 ---------------------
 456
-------------------- output from line 62 --------------------
+------------------- output from line 64 --------------------
 Argv was foo
 Stdin was 456
 
 
 ************************************************************
 4. JavaScript
---------------------- argv at line 53 ----------------------
+--------------------- argv at line 54 ----------------------
 bar
-------------------- output from line 67 --------------------
+------------------- output from line 69 --------------------
 Argv was bar
 
 
 ************************************************************
 5. JavaScript
---------------------- argv at line 54 ----------------------
+--------------------- argv at line 55 ----------------------
 baz
-------------------- output from line 67 --------------------
+------------------- output from line 69 --------------------
 Argv was baz
 
 
 ************************************************************
 6. Python
---------------------- code at line 72 ----------------------
+--------------------- code at line 74 ----------------------
 1//1; console = {'log': print}
 console['log']('This program runs in both Python and JS!')
---------------------- argv at line 51 ----------------------
+--------------------- argv at line 52 ----------------------
 foo
---------------------- stdin at line 58 ---------------------
+--------------------- stdin at line 60 ---------------------
 123
-------------------- output from line 72 --------------------
+------------------- output from line 74 --------------------
 This program runs in both Python and JS!
 
 
 ************************************************************
 7. Python
---------------------- code at line 72 ----------------------
+--------------------- code at line 74 ----------------------
 1//1; console = {'log': print}
 console['log']('This program runs in both Python and JS!')
---------------------- argv at line 51 ----------------------
+--------------------- argv at line 52 ----------------------
 foo
---------------------- stdin at line 59 ---------------------
+--------------------- stdin at line 61 ---------------------
 456
-------------------- output from line 72 --------------------
+------------------- output from line 74 --------------------
 This program runs in both Python and JS!
 
 
 ************************************************************
 8. JavaScript
---------------------- argv at line 53 ----------------------
+--------------------- argv at line 54 ----------------------
 bar
-------------------- output from line 72 --------------------
+------------------- output from line 74 --------------------
 This program runs in both Python and JS!
 
 
 ************************************************************
 9. JavaScript
---------------------- argv at line 54 ----------------------
+--------------------- argv at line 55 ----------------------
 baz
-------------------- output from line 72 --------------------
+------------------- output from line 74 --------------------
 This program runs in both Python and JS!
 
 

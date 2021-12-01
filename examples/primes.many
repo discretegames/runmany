@@ -1,4 +1,4 @@
-% Timing two ways of listing primes in both Python and JavaScript.
+%% Timing two ways of listing primes in both Python and JavaScript.
 
 Settings:
 	{

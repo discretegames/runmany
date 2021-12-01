@@ -18,9 +18,7 @@ BASE_SETTINGS = {
     "stderr": "yes",
     "newline": "\n",
     "tab": "\t",
-
     "run_blanks": False,
-    "keep_comments": False,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",
@@ -69,22 +67,22 @@ Python: print(1)
 START::
 
 Python: print(2)
-START   : %%%
-Settings: {"minimalist": true %%%, "spacing": 3
+START   :
+Settings: {"minimalist": true
     ,"spacing": -1
     }
 Python :
     print(3)
 End   .
-Python: %%%
+Python:
     print(4)
 end.
     print(5)
-End    . %%%
+End    .
     print(55)
 STOP:
 Python: print(6)
-STOP    . %%% 
+STOP    . 
 Python: print(7)
 '''
     verify('start_stop_end.txt', many_file, True)
@@ -405,50 +403,24 @@ Also: print(6)
     verify('empty.txt', many_file, False)
 
 
-def test_leading_comments() -> None:
+def test_comments() -> None:
     many_file = '''\
-% comment
-Stdin: % 1
-% 2
-    % 3
-% 4
-    % 5
-% 6
-Python:
-%Python:
 %% comment
-%STOP.
-    print(input())
-    input()
-%
-    print(input())
-    input()
-% % %
-    x = 5%1; print(input())
-'''
-    verify('leading_comments.txt', many_file)
-
-
-def test_inline_comments() -> None:
-    many_file = '''\
-Python: print('unseen2')
-START: %%% ok1
-	%%% ok2
-Stdin: a %%% b
-Argv: c %%% d
-Python: import sys %%% i()
-	print(sys.argv[1:]) %%% }
-%%% j()
-    %%% k()
-	print(input()) %%% ]
-End. %%% ok3
-%%% ok4
-	%%% ok5
-STOP. %%% ok6
-Python: print('unseen2')
+Python:
+	%%
+	x = """a
+	%%b
+	c%%"""
+	  	%% stuff
+%% x
+ %% y
+   %% z
+	print(x)
+End.
+%% hmm
 '''
     with io.StringIO() as stderr, redirect_stderr(stderr):
-        verify('inline_comments.txt', many_file)
+        verify('comments.txt', many_file)
         stderr.seek(0)
         assert stderr.read() == ''
 
@@ -457,7 +429,7 @@ def test_stop() -> None:
     many_file = '''\
 Python:
     print(1)
-%STOP.
+%%STOP.
 stop:
 STOP..
  STOP.
@@ -474,7 +446,7 @@ start:
 Python: print(1)
 Start:
 Python: print(2)
-% START:
+%% START:
 Python: print(3)
 START::
 Python: print(4)
@@ -516,7 +488,7 @@ Stdin for Python:
     Python:
     Also:
     Argv for:
-% Python:
+%% Python:
 Python:
     print(input())
     print(input())

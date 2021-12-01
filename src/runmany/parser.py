@@ -16,23 +16,21 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     STDIN = 'Stdin'
     FOR = 'for'
     ALSO = 'Also'
-    END_PATTERN = '^End\\s*\\.$'
-    START_PATTERN = '^START\\s*:$'
-    STOP_PATTERN = '^STOP\\s*\\.$'
+    END_PATTERN = '^End\\s*\\.\\s*$'
+    START_PATTERN = '^START\\s*:\\s*$'
+    STOP_PATTERN = '^STOP\\s*\\.\\s*$'
     DISABLER = '!'
     SOLOER = '@'
     SECTION_DISABLER = '!!'
     SECTION_SOLOER = '@@'
     SEPARATOR = ','
     FINISHER = ':'
-    LEADING_COMMENT = '%'
-    INLINE_COMMENT = '%%%'
+    COMMENT = '%%'
     TAB_INDENT = '\t'
     SPACE = ' '
     SPACE_INDENT_LENGTH = 4
     SPACE_INDENT = SPACE * SPACE_INDENT_LENGTH
 
-    INLINE_COMMENT_PATTERN = f'^{SPACE}{{1,{SPACE_INDENT_LENGTH-1}}}{TAB_INDENT}?{INLINE_COMMENT}'
     UNINDENT_PATTERN = f'^(?:{TAB_INDENT}|{SPACE}{{1,{SPACE_INDENT_LENGTH}}})'
     HEADER_START = f'^(?=\\S)({SECTION_DISABLER}|{SECTION_SOLOER}|)?\\s*({DISABLER}|{SOLOER}|)?\\s*'
     HEADER_END = '\\s*:'
@@ -41,14 +39,6 @@ class Syntax(ABC):  # pylint: disable=too-few-public-methods
     STDIN_HEADER = HEADER_START + f'{STDIN}(?:\\s+{FOR}\\b([^:]*))?' + HEADER_END
     CODE_HEADER = f'{HEADER_START}([^:]*){HEADER_END}'
     ALSO_HEADER = f'^(?=\\S)({DISABLER}|{SOLOER}|)?\\s*{ALSO}' + HEADER_END
-
-    @staticmethod
-    def remove_inline_comment(line: str) -> str:
-        return line.split(Syntax.INLINE_COMMENT, 1)[0]
-
-    @staticmethod
-    def pattern_matches_line(pattern: str, line: str) -> bool:
-        return bool(re.match(pattern, Syntax.remove_inline_comment(line).rstrip()))
 
 
 class Snippet:
@@ -64,8 +54,6 @@ class Snippet:
     def get_content(self, from_top: bool, strip: bool, unindent: bool, tab: str, newline: str) -> Optional[Content]:
         lines = self.parser.lines[self.first_line: self.last_line + 1]
         lines[0] = Syntax.TAB_INDENT + lines[0][lines[0].index(Syntax.FINISHER) + 1:].lstrip()
-        if not self.parser.settings.keep_comments:
-            lines = [Syntax.remove_inline_comment(line) for line in lines]
         if unindent:
             lines = [re.sub(Syntax.UNINDENT_PATTERN, '', line) for line in lines]
         prefix_extras = 0
@@ -134,8 +122,6 @@ class Section(ABC):
             if Snippet.line_is_also_header(line):
                 add_snippet()
                 snippet_first_line = i
-            elif re.match(Syntax.INLINE_COMMENT_PATTERN, line):
-                self.parser.lines[i] = ''
             elif not Snippet.line_is_indented(line):
                 self.parser.lines[i] = ''
                 print_err(f'Skipping invalid unindented line {i + 1} "{line}".')
@@ -300,19 +286,19 @@ class Parser:
 
     def get_first_line(self) -> int:
         for i in range(len(self.lines) - 1, -1, -1):
-            if Syntax.pattern_matches_line(Syntax.START_PATTERN, self.lines[i]):
+            if re.match(Syntax.START_PATTERN, self.lines[i]):
                 return i + 1
         return 0
 
     def get_last_line(self) -> int:
         for i, line in enumerate(self.lines):
-            if Syntax.pattern_matches_line(Syntax.STOP_PATTERN, line):
+            if re.match(Syntax.STOP_PATTERN, line):
                 return i - 1
         return len(self.lines) - 1
 
     def clean_lines(self) -> None:
         for i, line in enumerate(self.lines):
-            if i < self.first_line or i > self.last_line or line.startswith(Syntax.LEADING_COMMENT):
+            if i < self.first_line or i > self.last_line or line.lstrip().startswith(Syntax.COMMENT):
                 self.lines[i] = ''
 
     def make_sections(self) -> None:
@@ -326,12 +312,12 @@ class Parser:
                     in_section = True
                     section_first_line = i
                     section_type = tried_section_type
-                elif Syntax.remove_inline_comment(line).strip():
+                elif line.strip():
                     print_err(f'Line {i+1} "{line}" is not part of a section. Skipping line.')
-            elif Syntax.pattern_matches_line(Syntax.END_PATTERN, line) or Section.try_get_section_type(line):
+            elif re.match(Syntax.END_PATTERN, line) or Section.try_get_section_type(line):
                 in_section = False
                 self.sections.append(section_type(self, section_first_line, i - 1))
-                if not Syntax.pattern_matches_line(Syntax.END_PATTERN, line):
+                if not re.match(Syntax.END_PATTERN, line):
                     i -= 1
             i += 1
         if in_section:

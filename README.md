@@ -260,15 +260,17 @@ which has examples of all syntax as well.
 
 ### Comments
 
-`%` at the very start of a line makes a comment until the end of the line.  
-`%%%` anywhere in a line makes a comment until the end of the line unless the `"keep_comments"` setting is true.
+`%%` as the first non-whitespace characters in a line makes a comment until the end of that line.  
 
 ```text
-% this is a comment
-    %%% this is also a comment
+%% this is a comment
+Python: %% this is not a comment
+    %% this is a comment
+    print(1) %% this is not a comment
 ```
 
-There are no block comments.
+There are no block comments, though
+[Start & Stop](https://github.com/discretegames/runmany#start--stop) are close in functionality.
 
 ---
 
@@ -557,7 +559,6 @@ All settings described and whether or not they can be overridden on a per-langua
 | `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
 | `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
 | `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
-| `"keep_comments"` | bool   | `false`            | no          | Whether `%%%` comments are kept as snippet contents and thus not treated as comments.
 | `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown.
 | `"show_command"`  | bool   | `false`            | yes         | Whether the command used to run each program is shown. Useful for debugging commands for new languages.
 | `"show_code"`     | bool   | `false`            | yes         | Whether the source code of the program is shown.
@@ -567,7 +568,7 @@ All settings described and whether or not they can be overridden on a per-langua
 | `"show_runs"`     | bool   | `true`             | no          | Whether the list of runs is shown. This is usually the bulk of the output.
 | `"show_stats"`    | bool   | `true`             | no          | Whether the success and failure counts are shown after everything has run.
 | `"show_equal"`    | bool   | `true`             | no          | Whether the matching stdouts are compared and grouped after everything has run.
-| `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `%%% RunMany Error: ... %%%` are sent to stderr or silenced.
+| `"show_errors"`   | bool   | `true`             | no          | Whether RunMany errors like `||| RunMany Error: ... |||` are sent to stderr or silenced.
 | `"strip_argv"`    | string | `"smart"`          | no          | `"yes"`/`true` to strip the snippet content of leading and trailing whitespace. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to join all the lines in the snippet together with spaces as if they were on one line.
 | `"strip_stdin"`   | string | `"smart"`          | no          | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to do the same as `"yes"`/`true` but also append a single newline.
 | `"strip_code"`    | string | `"smart"`          | yes         | `"yes"`/`true` to strip the start and end of the snippet of whitespace-only lines. `"no"`/`false` to keep the snippet content as is. `"smart"`/`null` to treat the top of the .many file as the start of the code snippet with all irrelevant parts blanked out so errors in programs report correct line numbers.

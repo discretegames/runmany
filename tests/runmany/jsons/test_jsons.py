@@ -17,9 +17,7 @@ BASE_SETTINGS = {
     "stderr": "smart",
     "newline": "\n",
     "tab": "\t",
-
     "run_blanks": False,
-    "keep_comments": False,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",
@@ -103,18 +101,6 @@ Python: import sys
     verify(settings_json, "run_blanks3.txt", many_file)
     settings_json["run_blanks"] = True
     verify(settings_json, "run_blanks4.txt", many_file)
-
-
-def test_keep_comments() -> None:
-    many_file = '''
-Python: print("""foo%%%bar
-    """.strip())
-    print("""goo%%%far
-    """.strip())'''
-    settings_json = {"show_runs": True, "show_output": True, "show_code": True}
-    verify(settings_json, "keep_comments1.txt", many_file)
-    settings_json["keep_comments"] = True
-    verify(settings_json, "keep_comments2.txt", many_file)
 
 
 def test_strip_argv() -> None:

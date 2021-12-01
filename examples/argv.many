@@ -1,4 +1,4 @@
-% Programs that print the first command line argument to stdout.
+%% Programs that print the first command line argument to stdout.
 
 Argv: foobar arg2
 

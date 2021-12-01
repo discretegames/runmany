@@ -7,9 +7,7 @@
 	"stderr": "smart",
 	"newline": "\n",
 	"tab": "\t",
-
 	"run_blanks": false,
-	"keep_comments": false,
 
 	"strip_argv": "smart",
 	"strip_stdin": "smart",
