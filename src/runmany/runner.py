@@ -83,32 +83,51 @@ class Runnable:
             return subprocess.STDOUT
         return subprocess.DEVNULL
 
-    def run(self, run_number: int, argv: Optional[Content], stdin: Optional[Content]) -> Tuple[str, bool]:
-        command = self.get_command(argv)
-        stderr = self.get_stderr()
-        if self.settings.show_runs:
-            self.start_printing_headline(run_number)
-
-        start_time = time.perf_counter()
+    @staticmethod
+    def run_command(command: str, timeout: Optional[float],
+                    stdin: Optional[str], stdout: int, stderr: int) -> Tuple[str, Union[int, str], float]:
         try:
+            start_time = time.perf_counter()
             result = subprocess.run(command,
-                                    input=stdin.text if stdin else '',
-                                    timeout=self.language.timeout,
+                                    input=stdin,
+                                    timeout=timeout,
                                     shell=True,
                                     check=False,
-                                    universal_newlines=True,  # Backwards compatible with 3.6.
-                                    stdout=subprocess.PIPE,
+                                    universal_newlines=True,  # Keep for 3.6 backwards compatibility.
+                                    stdout=stdout,
                                     stderr=stderr)
             time_taken = time.perf_counter() - start_time
         except subprocess.TimeoutExpired:
             time_taken = time.perf_counter() - start_time
-            output = f'TIMED OUT OF {self.language.timeout:g}s LIMIT'
+            output = f'TIMED OUT OF {timeout:.3f}s LIMIT\n'
             exit_code: Union[int, str] = 'T'
         else:
             output = result.stdout
             exit_code = result.returncode
-            if exit_code != 0 and stderr == subprocess.PIPE:
+            if exit_code and stderr == subprocess.PIPE:
                 output += result.stderr
+        return output, exit_code, time_taken
+
+    def run(self, run_number: int, argv: Optional[Content], stdin: Optional[Content]) -> Tuple[str, bool]:
+        command = self.get_command(argv)
+        stdin_text = stdin.text if stdin else None
+        stderr = self.get_stderr()
+
+        if self.settings.show_runs:
+            self.start_printing_headline(run_number)
+
+        output = 'NO RUNS OCCURRED\n'
+        exit_code: Union[int, str] = 'N'
+        total_time = 0.0
+        for run_num in range(1, self.language.runs + 1):
+            if run_num == self.language.runs:
+                run_stdout = subprocess.PIPE
+                run_stderr = stderr
+            else:
+                run_stdout = run_stderr = subprocess.DEVNULL
+            output, exit_code, time_taken = self.run_command(
+                command, self.settings.timeout, stdin_text, run_stdout, run_stderr)
+            total_time += time_taken
 
         strip = convert_smart_yes_no(self.language.strip_output)
         if strip is None:
@@ -117,7 +136,7 @@ class Runnable:
             output = output.strip()
 
         if self.settings.show_runs:
-            self.finish_printing_headline(time_taken, exit_code, command)
+            self.finish_printing_headline(total_time, exit_code, command)
             self.print_results(argv, stdin, output)
         return output, exit_code == 0
 
@@ -126,10 +145,16 @@ class Runnable:
             print(DIVIDER_CHAR * DIVIDER_WIDTH, flush=True)
         print(f'{run_number}. {self.language.name}', end='', flush=True)
 
-    def finish_printing_headline(self, time_taken: float, exit_code: Union[str, int], command: str) -> None:
+    def finish_printing_headline(self, total_time: float, exit_code: Union[str, int], command: str) -> None:
         headline = []
         if self.language.show_time:
-            headline.append(f' ({time_taken:.3f}s)')
+            runs: int = self.language.runs
+            if runs <= 1:
+                time_str = f'{total_time:.3f}s'
+            else:
+                avg_time = total_time / runs
+                time_str = f'{avg_time:.3f}s avg of {runs} runs, {total_time:.3f}s total'
+            headline.append(f' ({time_str})')
         if exit_code != 0:
             headline.append(f' [exit code {exit_code}]')
         if self.language.show_command:

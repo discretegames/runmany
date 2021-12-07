@@ -552,14 +552,15 @@ All settings described and whether or not they can be overridden on a per-langua
 | ----------------- | ------ | ------------------ | ----------- | ----------- |
 | `"command"`       | string | `"echo NOCOMMAND"` | yes         | The console command to run a language, following the [command format](https://github.com/discretegames/runmany#command-format).
 | `"extension"`     | string | `""`               | yes         | The file extension of a language, including the dot.
-| `"timeout"`       | float  | `10.0`             | yes         | The time limit of each program in seconds.
+| `"timeout"`       | float  | `10.0`             | yes         | The time limit of each program in seconds, or `null` for no time limit.
+| `"runs"`          | int    | `1`                | yes         | The number of times each program is run. Only the output of the last run is shown.
 | `"stderr"`        | string | `"smart"`          | yes         | `"yes"`/`true` to combine program stderr with stdout. `"no"`/`false` to hide program stderr. `"smart"`/`null` to only show stderr when programs have non-zero exit codes.
 | `"spacing"`       | int    | `1`                | yes         | The number of blank lines to add after each run.
 | `"newline"`       | string | `"\n"`             | yes         | What newlines are replaced with in code, argv, and stdin snippet content. Or `null` for the OS default.
 | `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
 | `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
 | `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
-| `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown.
+| `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown. Useful for performance testing when combined with `"runs"`.
 | `"show_command"`  | bool   | `false`            | yes         | Whether the command used to run each program is shown. Useful for debugging commands for new languages.
 | `"show_code"`     | bool   | `false`            | yes         | Whether the source code of the program is shown.
 | `"show_argv"`     | bool   | `true`             | yes         | Whether the argv for the program is shown (when present).

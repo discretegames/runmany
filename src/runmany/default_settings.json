@@ -1,30 +1,30 @@
 {
-	"timeout": 10.0,
-	"extension": "",
 	"command": "echo NOCOMMAND",
-	"spacing": 1,
-	"minimalist": false,
+	"extension": "",
+	"timeout": 10.0,
+	"runs": 1,
 	"stderr": "smart",
+	"spacing": 1,
 	"newline": "\n",
 	"tab": "\t",
+	"minimalist": false,
 	"run_blanks": false,
 
-	"strip_argv": "smart",
-	"strip_stdin": "smart",
-	"strip_code": "smart",
-	"strip_output": "no",
-
-	"show_runs": true,
-	"show_stats": true,
-	"show_equal": true,
-
-	"show_errors": true,
 	"show_time": false,
 	"show_command": false,
 	"show_code": false,
 	"show_argv": true,
 	"show_stdin": true,
 	"show_output": true,
+	"show_runs": true,
+	"show_equal": true,
+	"show_stats": true,
+	"show_errors": true,
+
+	"strip_argv": "smart",
+	"strip_stdin": "smart",
+	"strip_code": "smart",
+	"strip_output": "no",
 
 	"languages": [],
 	"languages_windows": [],
@@ -165,12 +165,14 @@
 		{
 			"name": "Python",
 			"command": "python",
-			"extension": ".py"
+			"extension": ".py",
+			"tab": "    "
 		},
 		{
 			"name": "Python 2",
 			"command": "py -2.7",
-			"extension": ".py"
+			"extension": ".py",
+			"tab": "    "
 		},
 		{
 			"name": "R",
