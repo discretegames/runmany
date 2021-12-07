@@ -83,6 +83,23 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
     asserter(provided_json_result, expected)
 
 
+def test_runs() -> None:
+    many_file = '''\
+Python: print(3)
+Python 2: print 2
+'''
+    settings_json: Dict[str, Any] = {"runs": 0, "show_runs": True, "show_output": True}
+    verify(settings_json, 'runs.txt', many_file)
+
+    def asserter(actual: str, _: str) -> None:
+        assert actual.endswith(" total)\n3\n\n\n2. Python 2\n2\n\n\n")
+        assert "11" in actual
+
+    settings_json = {"show_runs": True, "show_output": True, "minimalist": True,
+                     "languages": [{"name": "Python", "show_time": True, "runs": 11}]}
+    verify(settings_json, None, many_file, asserter)
+
+
 def test_run_blanks() -> None:
     many_file = '''Python:'''
     settings_json = {"show_runs": True, "show_output": True}

@@ -86,8 +86,8 @@ class Runnable:
     @staticmethod
     def run_command(command: str, timeout: Optional[float],
                     stdin: Optional[str], stdout: int, stderr: int) -> Tuple[str, Union[int, str], float]:
+        start_time = time.perf_counter()
         try:
-            start_time = time.perf_counter()
             result = subprocess.run(command,
                                     input=stdin,
                                     timeout=timeout,
@@ -126,7 +126,7 @@ class Runnable:
             else:
                 run_stdout = run_stderr = subprocess.DEVNULL
             output, exit_code, time_taken = self.run_command(
-                command, self.settings.timeout, stdin_text, run_stdout, run_stderr)
+                command, self.language.timeout, stdin_text, run_stdout, run_stderr)
             total_time += time_taken
 
         strip = convert_smart_yes_no(self.language.strip_output)
