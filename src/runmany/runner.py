@@ -153,7 +153,7 @@ class Runnable:
                 time_str = f'{total_time:.3f}s'
             else:
                 avg_time = total_time / runs
-                time_str = f'{avg_time:.3f}s avg of {runs} runs, {total_time:.3f}s total'
+                time_str = f'{avg_time:.3f}s avg over {runs} runs, {total_time:.3f}s total'
             headline.append(f' ({time_str})')
         if exit_code != 0:
             headline.append(f' [exit code {exit_code}]')
