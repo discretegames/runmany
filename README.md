@@ -185,7 +185,10 @@ If neither are present, or for any missing settings,
 is used as a fallback. See more info in [Settings](https://github.com/discretegames/runmany#settings).
 
 For some examples of .many files and their output check
-[the examples folder on GitHub](https://github.com/discretegames/runmany/tree/main/examples).
+[the examples folder on GitHub](https://github.com/discretegames/runmany/tree/main/examples)
+or [the manychallenges repo](https://github.com/discretegames/manychallenges)
+where various code challenges for sites like [Project Euler](https://projecteuler.net/archives)
+are solved in many languages at once.
 
 The .many extension for RunMany files is not required but recommended for clarity.
 
