@@ -7,6 +7,7 @@
 	"spacing": 1,
 	"newline": "\n",
 	"tab": "\t",
+	"cwd": null,
 	"minimalist": false,
 	"run_blanks": false,
 

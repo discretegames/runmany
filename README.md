@@ -127,7 +127,6 @@ There are ways to add custom languages and change the behavior of built-in langu
 different operating systems. For more info see
 [Customizing Languages](https://github.com/discretegames/runmany#customizing-languages).
 
-
 Note that `Print` is a utility language that simply prints the code content to stdout, and
 `MIPS` expects `mars.jar` to be in the current working directory.
 
@@ -561,6 +560,7 @@ All settings described and whether or not they can be overridden on a per-langua
 | `"spacing"`       | int    | `1`                | yes         | The number of blank lines to add after each run.
 | `"newline"`       | string | `"\n"`             | yes         | What newlines are replaced with in code, argv, and stdin snippet content. Or `null` for the OS default.
 | `"tab"`           | string | `"\t"`             | yes         | What the tab character is replaced with in code, argv, and stdin snippet content.
+| `"cwd"`           | string | `null`             | yes         | The current working directory to run programs from. May be a relative path. Use `null` or `"."` for no change to the current working directory.
 | `"minimalist"`    | bool   | `false`            | no          | Whether to display all output in a minimal format where the dividers, code, argv, and stdin are not shown.
 | `"run_blanks"`    | bool   | `false`            | no          | Whether blank snippets that consist purely of whitespace are run or ignored.
 | `"show_time"`     | bool   | `false`            | yes         | Whether the execution time is shown. Useful for performance testing when combined with `"runs"`.

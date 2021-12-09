@@ -18,6 +18,7 @@ BASE_SETTINGS = {
     "newline": "\n",
     "tab": "\t",
     "run_blanks": False,
+    "cwd": None,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",
@@ -81,6 +82,26 @@ def verify(settings_json: Dict[str, Any], output_file: Optional[str] = None, man
 
     provided_json_result = runmanys(f'\n{many_file}', settings_json, from_string=True)
     asserter(provided_json_result, expected)
+
+
+def test_cwd() -> None:
+    many_file = '''\
+Python, Python 2:
+    try:
+        FileNotFoundError
+    except NameError:
+        FileNotFoundError = IOError
+    try:
+        with open('cwd_helper.txt', 'r') as f:
+                print(f.read())
+    except FileNotFoundError:
+        print('not found')
+'''
+    settings_json = {"cwd": "./tests/runmany/jsons", "show_runs": True, "show_output": True}
+    verify(settings_json, 'cwd1.txt', many_file)
+    settings_json = {"languages": [{"name": "Python", "cwd": "./tests/runmany/jsons"}],
+                     "show_runs": True, "show_output": True}
+    verify(settings_json, 'cwd2.txt', many_file)
 
 
 def test_runs() -> None:

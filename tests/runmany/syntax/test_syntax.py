@@ -19,6 +19,7 @@ BASE_SETTINGS = {
     "newline": "\n",
     "tab": "\t",
     "run_blanks": False,
+    "cwd": None,
 
     "strip_argv": "smart",
     "strip_stdin": "smart",
